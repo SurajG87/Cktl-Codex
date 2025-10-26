@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cocktail Menu</title>
+    <title>Cocktail Codex</title>
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cocktail Menu">
+    <meta name="apple-mobile-web-app-title" content="Cocktail Codex">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -1195,7 +1195,7 @@
                     <div ref={menuRef} className={`side-menu ${isOpen ? 'active' : ''}`}>
                         <div className="side-menu-header">
                             <div className="side-menu-logo">🍸</div>
-                            <div className="side-menu-title">Cocktail Menu</div>
+                            <div className="side-menu-title">Cocktail Codex</div>
                         </div>
                         
                         <nav className="side-menu-nav">
@@ -1203,17 +1203,8 @@
                                 className={`side-menu-button ${currentPage === 'home' ? 'active' : ''}`}
                                 onClick={() => handleNavigation('home')}
                             >
-                                📖 Cocktail Menu
+                                📖 Cocktail Codex
                             </button>
-                            
-                            {isAdmin && (
-                                <button 
-                                    className={`side-menu-button ${currentPage === 'create-recipe' ? 'active' : ''}`}
-                                    onClick={() => handleNavigation('create-recipe')}
-                                >
-                                    ➕ Add Recipe
-                                </button>
-                            )}
                             
                             <button 
                                 className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
@@ -2304,7 +2295,7 @@
             return (
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
-                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Menu</h1>
+                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
                         
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
@@ -2800,17 +2791,15 @@
                 <div className="app">
                     <header className="header">
                         <div className="header-left">
-                            {user.isAdmin && (
-                                <button 
-                                    className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                    onClick={() => setMenuOpen(!menuOpen)}
-                                    aria-label="Toggle menu"
-                                >
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
-                                </button>
-                            )}
+                            <button 
+                                className={`menu-button ${menuOpen ? 'active' : ''}`}
+                                onClick={() => setMenuOpen(!menuOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                            </button>
                         </div>
                         
                         <div className="nav-user">
@@ -2823,15 +2812,13 @@
                         </div>
                     </header>
                     
-                    {user.isAdmin && (
-                        <HamburgerMenu 
-                            isOpen={menuOpen}
-                            onToggle={setMenuOpen}
-                            currentPage={currentPage}
-                            onNavigate={navigateTo}
-                            isAdmin={user.isAdmin}
-                        />
-                    )}
+                    <HamburgerMenu 
+                        isOpen={menuOpen}
+                        onToggle={setMenuOpen}
+                        currentPage={currentPage}
+                        onNavigate={navigateTo}
+                        isAdmin={user.isAdmin}
+                    />
                     
                     <main>
                         {renderPage()}
@@ -2839,7 +2826,7 @@
 
                     <footer className="footer">
                         <p>
-                            Cocktail Menu © {new Date().getFullYear()} | Created by{' '}
+                            Cocktail Codex © {new Date().getFullYear()} | {' '}
                             <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
                                 @suraj.gg87
                             </a>
