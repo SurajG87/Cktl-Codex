@@ -1,11 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-    <!-- Apple Touch Icon (the main one for home screen) -->
-<link rel="apple-touch-icon" href="logo.png">
-
-<!-- Optional: Prevents zooming when launching from home screen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -978,6 +972,38 @@
             font-weight: bold;
         }
         
+        /* Role Badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        .role-badge.admin {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .role-badge.user {
+            background: #666;
+            color: white;
+        }
+        
+        /* Admin Only Elements */
+        .admin-only {
+            border-left: 3px solid #FFB366;
+            padding-left: 0.75rem;
+        }
+        
+        .user-view {
+            opacity: 1;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .header {
@@ -1159,15 +1185,14 @@
         };
         
         // TODO: REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
-        // Get this from Firebase Console → Project Settings → Your apps → Web app
         const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyD6ckqmjTMBD9HbrZvZ2l47cqfTOpsPYwA",
-    authDomain: "cocktail-codex-sync.firebaseapp.com",
-    projectId: "cocktail-codex-sync",
-    storageBucket: "cocktail-codex-sync.firebasestorage.app",
-    messagingSenderId: "694472141651",
-    appId: "1:694472141651:web:b0da450c8ec90a56244fa6",
-    measurementId: "G-F37NWVEGQ7"
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "YOUR_APP_ID"
         };
         
         // Load data from localStorage or use defaults
@@ -1192,9 +1217,9 @@
         let mockRecipes = loadFromStorage('cocktailRecipes', []);
         let mockSyrups = loadFromStorage('cocktailSyrups', []);
         let mockSettings = loadFromStorage('cocktailSettings', {
-            spirit_types: [],
-            glass_types: [],
-            venues: []
+            spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+            glass_types: ['Martini', 'Highball', 'Old Fashioned', 'Collins', 'Coupe', 'Margarita'],
+            venues: ['Bar', 'Restaurant', 'Event', 'Home']
         });
 
         // Enhanced Cloud Storage with iOS support
@@ -1206,7 +1231,6 @@
                         return false;
                     }
                     
-                    // Check if Firebase config is properly set
                     if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
                         console.warn('Firebase config not set, using localStorage only');
                         return false;
@@ -1229,7 +1253,6 @@
                         return await this.saveToMockServer(data);
                     }
                     
-                    // Add timestamp and device info
                     const syncData = {
                         ...data,
                         lastUpdated: Date.now(),
@@ -1256,7 +1279,6 @@
                     const data = snapshot.val();
                     
                     if (data) {
-                        // Check for conflicts
                         const localLastSync = loadFromStorage('lastCloudSync', 0);
                         if (data.lastUpdated > localLastSync) {
                             return data;
@@ -1281,7 +1303,6 @@
                 return Date.now().toString(36) + Math.random().toString(36).substr(2);
             },
             
-            // Enhanced mock server with better offline support
             async saveToMockServer(data) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
@@ -1293,13 +1314,13 @@
                                 syncId: this.generateSyncId()
                             };
                             localStorage.setItem('cocktailCloudData', JSON.stringify(cloudData));
-                            localStorage.setItem('cocktailCloudBackup', JSON.stringify(cloudData)); // Backup
+                            localStorage.setItem('cocktailCloudBackup', JSON.stringify(cloudData));
                             resolve(true);
                         } catch (error) {
                             console.error('Mock server save failed:', error);
                             resolve(false);
                         }
-                    }, 50); // Reduced timeout for mobile
+                    }, 50);
                 });
             },
             
@@ -1307,7 +1328,6 @@
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         try {
-                            // Try primary storage first, then backup
                             let cloudData = localStorage.getItem('cocktailCloudData');
                             if (!cloudData) {
                                 cloudData = localStorage.getItem('cocktailCloudBackup');
@@ -1330,19 +1350,6 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
-        };
-
-        // Enhanced error handling for sync
-        const handleSyncError = (error, operation) => {
-            console.error(`Sync ${operation} failed:`, error);
-            
-            if (error.code === 'PERMISSION_DENIED') {
-                return { type: 'error', message: '❌ Sync permission denied - check Firebase rules' };
-            } else if (error.code === 'NETWORK_ERROR') {
-                return { type: 'error', message: '❌ Network error - working offline' };
-            } else {
-                return { type: 'error', message: `❌ Sync failed - using local data` };
-            }
         };
 
         // Authentication Hook
@@ -1447,8 +1454,8 @@
             );
         }
 
-        // Recipe Card Component - REMOVED DELETE BUTTON AND ABV
-        function RecipeCard({ recipe, onClick }) {
+        // Recipe Card Component
+        function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
                 backgroundSize: 'cover',
@@ -1486,7 +1493,7 @@
         }
 
         // Enhanced Sync Status Component
-        function SyncStatus({ status, lastSync, isOnline = true }) {
+        function SyncStatus({ status, lastSync, isOnline = true, isAdmin }) {
             if (!status) return null;
             
             return (
@@ -1498,6 +1505,7 @@
                     {lastSync && (
                         <div style={{fontSize: '0.7rem', marginTop: '0.25rem'}}>
                             Last sync: {new Date(lastSync).toLocaleString()}
+                            {isAdmin && <span style={{marginLeft: '0.5rem', color: '#FFB366'}}>Admin Mode</span>}
                         </div>
                     )}
                 </div>
@@ -1569,11 +1577,7 @@
                                             <>
                                                 <button 
                                                     className="action-button edit"
-                                                    onClick={() => {
-                                                        if (onEditRecipe) {
-                                                            onEditRecipe(recipe);
-                                                        }
-                                                    }}
+                                                    onClick={() => onEditRecipe(recipe)}
                                                 >
                                                     ✏️ Edit
                                                 </button>
@@ -1625,6 +1629,14 @@
             return (
                 <div className="container">
                     <div className="page-header">
+                        <h1 className="page-title">
+                            Cocktail Codex
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
                         {isAdmin && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
@@ -1632,7 +1644,7 @@
                         )}
                     </div>
                     
-                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} />
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
                     
                     <div className="search-section">
                         <input 
@@ -1676,14 +1688,32 @@
                     )}
                     
                     {filteredRecipes.length === 0 ? (
-                        <div className="loading">No cocktails found matching your criteria.</div>
+                        <div className="loading">
+                            {mockRecipes.length === 0 ? (
+                                <div>
+                                    <p>No cocktails found.</p>
+                                    {isAdmin && (
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add Recipe" to create your first cocktail!
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                'No cocktails found matching your criteria.'
+                            )}
+                        </div>
                     ) : (
                         sortedLetters.map(letter => (
                             <div key={letter} id={`letter-${letter}`} className="alphabet-section">
                                 <h2 className="letter-header">{letter}</h2>
                                 <div className="recipes-grid">
                                     {groupedRecipes[letter].map(recipe => (
-                                        <RecipeCard key={recipe.id} recipe={recipe} onClick={onRecipeClick} />
+                                        <RecipeCard 
+                                            key={recipe.id} 
+                                            recipe={recipe} 
+                                            onClick={onRecipeClick}
+                                            isAdmin={isAdmin}
+                                        />
                                     ))}
                                 </div>
                             </div>
@@ -1694,7 +1724,7 @@
         }
 
         // Create/Edit Recipe Component
-        function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
+        function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false, isAdmin }) {
             const [formData, setFormData] = useState(recipe || {
                 name: '', spirit_type: '', venue: '', glass_type: '', abv: '', pour_cost: '', 
                 image_url: '', ingredients: [{ name: '', amount: '', unit: 'ml' }], instructions: '', notes: ''
@@ -1757,10 +1787,29 @@
                 onSave(recipeData);
             };
             
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                        <div className="recipe-view">
+                            <h2 style={{color: '#f44336', textAlign: 'center', padding: '2rem'}}>
+                                ⚠️ Admin Access Required
+                            </h2>
+                            <p style={{textAlign: 'center', color: '#666'}}>
+                                Only administrators can create or edit recipes.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+            
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
-                    <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
+                    <h1 className="page-title">
+                        {isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}
+                        <span className="role-badge admin">ADMIN</span>
+                    </h1>
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
@@ -1849,13 +1898,20 @@
         function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin, syncStatus, lastSync, isOnline }) {
             return (
                 <div className="container">
-                    <h1 className="page-title">Syrups & Infusions</h1>
-                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} />
-                    {isAdmin && (
-                        <div className="buttons-row">
+                    <div className="page-header">
+                        <h1 className="page-title">
+                            Syrups & Infusions
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
+                        {isAdmin && (
                             <button className="button" onClick={onCreateSyrup}>+ Add New Syrup</button>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
                     <div className="syrups-grid">
                         {mockSyrups.map(syrup => (
                             <div key={syrup.id} className="syrup-card" onClick={() => onSyrupClick(syrup)}>
@@ -1865,10 +1921,31 @@
                                 <div className="syrup-name">{syrup.name}</div>
                                 <div className="syrup-cost">Cost: ${syrup.cost}</div>
                                 {isAdmin && (
-                                    <button className="delete-overlay" onClick={(e) => { e.stopPropagation(); onDeleteSyrup(syrup.id); }}>🗑️</button>
+                                    <div style={{position: 'absolute', top: '0.5rem', right: '0.5rem'}}>
+                                        <button 
+                                            className="icon-button delete" 
+                                            onClick={(e) => { e.stopPropagation(); onDeleteSyrup(syrup.id); }}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         ))}
+                        {mockSyrups.length === 0 && (
+                            <div className="loading">
+                                {isAdmin ? (
+                                    <div>
+                                        <p>No syrups found.</p>
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add New Syrup" to create your first syrup!
+                                        </p>
+                                    </div>
+                                ) : (
+                                    'No syrups available.'
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -1917,7 +1994,7 @@
         }
 
         // Create/Edit Syrup Component
-        function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
+        function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false, isAdmin }) {
             const [formData, setFormData] = useState(syrup || {
                 name: '', cost: '', image_url: '', ingredients: [{ name: '', amount: '', unit: 'g' }], instructions: ''
             });
@@ -1978,10 +2055,29 @@
                 onSave(syrupData);
             };
             
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
+                        <div className="recipe-view">
+                            <h2 style={{color: '#f44336', textAlign: 'center', padding: '2rem'}}>
+                                ⚠️ Admin Access Required
+                            </h2>
+                            <p style={{textAlign: 'center', color: '#666'}}>
+                                Only administrators can create or edit syrups.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+            
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
-                    <h1 className="page-title">{isEdit ? 'Edit Syrup' : 'Add New Syrup'}</h1>
+                    <h1 className="page-title">
+                        {isEdit ? 'Edit Syrup' : 'Add New Syrup'}
+                        <span className="role-badge admin">ADMIN</span>
+                    </h1>
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Syrup Name *</label>
@@ -2032,10 +2128,11 @@
         }
 
         // Draggable Settings Component
-        function DraggableSettingsList({ items, onReorder, onRemove, placeholder }) {
+        function DraggableSettingsList({ items, onReorder, onRemove, placeholder, isAdmin }) {
             const [draggedItem, setDraggedItem] = useState(null);
             
             const handleDragStart = (e, index) => {
+                if (!isAdmin) return;
                 setDraggedItem(index);
                 e.dataTransfer.effectAllowed = 'move';
             };
@@ -2047,6 +2144,7 @@
             
             const handleDrop = (e, index) => {
                 e.preventDefault();
+                if (!isAdmin) return;
                 if (draggedItem !== null && draggedItem !== index) {
                     const newItems = [...items];
                     const [removed] = newItems.splice(draggedItem, 1);
@@ -2063,11 +2161,20 @@
             return (
                 <ul className="settings-list">
                     {items.map((item, index) => (
-                        <li key={index} className={`settings-item ${draggedItem === index ? 'dragging' : ''}`} draggable onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
+                        <li 
+                            key={index} 
+                            className={`settings-item ${draggedItem === index ? 'dragging' : ''} ${!isAdmin ? 'user-view' : ''}`} 
+                            draggable={isAdmin}
+                            onDragStart={(e) => handleDragStart(e, index)} 
+                            onDragOver={handleDragOver} 
+                            onDrop={(e) => handleDrop(e, index)}
+                        >
                             <span>{item}</span>
-                            <div className="settings-actions">
-                                <button className="icon-button delete" onClick={() => onRemove(index)}>×</button>
-                            </div>
+                            {isAdmin && (
+                                <div className="settings-actions">
+                                    <button className="icon-button delete" onClick={() => onRemove(index)}>×</button>
+                                </div>
+                            )}
                         </li>
                     ))}
                 </ul>
@@ -2085,6 +2192,7 @@
             }, [settings]);
             
             const handleAddItem = (type) => {
+                if (!isAdmin) return;
                 const value = newItems[type].trim();
                 if (!value) {
                     alert('Please enter a value');
@@ -2102,10 +2210,12 @@
             };
             
             const handleRemoveItem = (type, index) => {
+                if (!isAdmin) return;
                 setSettings(prev => ({ ...prev, [type]: prev[type].filter((_, i) => i !== index) }));
             };
             
             const handleReorderItems = (type, newItems) => {
+                if (!isAdmin) return;
                 setSettings(prev => ({ ...prev, [type]: newItems }));
             };
             
@@ -2116,35 +2226,56 @@
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
-                    <h1 className="page-title">Settings</h1>
-                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} />
+                    <h1 className="page-title">
+                        Settings
+                        {isAdmin ? (
+                            <span className="role-badge admin">ADMIN</span>
+                        ) : (
+                            <span className="role-badge user">VIEWER</span>
+                        )}
+                    </h1>
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
+                    
                     {!isAdmin ? (
-                        <div className="settings-section"><p>Admin access required to modify settings.</p></div>
+                        <div className="settings-section">
+                            <h3 className="settings-title">View Only Mode</h3>
+                            <p style={{color: '#666', lineHeight: '1.6'}}>
+                                You are currently in <strong>Viewer Mode</strong>. To modify settings, 
+                                create recipes, or manage syrups, please log in as an administrator.
+                            </p>
+                            <div style={{marginTop: '1rem', padding: '1rem', background: '#333', borderRadius: '6px'}}>
+                                <p style={{color: '#FFB366', marginBottom: '0.5rem'}}>Admin Credentials:</p>
+                                <p style={{fontSize: '0.9rem', color: '#888'}}>
+                                    Username: <strong>suraj</strong><br/>
+                                    Password: <strong>cocktail123</strong>
+                                </p>
+                            </div>
+                        </div>
                     ) : (
                         <>
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Spirit Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
                                     <input type="text" className="form-input" placeholder="Add new spirit type" value={newItems.spirit_types} onChange={(e) => handleInputChange('spirit_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'spirit_types')} style={{flex: 1}} />
                                     <button className="button" onClick={() => handleAddItem('spirit_types')}>Add</button>
                                 </div>
-                                <DraggableSettingsList items={settings.spirit_types} onReorder={(newItems) => handleReorderItems('spirit_types', newItems)} onRemove={(index) => handleRemoveItem('spirit_types', index)} placeholder="No spirit types added yet" />
+                                <DraggableSettingsList items={settings.spirit_types} onReorder={(newItems) => handleReorderItems('spirit_types', newItems)} onRemove={(index) => handleRemoveItem('spirit_types', index)} placeholder="No spirit types added yet" isAdmin={isAdmin} />
                             </div>
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Glass Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
                                     <input type="text" className="form-input" placeholder="Add new glass type" value={newItems.glass_types} onChange={(e) => handleInputChange('glass_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'glass_types')} style={{flex: 1}} />
                                     <button className="button" onClick={() => handleAddItem('glass_types')}>Add</button>
                                 </div>
-                                <DraggableSettingsList items={settings.glass_types} onReorder={(newItems) => handleReorderItems('glass_types', newItems)} onRemove={(index) => handleRemoveItem('glass_types', index)} placeholder="No glass types added yet" />
+                                <DraggableSettingsList items={settings.glass_types} onReorder={(newItems) => handleReorderItems('glass_types', newItems)} onRemove={(index) => handleRemoveItem('glass_types', index)} placeholder="No glass types added yet" isAdmin={isAdmin} />
                             </div>
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Venues</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
                                     <input type="text" className="form-input" placeholder="Add new venue" value={newItems.venues} onChange={(e) => handleInputChange('venues', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'venues')} style={{flex: 1}} />
                                     <button className="button" onClick={() => handleAddItem('venues')}>Add</button>
                                 </div>
-                                <DraggableSettingsList items={settings.venues} onReorder={(newItems) => handleReorderItems('venues', newItems)} onRemove={(index) => handleRemoveItem('venues', index)} placeholder="No venues added yet" />
+                                <DraggableSettingsList items={settings.venues} onReorder={(newItems) => handleReorderItems('venues', newItems)} onRemove={(index) => handleRemoveItem('venues', index)} placeholder="No venues added yet" isAdmin={isAdmin} />
                             </div>
                         </>
                     )}
@@ -2171,6 +2302,9 @@
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
                         <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
+                        <p style={{textAlign: 'center', color: '#666', marginBottom: '2rem'}}>
+                            Login as admin to manage recipes, or continue as guest to view.
+                        </p>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label className="form-label">Username</label>
@@ -2182,10 +2316,17 @@
                             </div>
                             {error && <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>{error}</div>}
                             <div className="buttons-row">
-                                <button type="submit" className="button">Login</button>
+                                <button type="submit" className="button">Login as Admin</button>
                                 <button type="button" className="button button-secondary" onClick={onGuestLogin}>Continue as Guest</button>
                             </div>
                         </form>
+                        <div style={{marginTop: '2rem', padding: '1rem', background: '#333', borderRadius: '6px', textAlign: 'center'}}>
+                            <p style={{color: '#FFB366', fontSize: '0.9rem', marginBottom: '0.5rem'}}>Demo Admin Credentials:</p>
+                            <p style={{fontSize: '0.8rem', color: '#888'}}>
+                                Username: <strong>suraj</strong><br/>
+                                Password: <strong>cocktail123</strong>
+                            </p>
+                        </div>
                     </div>
                 </div>
             );
@@ -2421,7 +2562,6 @@
                 const handleOnline = () => {
                     setIsOnline(true);
                     setSyncStatus({ type: 'success', message: '✅ Back online - syncing...' });
-                    // Trigger immediate sync when coming back online
                     setTimeout(saveToCloud, 1000);
                 };
                 
@@ -2553,15 +2693,80 @@
             const renderPage = () => {
                 if (!user) return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
                 
+                const isAdmin = user.isAdmin;
+                
                 switch(currentPage) {
-                    case 'home': return <HomePage onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} onDeleteRecipe={handleDeleteRecipe} isAdmin={user.isAdmin} onCreateRecipe={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-recipe'); }} syncStatus={syncStatus} lastSync={lastSync} isOnline={isOnline} />;
-                    case 'view-recipe': return <ViewRecipePage recipe={selectedRecipe} onBack={() => navigateTo('home')} onScale={() => setShowScaleModal(true)} isAdmin={user.isAdmin} onDeleteRecipe={handleDeleteRecipe} onEditRecipe={handleEditRecipe} />;
-                    case 'create-recipe': return <CreateEditRecipePage recipe={editingItem} onBack={() => navigateTo('home')} onSave={handleSaveRecipe} isEdit={isEditing} />;
-                    case 'syrups': return <SyrupsPage onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)} onCreateSyrup={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-syrup'); }} onDeleteSyrup={handleDeleteSyrup} isAdmin={user.isAdmin} syncStatus={syncStatus} lastSync={lastSync} isOnline={isOnline} />;
-                    case 'view-syrup': return <ViewSyrupPage syrup={selectedSyrup} onBack={() => navigateTo('syrups')} isAdmin={user.isAdmin} onDeleteSyrup={handleDeleteSyrup} onEditSyrup={handleEditSyrup} />;
-                    case 'create-syrup': return <CreateEditSyrupPage syrup={editingItem} onBack={() => navigateTo('syrups')} onSave={handleSaveSyrup} isEdit={isEditing} />;
-                    case 'settings': return <SettingsPage onBack={() => navigateTo('home')} isAdmin={user.isAdmin} syncStatus={syncStatus} lastSync={lastSync} isOnline={isOnline} />;
-                    default: return <HomePage onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} onDeleteRecipe={handleDeleteRecipe} isAdmin={user.isAdmin} onCreateRecipe={() => navigateTo('create-recipe')} syncStatus={syncStatus} lastSync={lastSync} isOnline={isOnline} />;
+                    case 'home': 
+                        return <HomePage 
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            isAdmin={isAdmin} 
+                            onCreateRecipe={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-recipe'); }} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
+                        />;
+                    case 'view-recipe': 
+                        return <ViewRecipePage 
+                            recipe={selectedRecipe} 
+                            onBack={() => navigateTo('home')} 
+                            onScale={() => setShowScaleModal(true)} 
+                            isAdmin={isAdmin} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            onEditRecipe={handleEditRecipe} 
+                        />;
+                    case 'create-recipe': 
+                        return <CreateEditRecipePage 
+                            recipe={editingItem} 
+                            onBack={() => navigateTo('home')} 
+                            onSave={handleSaveRecipe} 
+                            isEdit={isEditing} 
+                            isAdmin={isAdmin}
+                        />;
+                    case 'syrups': 
+                        return <SyrupsPage 
+                            onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)} 
+                            onCreateSyrup={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-syrup'); }} 
+                            onDeleteSyrup={handleDeleteSyrup} 
+                            isAdmin={isAdmin} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
+                        />;
+                    case 'view-syrup': 
+                        return <ViewSyrupPage 
+                            syrup={selectedSyrup} 
+                            onBack={() => navigateTo('syrups')} 
+                            isAdmin={isAdmin} 
+                            onDeleteSyrup={handleDeleteSyrup} 
+                            onEditSyrup={handleEditSyrup} 
+                        />;
+                    case 'create-syrup': 
+                        return <CreateEditSyrupPage 
+                            syrup={editingItem} 
+                            onBack={() => navigateTo('syrups')} 
+                            onSave={handleSaveSyrup} 
+                            isEdit={isEditing} 
+                            isAdmin={isAdmin}
+                        />;
+                    case 'settings': 
+                        return <SettingsPage 
+                            onBack={() => navigateTo('home')} 
+                            isAdmin={isAdmin} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
+                        />;
+                    default: 
+                        return <HomePage 
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            isAdmin={isAdmin} 
+                            onCreateRecipe={() => navigateTo('create-recipe')} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
+                        />;
                 }
             };
             
@@ -2577,8 +2782,11 @@
                         </div>
                         <div className="nav-user">
                             👤 {user.username}
-                            {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                            {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
+                            {user.isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
                             <button className="logout-btn" onClick={logout}>Logout</button>
                         </div>
                     </header>
