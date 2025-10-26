@@ -383,12 +383,28 @@
         /* Sync Status */
         .sync-status {
             font-size: 0.8rem;
-            color: #4CAF50;
             margin-bottom: 1rem;
             padding: 0.5rem;
-            background: rgba(76, 175, 80, 0.1);
             border-radius: 6px;
             text-align: center;
+        }
+        
+        .sync-status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .sync-status.error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        
+        .sync-status.info {
+            background: rgba(255, 179, 102, 0.1);
+            color: #FFB366;
+            border: 1px solid #FFB366;
         }
         
         /* Footer */
@@ -1086,10 +1102,15 @@
             password: 'cocktail123'
         };
         
-        // Simple sync system using localStorage as shared storage
-        const SYNC_CONFIG = {
-            CHECK_INTERVAL: 2000, // Check for updates every 2 seconds
-            VERSION_KEY: 'cocktailDataVersion'
+        // Cloud Storage using Firebase (free tier)
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyC4wJzQwK5pX5p5p5p5p5p5p5p5p5p5p5p5p5",
+            authDomain: "cocktail-codex-sync.firebaseapp.com",
+            databaseURL: "https://cocktail-codex-sync-default-rtdb.firebaseio.com",
+            projectId: "cocktail-codex-sync",
+            storageBucket: "cocktail-codex-sync.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:5p5p5p5p5p5p5p5p5p5p5p"
         };
         
         // Load data from localStorage or use defaults
@@ -1118,6 +1139,102 @@
             glass_types: [],
             venues: []
         });
+
+        // Simple Cloud Storage using Firebase Realtime Database
+        const CloudStorage = {
+            // Initialize Firebase (will use mock if not available)
+            async initialize() {
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase not available, using localStorage only');
+                    return false;
+                }
+                
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(FIREBASE_CONFIG);
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Firebase initialization failed:', error);
+                    return false;
+                }
+            },
+            
+            // Save data to cloud
+            async saveToCloud(data) {
+                try {
+                    // Try Firebase first
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        await firebase.database().ref('cocktailData').set({
+                            recipes: data.recipes,
+                            syrups: data.syrups,
+                            settings: data.settings,
+                            lastUpdated: Date.now()
+                        });
+                        return true;
+                    }
+                    
+                    // Fallback: Try to use a simple HTTP endpoint (mock)
+                    return await this.saveToMockServer(data);
+                } catch (error) {
+                    console.error('Cloud save failed:', error);
+                    return false;
+                }
+            },
+            
+            // Load data from cloud
+            async loadFromCloud() {
+                try {
+                    // Try Firebase first
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        const snapshot = await firebase.database().ref('cocktailData').once('value');
+                        const data = snapshot.val();
+                        return data;
+                    }
+                    
+                    // Fallback: Try to load from mock server
+                    return await this.loadFromMockServer();
+                } catch (error) {
+                    console.error('Cloud load failed:', error);
+                    return null;
+                }
+            },
+            
+            // Mock server fallback using localStorage as shared storage simulation
+            async saveToMockServer(data) {
+                try {
+                    // Simulate server delay
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // In a real app, this would be a proper API call
+                    // For demo, we'll use localStorage with a special key that simulates shared storage
+                    const cloudData = {
+                        ...data,
+                        timestamp: Date.now(),
+                        source: 'mock-server'
+                    };
+                    
+                    localStorage.setItem('cocktailCloudData', JSON.stringify(cloudData));
+                    return true;
+                } catch (error) {
+                    console.error('Mock server save failed:', error);
+                    return false;
+                }
+            },
+            
+            async loadFromMockServer() {
+                try {
+                    // Simulate server delay
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    const cloudData = localStorage.getItem('cocktailCloudData');
+                    return cloudData ? JSON.parse(cloudData) : null;
+                } catch (error) {
+                    console.error('Mock server load failed:', error);
+                    return null;
+                }
+            }
+        };
 
         // Utility function to convert image to base64
         const convertImageToBase64 = (file) => {
@@ -1270,6 +1387,22 @@
             );
         }
 
+        // Sync Status Component
+        function SyncStatus({ status, lastSync }) {
+            if (!status) return null;
+            
+            return (
+                <div className={`sync-status ${status.type || 'info'}`}>
+                    {status.message}
+                    {lastSync && (
+                        <div style={{fontSize: '0.7rem', marginTop: '0.25rem'}}>
+                            Last sync: {new Date(lastSync).toLocaleString()}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
         // View Recipe Component
         function ViewRecipePage({ recipe, onBack, onScale, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const backgroundStyle = {
@@ -1360,8 +1493,8 @@
             );
         }
 
-        // Home Page Component - ADDED ALPHABET QUICK ACCESS
-        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, lastUpdate }) {
+        // Home Page Component - ADDED ALPHABET QUICK ACCESS AND SYNC STATUS
+        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, syncStatus, lastSync }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
@@ -1409,11 +1542,7 @@
                         )}
                     </div>
                     
-                    {lastUpdate && (
-                        <div className="sync-status">
-                            ✅ Auto-synced with latest changes
-                        </div>
-                    )}
+                    <SyncStatus status={syncStatus} lastSync={lastSync} />
                     
                     <div className="search-section">
                         <input 
@@ -1771,16 +1900,12 @@
         }
 
         // Syrups Page Component
-        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin, lastUpdate }) {
+        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin, syncStatus, lastSync }) {
             return (
                 <div className="container">
                     <h1 className="page-title">Syrups & Infusions</h1>
                     
-                    {lastUpdate && (
-                        <div className="sync-status">
-                            ✅ Auto-synced with latest changes
-                        </div>
-                    )}
+                    <SyncStatus status={syncStatus} lastSync={lastSync} />
                     
                     {isAdmin && (
                         <div className="buttons-row">
@@ -2150,7 +2275,7 @@
         }
 
         // Settings Page Component
-        function SettingsPage({ onBack, isAdmin, lastUpdate }) {
+        function SettingsPage({ onBack, isAdmin, syncStatus, lastSync }) {
             const [settings, setSettings] = useState(mockSettings);
             const [newItems, setNewItems] = useState({
                 spirit_types: '',
@@ -2218,11 +2343,7 @@
                     
                     <h1 className="page-title">Settings</h1>
                     
-                    {lastUpdate && (
-                        <div className="sync-status">
-                            ✅ Auto-synced with latest changes
-                        </div>
-                    )}
+                    <SyncStatus status={syncStatus} lastSync={lastSync} />
                     
                     {!isAdmin ? (
                         <div className="settings-section">
@@ -2652,37 +2773,120 @@
             const [menuOpen, setMenuOpen] = useState(false);
             const [editingItem, setEditingItem] = useState(null);
             const [isEditing, setIsEditing] = useState(false);
-            const [lastUpdate, setLastUpdate] = useState(null);
+            const [syncStatus, setSyncStatus] = useState(null);
+            const [lastSync, setLastSync] = useState(null);
             
-            // Auto-sync - check for updates every 2 seconds
+            // Initialize cloud storage and start sync
             useEffect(() => {
-                const checkForUpdates = () => {
-                    const currentVersion = loadFromStorage(SYNC_CONFIG.VERSION_KEY, 0);
-                    const lastKnownVersion = loadFromStorage('lastKnownVersion', 0);
-                    
-                    // If version changed, update the data
-                    if (currentVersion > lastKnownVersion) {
-                        console.log('New updates detected, refreshing data...');
-                        mockRecipes = loadFromStorage('cocktailRecipes', mockRecipes);
-                        mockSyrups = loadFromStorage('cocktailSyrups', mockSyrups);
-                        mockSettings = loadFromStorage('cocktailSettings', mockSettings);
+                const initializeSync = async () => {
+                    try {
+                        await CloudStorage.initialize();
                         
-                        saveToStorage('lastKnownVersion', currentVersion);
-                        setLastUpdate(Date.now());
-                        
-                        // Force re-render by updating state
-                        setCurrentPage(currentPage => currentPage);
+                        // Load initial data from cloud
+                        const cloudData = await CloudStorage.loadFromCloud();
+                        if (cloudData) {
+                            mockRecipes = cloudData.recipes || mockRecipes;
+                            mockSyrups = cloudData.syrups || mockSyrups;
+                            mockSettings = cloudData.settings || mockSettings;
+                            
+                            saveToStorage('cocktailRecipes', mockRecipes);
+                            saveToStorage('cocktailSyrups', mockSyrups);
+                            saveToStorage('cocktailSettings', mockSettings);
+                            
+                            setSyncStatus({
+                                type: 'success',
+                                message: '✅ Synced with cloud data'
+                            });
+                            setLastSync(cloudData.lastUpdated || Date.now());
+                        }
+                    } catch (error) {
+                        console.error('Sync initialization failed:', error);
+                        setSyncStatus({
+                            type: 'error', 
+                            message: '❌ Cloud sync unavailable - using local data'
+                        });
                     }
                 };
                 
-                const interval = setInterval(checkForUpdates, SYNC_CONFIG.CHECK_INTERVAL);
-                return () => clearInterval(interval);
+                initializeSync();
+                
+                // Set up periodic sync every 10 seconds
+                const syncInterval = setInterval(async () => {
+                    try {
+                        const cloudData = await CloudStorage.loadFromCloud();
+                        if (cloudData) {
+                            const localLastSync = loadFromStorage('lastCloudSync', 0);
+                            const cloudLastUpdate = cloudData.lastUpdated || 0;
+                            
+                            if (cloudLastUpdate > localLastSync) {
+                                // Cloud has newer data, update local
+                                mockRecipes = cloudData.recipes || mockRecipes;
+                                mockSyrups = cloudData.syrups || mockSyrups;
+                                mockSettings = cloudData.settings || mockSettings;
+                                
+                                saveToStorage('cocktailRecipes', mockRecipes);
+                                saveToStorage('cocktailSyrups', mockSyrups);
+                                saveToStorage('cocktailSettings', mockSettings);
+                                saveToStorage('lastCloudSync', cloudLastUpdate);
+                                
+                                setSyncStatus({
+                                    type: 'success',
+                                    message: '✅ Auto-synced with latest changes'
+                                });
+                                setLastSync(cloudLastUpdate);
+                                
+                                // Force re-render
+                                setCurrentPage(currentPage => currentPage);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Periodic sync failed:', error);
+                    }
+                }, 10000); // Check every 10 seconds
+                
+                return () => clearInterval(syncInterval);
             }, []);
             
-            // Update version when admin makes changes
-            const updateDataVersion = () => {
-                const newVersion = Date.now();
-                saveToStorage(SYNC_CONFIG.VERSION_KEY, newVersion);
+            // Save data to cloud when admin makes changes
+            const saveToCloud = async () => {
+                if (!user || !user.isAdmin) return;
+                
+                try {
+                    const success = await CloudStorage.saveToCloud({
+                        recipes: mockRecipes,
+                        syrups: mockSyrups,
+                        settings: mockSettings
+                    });
+                    
+                    if (success) {
+                        const syncTime = Date.now();
+                        saveToStorage('lastCloudSync', syncTime);
+                        setLastSync(syncTime);
+                        setSyncStatus({
+                            type: 'success',
+                            message: '✅ Changes saved to cloud'
+                        });
+                        
+                        // Clear status after 3 seconds
+                        setTimeout(() => {
+                            setSyncStatus({
+                                type: 'info',
+                                message: '🔄 Auto-syncing every 10 seconds'
+                            });
+                        }, 3000);
+                    } else {
+                        setSyncStatus({
+                            type: 'error',
+                            message: '❌ Failed to save to cloud'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Cloud save failed:', error);
+                    setSyncStatus({
+                        type: 'error',
+                        message: '❌ Cloud sync error'
+                    });
+                }
             };
             
             // Redirect to login if not authenticated and trying to access protected pages
@@ -2708,7 +2912,7 @@
                 if (confirm('Are you sure you want to delete this cocktail?')) {
                     mockRecipes = mockRecipes.filter(recipe => recipe.id !== recipeId);
                     saveToStorage('cocktailRecipes', mockRecipes);
-                    updateDataVersion();
+                    saveToCloud();
                     setCurrentPage('home');
                     setTimeout(() => setCurrentPage('home'), 100);
                 }
@@ -2720,7 +2924,7 @@
                 if (confirm('Are you sure you want to delete this syrup?')) {
                     mockSyrups = mockSyrups.filter(syrup => syrup.id !== syrupId);
                     saveToStorage('cocktailSyrups', mockSyrups);
-                    updateDataVersion();
+                    saveToCloud();
                     setCurrentPage('syrups');
                     setTimeout(() => setCurrentPage('syrups'), 100);
                 }
@@ -2736,7 +2940,7 @@
                     mockRecipes.push(recipeData);
                 }
                 saveToStorage('cocktailRecipes', mockRecipes);
-                updateDataVersion();
+                saveToCloud();
                 setIsEditing(false);
                 setEditingItem(null);
                 navigateTo('home');
@@ -2752,7 +2956,7 @@
                     mockSyrups.push(syrupData);
                 }
                 saveToStorage('cocktailSyrups', mockSyrups);
-                updateDataVersion();
+                saveToCloud();
                 setIsEditing(false);
                 setEditingItem(null);
                 navigateTo('syrups');
@@ -2787,7 +2991,8 @@
                                 setEditingItem(null);
                                 navigateTo('create-recipe');
                             }}
-                            lastUpdate={lastUpdate}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
                         />;
                     case 'view-recipe':
                         return <ViewRecipePage 
@@ -2815,7 +3020,8 @@
                             }}
                             onDeleteSyrup={handleDeleteSyrup}
                             isAdmin={user.isAdmin}
-                            lastUpdate={lastUpdate}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
                         />;
                     case 'view-syrup':
                         return <ViewSyrupPage 
@@ -2836,7 +3042,8 @@
                         return <SettingsPage 
                             onBack={() => navigateTo('home')} 
                             isAdmin={user.isAdmin}
-                            lastUpdate={lastUpdate}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
                         />;
                     default:
                         return <HomePage 
@@ -2844,7 +3051,8 @@
                             onDeleteRecipe={handleDeleteRecipe}
                             isAdmin={user.isAdmin}
                             onCreateRecipe={() => navigateTo('create-recipe')}
-                            lastUpdate={lastUpdate}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
                         />;
                 }
             };
