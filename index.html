@@ -12,9 +12,6 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -1105,17 +1102,16 @@
             password: 'cocktail123'
         };
         
-        // TODO: REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
-        // Get this from Firebase Console → Project Settings → Your apps → Web app
-       const firebaseConfig = {
-  apiKey: "AIzaSyD6ckqmjTMBD9HbrZvZ2l47cqfTOpsPYwA",
-  authDomain: "cocktail-codex-sync.firebaseapp.com",
-  projectId: "cocktail-codex-sync",
-  storageBucket: "cocktail-codex-sync.firebasestorage.app",
-  messagingSenderId: "694472141651",
-  appId: "1:694472141651:web:b0da450c8ec90a56244fa6",
-  measurementId: "G-F37NWVEGQ7"
-};
+        // Cloud Storage using Firebase (free tier)
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyC4wJzQwK5pX5p5p5p5p5p5p5p5p5p5p5p5p5",
+            authDomain: "cocktail-codex-sync.firebaseapp.com",
+            databaseURL: "https://cocktail-codex-sync-default-rtdb.firebaseio.com",
+            projectId: "cocktail-codex-sync",
+            storageBucket: "cocktail-codex-sync.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:5p5p5p5p5p5p5p5p5p5p5p"
+        };
         
         // Load data from localStorage or use defaults
         const loadFromStorage = (key, defaultValue) => {
@@ -1146,20 +1142,14 @@
 
         // Simple Cloud Storage using Firebase Realtime Database
         const CloudStorage = {
-            // Initialize Firebase
+            // Initialize Firebase (will use mock if not available)
             async initialize() {
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase not available, using localStorage only');
+                    return false;
+                }
+                
                 try {
-                    if (typeof firebase === 'undefined') {
-                        console.warn('Firebase not available, using localStorage only');
-                        return false;
-                    }
-                    
-                    // Check if Firebase config is properly set
-                    if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
-                        console.warn('Firebase config not set, using localStorage only');
-                        return false;
-                    }
-                    
                     if (!firebase.apps.length) {
                         firebase.initializeApp(FIREBASE_CONFIG);
                     }
@@ -1173,50 +1163,57 @@
             // Save data to cloud
             async saveToCloud(data) {
                 try {
-                    const firebaseReady = await this.initialize();
-                    if (!firebaseReady) {
-                        return await this.saveToMockServer(data);
+                    // Try Firebase first
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        await firebase.database().ref('cocktailData').set({
+                            recipes: data.recipes,
+                            syrups: data.syrups,
+                            settings: data.settings,
+                            lastUpdated: Date.now()
+                        });
+                        return true;
                     }
                     
-                    await firebase.database().ref('cocktailData').set({
-                        recipes: data.recipes,
-                        syrups: data.syrups,
-                        settings: data.settings,
-                        lastUpdated: Date.now()
-                    });
-                    return true;
+                    // Fallback: Try to use a simple HTTP endpoint (mock)
+                    return await this.saveToMockServer(data);
                 } catch (error) {
                     console.error('Cloud save failed:', error);
-                    return await this.saveToMockServer(data);
+                    return false;
                 }
             },
             
             // Load data from cloud
             async loadFromCloud() {
                 try {
-                    const firebaseReady = await this.initialize();
-                    if (!firebaseReady) {
-                        return await this.loadFromMockServer();
+                    // Try Firebase first
+                    if (typeof firebase !== 'undefined' && firebase.database) {
+                        const snapshot = await firebase.database().ref('cocktailData').once('value');
+                        const data = snapshot.val();
+                        return data;
                     }
                     
-                    const snapshot = await firebase.database().ref('cocktailData').once('value');
-                    const data = snapshot.val();
-                    return data;
+                    // Fallback: Try to load from mock server
+                    return await this.loadFromMockServer();
                 } catch (error) {
                     console.error('Cloud load failed:', error);
-                    return await this.loadFromMockServer();
+                    return null;
                 }
             },
             
-            // Mock server fallback
+            // Mock server fallback using localStorage as shared storage simulation
             async saveToMockServer(data) {
                 try {
+                    // Simulate server delay
                     await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // In a real app, this would be a proper API call
+                    // For demo, we'll use localStorage with a special key that simulates shared storage
                     const cloudData = {
                         ...data,
                         timestamp: Date.now(),
                         source: 'mock-server'
                     };
+                    
                     localStorage.setItem('cocktailCloudData', JSON.stringify(cloudData));
                     return true;
                 } catch (error) {
@@ -1227,7 +1224,9 @@
             
             async loadFromMockServer() {
                 try {
+                    // Simulate server delay
                     await new Promise(resolve => setTimeout(resolve, 100));
+                    
                     const cloudData = localStorage.getItem('cocktailCloudData');
                     return cloudData ? JSON.parse(cloudData) : null;
                 } catch (error) {
@@ -1252,6 +1251,7 @@
             const [user, setUser] = useState(null);
             
             useEffect(() => {
+                // Check if user is logged in from localStorage
                 const savedUser = localStorage.getItem('cocktailAppUser');
                 if (savedUser) {
                     setUser(JSON.parse(savedUser));
@@ -1493,32 +1493,43 @@
             );
         }
 
-        // Home Page Component
+        // Home Page Component - ADDED ALPHABET QUICK ACCESS AND SYNC STATUS
         function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, syncStatus, lastSync }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
             
+            // Filter recipes based on search and filters
             const filteredRecipes = mockRecipes.filter(recipe => {
                 const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesSpirit = filterSpirit === 'All' || recipe.spirit_type === filterSpirit;
                 const matchesVenue = filterVenue === 'All' || recipe.venue === filterVenue;
+                
                 return matchesSearch && matchesSpirit && matchesVenue;
             });
             
+            // Group recipes by first letter
             const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
                 const firstLetter = recipe.name.charAt(0).toUpperCase();
-                if (!groups[firstLetter]) groups[firstLetter] = [];
+                if (!groups[firstLetter]) {
+                    groups[firstLetter] = [];
+                }
                 groups[firstLetter].push(recipe);
                 return groups;
             }, {});
             
+            // Sort the groups alphabetically
             const sortedLetters = Object.keys(groupedRecipes).sort();
+            
+            // Create alphabet array for quick access
             const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             
+            // Scroll to letter section
             const scrollToLetter = (letter) => {
                 const element = document.getElementById(`letter-${letter}`);
-                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             };
             
             return (
@@ -1567,6 +1578,7 @@
                         </div>
                     </div>
                     
+                    {/* Alphabet Quick Access */}
                     {filteredRecipes.length > 0 && (
                         <AlphabetQuickAccess 
                             letters={alphabet.filter(letter => sortedLetters.includes(letter))}
@@ -1575,18 +1587,26 @@
                     )}
                     
                     {filteredRecipes.length === 0 ? (
-                        <div className="loading">No cocktails found matching your criteria.</div>
+                        <div className="loading">
+                            No cocktails found matching your criteria.
+                        </div>
                     ) : (
-                        sortedLetters.map(letter => (
-                            <div key={letter} id={`letter-${letter}`} className="alphabet-section">
-                                <h2 className="letter-header">{letter}</h2>
-                                <div className="recipes-grid">
-                                    {groupedRecipes[letter].map(recipe => (
-                                        <RecipeCard key={recipe.id} recipe={recipe} onClick={onRecipeClick} />
-                                    ))}
+                        <>
+                            {sortedLetters.map(letter => (
+                                <div key={letter} id={`letter-${letter}`} className="alphabet-section">
+                                    <h2 className="letter-header">{letter}</h2>
+                                    <div className="recipes-grid">
+                                        {groupedRecipes[letter].map(recipe => (
+                                            <RecipeCard 
+                                                key={recipe.id}
+                                                recipe={recipe}
+                                                onClick={onRecipeClick}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            ))}
+                        </>
                     )}
                 </div>
             );
@@ -1594,22 +1614,38 @@
 
         // Create/Edit Recipe Component
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
-            const [formData, setFormData] = useState(recipe || {
-                name: '', spirit_type: '', venue: '', glass_type: '', abv: '', pour_cost: '', 
-                image_url: '', ingredients: [{ name: '', amount: '', unit: 'ml' }], instructions: '', notes: ''
-            });
+            const [formData, setFormData] = useState(
+                recipe || {
+                    name: '',
+                    spirit_type: '',
+                    venue: '',
+                    glass_type: '',
+                    abv: '',
+                    pour_cost: '',
+                    image_url: '',
+                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
+                    instructions: '',
+                    notes: ''
+                }
+            );
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
             };
             
             const handleIngredientChange = (index, field, value) => {
                 const updatedIngredients = [...formData.ingredients];
                 updatedIngredients[index][field] = value;
-                setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
+                setFormData(prev => ({
+                    ...prev,
+                    ingredients: updatedIngredients
+                }));
             };
             
             const addIngredient = () => {
@@ -1623,7 +1659,10 @@
                 if (formData.ingredients.length > 1) {
                     const updatedIngredients = [...formData.ingredients];
                     updatedIngredients.splice(index, 1);
-                    setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
+                    setFormData(prev => ({
+                        ...prev,
+                        ingredients: updatedIngredients
+                    }));
                 }
             };
             
@@ -1632,7 +1671,10 @@
                 if (file) {
                     try {
                         const base64 = await convertImageToBase64(file);
-                        setFormData(prev => ({ ...prev, image_url: base64 }));
+                        setFormData(prev => ({
+                            ...prev,
+                            image_url: base64
+                        }));
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
@@ -1643,101 +1685,214 @@
             
             const handleSubmit = (e) => {
                 e.preventDefault();
+                
                 if (!formData.name) {
                     alert('Please at least enter a cocktail name');
                     return;
                 }
+                
                 const recipeData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
                     abv: parseFloat(formData.abv) || 0,
                     pour_cost: parseFloat(formData.pour_cost) || 0
                 };
+                
                 onSave(recipeData);
             };
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Cocktails
+                    </button>
+                    
                     <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
+                    
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
-                            <input type="text" className="form-input" name="name" value={formData.name} onChange={handleInputChange} required />
+                            <input
+                                type="text"
+                                className="form-input"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                            />
                         </div>
+                        
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                             <div className="form-group">
                                 <label className="form-label">Spirit Type</label>
-                                <select className="form-input" name="spirit_type" value={formData.spirit_type} onChange={handleInputChange}>
+                                <select
+                                    className="form-input"
+                                    name="spirit_type"
+                                    value={formData.spirit_type}
+                                    onChange={handleInputChange}
+                                >
                                     <option value="">Select Spirit</option>
-                                    {mockSettings.spirit_types.map(spirit => <option key={spirit} value={spirit}>{spirit}</option>)}
+                                    {mockSettings.spirit_types.map(spirit => (
+                                        <option key={spirit} value={spirit}>{spirit}</option>
+                                    ))}
                                 </select>
                             </div>
+                            
                             <div className="form-group">
                                 <label className="form-label">Venue</label>
-                                <select className="form-input" name="venue" value={formData.venue} onChange={handleInputChange}>
+                                <select
+                                    className="form-input"
+                                    name="venue"
+                                    value={formData.venue}
+                                    onChange={handleInputChange}
+                                >
                                     <option value="">Select Venue</option>
-                                    {mockSettings.venues.map(venue => <option key={venue} value={venue}>{venue}</option>)}
+                                    {mockSettings.venues.map(venue => (
+                                        <option key={venue} value={venue}>{venue}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
+                        
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                             <div className="form-group">
                                 <label className="form-label">Glass Type</label>
-                                <select className="form-input" name="glass_type" value={formData.glass_type} onChange={handleInputChange}>
+                                <select
+                                    className="form-input"
+                                    name="glass_type"
+                                    value={formData.glass_type}
+                                    onChange={handleInputChange}
+                                >
                                     <option value="">Select Glass</option>
-                                    {mockSettings.glass_types.map(glass => <option key={glass} value={glass}>{glass}</option>)}
+                                    {mockSettings.glass_types.map(glass => (
+                                        <option key={glass} value={glass}>{glass}</option>
+                                    ))}
                                 </select>
                             </div>
+                            
                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                                 <div className="form-group">
                                     <label className="form-label">ABV (%)</label>
-                                    <input type="number" step="0.1" className="form-input" name="abv" value={formData.abv} onChange={handleInputChange} />
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        className="form-input"
+                                        name="abv"
+                                        value={formData.abv}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
+                                
                                 <div className="form-group">
                                     <label className="form-label">Pour Cost ($)</label>
-                                    <input type="number" step="0.01" className="form-input" name="pour_cost" value={formData.pour_cost} onChange={handleInputChange} />
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="form-input"
+                                        name="pour_cost"
+                                        value={formData.pour_cost}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
                             </div>
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Cocktail Image</label>
                             <div className="image-upload">
-                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{display: 'none'}} id="image-upload" />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    style={{display: 'none'}}
+                                    id="image-upload"
+                                />
                                 <label htmlFor="image-upload" style={{cursor: 'pointer'}}>
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </label>
-                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
+                                {imagePreview && (
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                )}
                             </div>
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                    <input type="text" className="form-input" placeholder="Ingredient name" value={ingredient.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} style={{flex: 2}} />
-                                    <input type="number" step="0.1" className="form-input" placeholder="Amount" value={ingredient.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} style={{flex: 1}} />
-                                    <select className="form-input" value={ingredient.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} style={{flex: 1}}>
-                                        <option value="ml">ml</option><option value="oz">oz</option><option value="dash">dash</option>
-                                        <option value="piece">piece</option><option value="slice">slice</option><option value="sprig">sprig</option>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Ingredient name"
+                                        value={ingredient.name}
+                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                                        style={{flex: 2}}
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        className="form-input"
+                                        placeholder="Amount"
+                                        value={ingredient.amount}
+                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+                                        style={{flex: 1}}
+                                    />
+                                    <select
+                                        className="form-input"
+                                        value={ingredient.unit}
+                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                                        style={{flex: 1}}
+                                    >
+                                        <option value="ml">ml</option>
+                                        <option value="oz">oz</option>
+                                        <option value="dash">dash</option>
+                                        <option value="piece">piece</option>
+                                        <option value="slice">slice</option>
+                                        <option value="sprig">sprig</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button type="button" className="icon-button delete" onClick={() => removeIngredient(index)}>×</button>
+                                        <button
+                                            type="button"
+                                            className="icon-button delete"
+                                            onClick={() => removeIngredient(index)}
+                                        >
+                                            ×
+                                        </button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" className="button button-secondary" onClick={addIngredient}>+ Add Ingredient</button>
+                            <button type="button" className="button button-secondary" onClick={addIngredient}>
+                                + Add Ingredient
+                            </button>
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Instructions</label>
-                            <textarea className="form-textarea" name="instructions" value={formData.instructions} onChange={handleInputChange} />
+                            <textarea
+                                className="form-textarea"
+                                name="instructions"
+                                value={formData.instructions}
+                                onChange={handleInputChange}
+                            />
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Notes</label>
-                            <textarea className="form-textarea" name="notes" value={formData.notes} onChange={handleInputChange} />
+                            <textarea
+                                className="form-textarea"
+                                name="notes"
+                                value={formData.notes}
+                                onChange={handleInputChange}
+                            />
                         </div>
+                        
                         <div className="buttons-row">
-                            <button type="submit" className="button">{isEdit ? 'Update Cocktail' : 'Save Cocktail'}</button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
+                            <button type="submit" className="button">
+                                {isEdit ? 'Update Cocktail' : 'Save Cocktail'}
+                            </button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>
+                                Cancel
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -1749,22 +1904,40 @@
             return (
                 <div className="container">
                     <h1 className="page-title">Syrups & Infusions</h1>
+                    
                     <SyncStatus status={syncStatus} lastSync={lastSync} />
+                    
                     {isAdmin && (
                         <div className="buttons-row">
-                            <button className="button" onClick={onCreateSyrup}>+ Add New Syrup</button>
+                            <button className="button" onClick={onCreateSyrup}>
+                                + Add New Syrup
+                            </button>
                         </div>
                     )}
+                    
                     <div className="syrups-grid">
                         {mockSyrups.map(syrup => (
                             <div key={syrup.id} className="syrup-card" onClick={() => onSyrupClick(syrup)}>
-                                <div className="syrup-image" style={{backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'}}>
+                                <div 
+                                    className="syrup-image"
+                                    style={{
+                                        backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'
+                                    }}
+                                >
                                     {!syrup.image_url && 'No Image'}
                                 </div>
                                 <div className="syrup-name">{syrup.name}</div>
                                 <div className="syrup-cost">Cost: ${syrup.cost}</div>
                                 {isAdmin && (
-                                    <button className="delete-overlay" onClick={(e) => { e.stopPropagation(); onDeleteSyrup(syrup.id); }}>🗑️</button>
+                                    <button 
+                                        className="delete-overlay"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteSyrup(syrup.id);
+                                        }}
+                                    >
+                                        🗑️
+                                    </button>
                                 )}
                             </div>
                         ))}
@@ -1777,7 +1950,10 @@
         function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Syrups
+                    </button>
+                    
                     <div className="recipe-view">
                         <div className="recipe-header">
                             <div>
@@ -1786,13 +1962,29 @@
                                     <div className="meta-item">Cost: ${syrup.cost}</div>
                                 </div>
                             </div>
+                            
                             {isAdmin && (
                                 <div className="action-buttons">
-                                    <button className="action-button edit" onClick={() => onEditSyrup(syrup)}>✏️ Edit</button>
-                                    <button className="action-button delete" onClick={() => onDeleteSyrup(syrup.id)}>🗑️ Delete</button>
+                                    <button 
+                                        className="action-button edit"
+                                        onClick={() => {
+                                            if (onEditSyrup) {
+                                                onEditSyrup(syrup);
+                                            }
+                                        }}
+                                    >
+                                        ✏️ Edit
+                                    </button>
+                                    <button 
+                                        className="action-button delete"
+                                        onClick={() => onDeleteSyrup(syrup.id)}
+                                    >
+                                        🗑️ Delete
+                                    </button>
                                 </div>
                             )}
                         </div>
+                        
                         <div className="recipe-details">
                             <div>
                                 <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
@@ -1805,6 +1997,7 @@
                                     ))}
                                 </ul>
                             </div>
+                            
                             <div>
                                 <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
                                 <div className="instructions">{syrup.instructions}</div>
@@ -1817,21 +2010,33 @@
 
         // Create/Edit Syrup Component
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
-            const [formData, setFormData] = useState(syrup || {
-                name: '', cost: '', image_url: '', ingredients: [{ name: '', amount: '', unit: 'g' }], instructions: ''
-            });
+            const [formData, setFormData] = useState(
+                syrup || {
+                    name: '',
+                    cost: '',
+                    image_url: '',
+                    ingredients: [{ name: '', amount: '', unit: 'g' }],
+                    instructions: ''
+                }
+            );
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
             };
             
             const handleIngredientChange = (index, field, value) => {
                 const updatedIngredients = [...formData.ingredients];
                 updatedIngredients[index][field] = value;
-                setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
+                setFormData(prev => ({
+                    ...prev,
+                    ingredients: updatedIngredients
+                }));
             };
             
             const addIngredient = () => {
@@ -1845,7 +2050,10 @@
                 if (formData.ingredients.length > 1) {
                     const updatedIngredients = [...formData.ingredients];
                     updatedIngredients.splice(index, 1);
-                    setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
+                    setFormData(prev => ({
+                        ...prev,
+                        ingredients: updatedIngredients
+                    }));
                 }
             };
             
@@ -1854,7 +2062,10 @@
                 if (file) {
                     try {
                         const base64 = await convertImageToBase64(file);
-                        setFormData(prev => ({ ...prev, image_url: base64 }));
+                        setFormData(prev => ({
+                            ...prev,
+                            image_url: base64
+                        }));
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
@@ -1865,65 +2076,139 @@
             
             const handleSubmit = (e) => {
                 e.preventDefault();
+                
                 if (!formData.name) {
                     alert('Please at least enter a syrup name');
                     return;
                 }
+                
                 const syrupData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
                     cost: parseFloat(formData.cost) || 0
                 };
+                
                 onSave(syrupData);
             };
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Syrups
+                    </button>
+                    
                     <h1 className="page-title">{isEdit ? 'Edit Syrup' : 'Add New Syrup'}</h1>
+                    
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Syrup Name *</label>
-                            <input type="text" className="form-input" name="name" value={formData.name} onChange={handleInputChange} required />
+                            <input
+                                type="text"
+                                className="form-input"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                            />
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Cost ($)</label>
-                            <input type="number" step="0.01" className="form-input" name="cost" value={formData.cost} onChange={handleInputChange} />
+                            <input
+                                type="number"
+                                step="0.01"
+                                className="form-input"
+                                name="cost"
+                                value={formData.cost}
+                                onChange={handleInputChange}
+                            />
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Syrup Image</label>
                             <div className="image-upload">
-                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{display: 'none'}} id="syrup-image-upload" />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    style={{display: 'none'}}
+                                    id="syrup-image-upload"
+                                />
                                 <label htmlFor="syrup-image-upload" style={{cursor: 'pointer'}}>
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </label>
-                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
+                                {imagePreview && (
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                )}
                             </div>
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                    <input type="text" className="form-input" placeholder="Ingredient name" value={ingredient.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} style={{flex: 2}} />
-                                    <input type="number" step="0.1" className="form-input" placeholder="Amount" value={ingredient.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} style={{flex: 1}} />
-                                    <select className="form-input" value={ingredient.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} style={{flex: 1}}>
-                                        <option value="g">g</option><option value="ml">ml</option><option value="cup">cup</option>
-                                        <option value="tsp">tsp</option><option value="tbsp">tbsp</option>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Ingredient name"
+                                        value={ingredient.name}
+                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                                        style={{flex: 2}}
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        className="form-input"
+                                        placeholder="Amount"
+                                        value={ingredient.amount}
+                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+                                        style={{flex: 1}}
+                                    />
+                                    <select
+                                        className="form-input"
+                                        value={ingredient.unit}
+                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                                        style={{flex: 1}}
+                                    >
+                                        <option value="g">g</option>
+                                        <option value="ml">ml</option>
+                                        <option value="cup">cup</option>
+                                        <option value="tsp">tsp</option>
+                                        <option value="tbsp">tbsp</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button type="button" className="icon-button delete" onClick={() => removeIngredient(index)}>×</button>
+                                        <button
+                                            type="button"
+                                            className="icon-button delete"
+                                            onClick={() => removeIngredient(index)}
+                                        >
+                                            ×
+                                        </button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" className="button button-secondary" onClick={addIngredient}>+ Add Ingredient</button>
+                            <button type="button" className="button button-secondary" onClick={addIngredient}>
+                                + Add Ingredient
+                            </button>
                         </div>
+                        
                         <div className="form-group">
                             <label className="form-label">Instructions</label>
-                            <textarea className="form-textarea" name="instructions" value={formData.instructions} onChange={handleInputChange} />
+                            <textarea
+                                className="form-textarea"
+                                name="instructions"
+                                value={formData.instructions}
+                                onChange={handleInputChange}
+                            />
                         </div>
+                        
                         <div className="buttons-row">
-                            <button type="submit" className="button">{isEdit ? 'Update Syrup' : 'Save Syrup'}</button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
+                            <button type="submit" className="button">
+                                {isEdit ? 'Update Syrup' : 'Save Syrup'}
+                            </button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>
+                                Cancel
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -1956,16 +2241,32 @@
             };
             
             if (items.length === 0) {
-                return <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>{placeholder}</div>;
+                return (
+                    <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
+                        {placeholder}
+                    </div>
+                );
             }
             
             return (
                 <ul className="settings-list">
                     {items.map((item, index) => (
-                        <li key={index} className={`settings-item ${draggedItem === index ? 'dragging' : ''}`} draggable onDragStart={(e) => handleDragStart(e, index)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, index)}>
+                        <li 
+                            key={index}
+                            className={`settings-item ${draggedItem === index ? 'dragging' : ''}`}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, index)}
+                        >
                             <span>{item}</span>
                             <div className="settings-actions">
-                                <button className="icon-button delete" onClick={() => onRemove(index)}>×</button>
+                                <button 
+                                    className="icon-button delete"
+                                    onClick={() => onRemove(index)}
+                                >
+                                    ×
+                                </button>
                             </div>
                         </li>
                     ))}
@@ -1976,8 +2277,13 @@
         // Settings Page Component
         function SettingsPage({ onBack, isAdmin, syncStatus, lastSync }) {
             const [settings, setSettings] = useState(mockSettings);
-            const [newItems, setNewItems] = useState({ spirit_types: '', glass_types: '', venues: '' });
+            const [newItems, setNewItems] = useState({
+                spirit_types: '',
+                glass_types: '',
+                venues: ''
+            });
             
+            // Save settings whenever they change
             useEffect(() => {
                 saveToStorage('cocktailSettings', settings);
                 mockSettings = settings;
@@ -1989,8 +2295,16 @@
                     alert('Please enter a value');
                     return;
                 }
-                setSettings(prev => ({ ...prev, [type]: [...prev[type], value] }));
-                setNewItems(prev => ({ ...prev, [type]: '' }));
+                
+                setSettings(prev => ({
+                    ...prev,
+                    [type]: [...prev[type], value]
+                }));
+                
+                setNewItems(prev => ({
+                    ...prev,
+                    [type]: ''
+                }));
             };
             
             const handleKeyPress = (e, type) => {
@@ -2001,49 +2315,121 @@
             };
             
             const handleRemoveItem = (type, index) => {
-                setSettings(prev => ({ ...prev, [type]: prev[type].filter((_, i) => i !== index) }));
+                setSettings(prev => ({
+                    ...prev,
+                    [type]: prev[type].filter((_, i) => i !== index)
+                }));
             };
             
             const handleReorderItems = (type, newItems) => {
-                setSettings(prev => ({ ...prev, [type]: newItems }));
+                setSettings(prev => ({
+                    ...prev,
+                    [type]: newItems
+                }));
             };
             
             const handleInputChange = (type, value) => {
-                setNewItems(prev => ({ ...prev, [type]: value }));
+                setNewItems(prev => ({
+                    ...prev,
+                    [type]: value
+                }));
             };
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Cocktails
+                    </button>
+                    
                     <h1 className="page-title">Settings</h1>
+                    
                     <SyncStatus status={syncStatus} lastSync={lastSync} />
+                    
                     {!isAdmin ? (
-                        <div className="settings-section"><p>Admin access required to modify settings.</p></div>
+                        <div className="settings-section">
+                            <p>Admin access required to modify settings.</p>
+                        </div>
                     ) : (
                         <>
                             <div className="settings-section">
                                 <h3 className="settings-title">Spirit Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input type="text" className="form-input" placeholder="Add new spirit type" value={newItems.spirit_types} onChange={(e) => handleInputChange('spirit_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'spirit_types')} style={{flex: 1}} />
-                                    <button className="button" onClick={() => handleAddItem('spirit_types')}>Add</button>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new spirit type"
+                                        value={newItems.spirit_types}
+                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('spirit_types')}
+                                    >
+                                        Add
+                                    </button>
                                 </div>
-                                <DraggableSettingsList items={settings.spirit_types} onReorder={(newItems) => handleReorderItems('spirit_types', newItems)} onRemove={(index) => handleRemoveItem('spirit_types', index)} placeholder="No spirit types added yet" />
+                                <DraggableSettingsList 
+                                    items={settings.spirit_types}
+                                    onReorder={(newItems) => handleReorderItems('spirit_types', newItems)}
+                                    onRemove={(index) => handleRemoveItem('spirit_types', index)}
+                                    placeholder="No spirit types added yet"
+                                />
                             </div>
+                            
                             <div className="settings-section">
                                 <h3 className="settings-title">Glass Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input type="text" className="form-input" placeholder="Add new glass type" value={newItems.glass_types} onChange={(e) => handleInputChange('glass_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'glass_types')} style={{flex: 1}} />
-                                    <button className="button" onClick={() => handleAddItem('glass_types')}>Add</button>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new glass type"
+                                        value={newItems.glass_types}
+                                        onChange={(e) => handleInputChange('glass_types', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'glass_types')}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('glass_types')}
+                                    >
+                                        Add
+                                    </button>
                                 </div>
-                                <DraggableSettingsList items={settings.glass_types} onReorder={(newItems) => handleReorderItems('glass_types', newItems)} onRemove={(index) => handleRemoveItem('glass_types', index)} placeholder="No glass types added yet" />
+                                <DraggableSettingsList 
+                                    items={settings.glass_types}
+                                    onReorder={(newItems) => handleReorderItems('glass_types', newItems)}
+                                    onRemove={(index) => handleRemoveItem('glass_types', index)}
+                                    placeholder="No glass types added yet"
+                                />
                             </div>
+                            
                             <div className="settings-section">
                                 <h3 className="settings-title">Venues</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input type="text" className="form-input" placeholder="Add new venue" value={newItems.venues} onChange={(e) => handleInputChange('venues', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'venues')} style={{flex: 1}} />
-                                    <button className="button" onClick={() => handleAddItem('venues')}>Add</button>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new venue"
+                                        value={newItems.venues}
+                                        onChange={(e) => handleInputChange('venues', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'venues')}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('venues')}
+                                    >
+                                        Add
+                                    </button>
                                 </div>
-                                <DraggableSettingsList items={settings.venues} onReorder={(newItems) => handleReorderItems('venues', newItems)} onRemove={(index) => handleRemoveItem('venues', index)} placeholder="No venues added yet" />
+                                <DraggableSettingsList 
+                                    items={settings.venues}
+                                    onReorder={(newItems) => handleReorderItems('venues', newItems)}
+                                    onRemove={(index) => handleRemoveItem('venues', index)}
+                                    placeholder="No venues added yet"
+                                />
                             </div>
                         </>
                     )}
@@ -2070,19 +2456,47 @@
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
                         <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
+                        
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label className="form-label">Username</label>
-                                <input type="text" className="form-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
                             </div>
+                            
                             <div className="form-group">
                                 <label className="form-label">Password</label>
-                                <input type="password" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                <input 
+                                    type="password"
+                                    className="form-input"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
                             </div>
-                            {error && <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>{error}</div>}
+                            
+                            {error && (
+                                <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>
+                                    {error}
+                                </div>
+                            )}
+                            
                             <div className="buttons-row">
-                                <button type="submit" className="button">Login</button>
-                                <button type="button" className="button button-secondary" onClick={onGuestLogin}>Continue as Guest</button>
+                                <button type="submit" className="button">
+                                    Login
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="button button-secondary"
+                                    onClick={onGuestLogin}
+                                >
+                                    Continue as Guest
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -2100,8 +2514,11 @@
             
             const calculateOriginalVolume = () => {
                 return recipe.ingredients.reduce((total, ingredient) => {
-                    if (ingredient.unit === 'ml') return total + parseFloat(ingredient.amount);
-                    if (ingredient.unit === 'oz') return total + (parseFloat(ingredient.amount) * 29.5735);
+                    if (ingredient.unit === 'ml') {
+                        return total + parseFloat(ingredient.amount);
+                    } else if (ingredient.unit === 'oz') {
+                        return total + (parseFloat(ingredient.amount) * 29.5735);
+                    }
                     return total;
                 }, 0);
             };
@@ -2117,7 +2534,8 @@
             
             const calculateScaledIngredients = () => {
                 const originalVolume = calculateOriginalVolume();
-                let scaleFactor, servings = 1;
+                let scaleFactor;
+                let servings = 1;
                 
                 if (scaleMethod === 'servings') {
                     scaleFactor = quantity;
@@ -2132,10 +2550,14 @@
                 const totalScaledVolume = originalVolume * scaleFactor;
                 const dilutionWater = (totalScaledVolume * dilutionPercentage) / 100;
                 
-                const scaledIngredients = recipe.ingredients.map(ingredient => ({
-                    ...ingredient,
-                    scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
-                }));
+                const scaledIngredients = recipe.ingredients.map(ingredient => {
+                    let scaledAmount = ingredient.amount * scaleFactor;
+                    
+                    return {
+                        ...ingredient,
+                        scaledAmount: Math.round(scaledAmount * 10) / 10
+                    };
+                });
                 
                 if (dilutionWater > 0) {
                     scaledIngredients.push({
@@ -2145,7 +2567,11 @@
                     });
                 }
                 
-                return { ingredients: scaledIngredients, servings, totalVolume: totalScaledVolume + dilutionWater };
+                return {
+                    ingredients: scaledIngredients,
+                    servings: servings,
+                    totalVolume: totalScaledVolume + dilutionWater
+                };
             };
             
             const scaledResult = calculateScaledIngredients();
@@ -2153,78 +2579,170 @@
             return (
                 <div className="modal-overlay">
                     <div className="modal">
-                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>Scale: {recipe.name}</h2>
+                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>
+                            Scale: {recipe.name}
+                        </h2>
+                        
                         <div className="scale-option">
                             <h3 className="scale-option-title">Scale by Number of Servings</h3>
-                            <p className="scale-option-description">Choose this option if you know how many servings you need.</p>
+                            <p className="scale-option-description">
+                                Choose this option if you know how many servings you need.
+                            </p>
                             <div className="radio-group">
                                 <label className="radio-option">
-                                    <input type="radio" name="scaleMethod" value="servings" checked={scaleMethod === 'servings'} onChange={(e) => setScaleMethod(e.target.value)} />
+                                    <input
+                                        type="radio"
+                                        name="scaleMethod"
+                                        value="servings"
+                                        checked={scaleMethod === 'servings'}
+                                        onChange={(e) => setScaleMethod(e.target.value)}
+                                    />
                                     Scale by Servings
                                 </label>
                                 {scaleMethod === 'servings' && (
                                     <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                         <label>Enter Quantity:</label>
-                                        <input type="number" min="1" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value))} className="form-input" style={{width: '100px'}} />
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={quantity}
+                                            onChange={(e) => setQuantity(parseInt(e.target.value))}
+                                            className="form-input"
+                                            style={{width: '100px'}}
+                                        />
                                         <span>servings</span>
                                     </div>
                                 )}
                             </div>
                         </div>
+                        
                         <div className="scale-option">
                             <h3 className="scale-option-title">Scale by Total Volume</h3>
-                            <p className="scale-option-description">Ideal for filling a specific container or batch size.</p>
+                            <p className="scale-option-description">
+                                Ideal for filling a specific container or batch size.
+                            </p>
                             <div className="radio-group">
                                 <label className="radio-option">
-                                    <input type="radio" name="scaleMethod" value="volume" checked={scaleMethod === 'volume'} onChange={(e) => setScaleMethod(e.target.value)} />
+                                    <input
+                                        type="radio"
+                                        name="scaleMethod"
+                                        value="volume"
+                                        checked={scaleMethod === 'volume'}
+                                        onChange={(e) => setScaleMethod(e.target.value)}
+                                    />
                                     Scale by Volume
                                 </label>
                                 {scaleMethod === 'volume' && (
                                     <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap'}}>
                                         <label>Enter Quantity:</label>
-                                        <input type="number" min="1" step="0.1" value={quantity} onChange={(e) => setQuantity(parseFloat(e.target.value))} className="form-input" style={{width: '100px'}} />
-                                        <select value={volumeUnit} onChange={(e) => setVolumeUnit(e.target.value)} className="form-input" style={{width: '120px'}}>
-                                            <option value="ml">Milliliters</option><option value="oz">Ounces</option>
-                                            <option value="l">Liters</option><option value="gal">Gallons</option>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            step="0.1"
+                                            value={quantity}
+                                            onChange={(e) => setQuantity(parseFloat(e.target.value))}
+                                            className="form-input"
+                                            style={{width: '100px'}}
+                                        />
+                                        <select
+                                            value={volumeUnit}
+                                            onChange={(e) => setVolumeUnit(e.target.value)}
+                                            className="form-input"
+                                            style={{width: '120px'}}
+                                        >
+                                            <option value="ml">Milliliters</option>
+                                            <option value="oz">Ounces</option>
+                                            <option value="l">Liters</option>
+                                            <option value="gal">Gallons</option>
                                         </select>
                                     </div>
                                 )}
                             </div>
                         </div>
+                        
                         <div className="scale-option">
                             <h3 className="scale-option-title">Add Dilution (Optional)</h3>
-                            <p className="scale-option-description">Choose a dilution percentage that suits your cocktail.</p>
+                            <p className="scale-option-description">
+                                Choose a dilution percentage that suits your cocktail. Water will be added as a separate ingredient.
+                            </p>
                             <div className="dilution-options">
-                                {['0', '18', '25', 'custom'].map(value => (
-                                    <label key={value} className="dilution-option">
-                                        <input type="radio" name="dilution" value={value} checked={dilution === value} onChange={(e) => setDilution(e.target.value)} />
-                                        <div className="dilution-label">
-                                            <span className="dilution-percentage">
-                                                {value === '0' ? '0% (No Dilution)' : value === 'custom' ? 'Custom:' : `${value}%`}
-                                            </span>
-                                            <span className="dilution-description">
-                                                {value === '0' ? 'Best if you plan to shake or stir your drinks to order.' :
-                                                 value === '18' ? 'Best for strong drinks containing mainly spirits.' :
-                                                 value === '25' ? 'Ideal for cocktails containing fruit juices, dairy, or eggs.' :
-                                                 'Enter custom dilution percentage'}
-                                            </span>
-                                        </div>
-                                    </label>
-                                ))}
-                                {dilution === 'custom' && (
-                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem'}}>
-                                        <input type="number" min="0" max="100" value={customDilution} onChange={(e) => setCustomDilution(e.target.value)} className="form-input" style={{width: '80px'}} placeholder="0" />
-                                        <span>%</span>
+                                <label className="dilution-option">
+                                    <input
+                                        type="radio"
+                                        name="dilution"
+                                        value="0"
+                                        checked={dilution === '0'}
+                                        onChange={(e) => setDilution(e.target.value)}
+                                    />
+                                    <div className="dilution-label">
+                                        <span className="dilution-percentage">0% (No Dilution)</span>
+                                        <span className="dilution-description">Best if you plan to shake or stir your drinks to order.</span>
                                     </div>
-                                )}
+                                </label>
+                                
+                                <label className="dilution-option">
+                                    <input
+                                        type="radio"
+                                        name="dilution"
+                                        value="18"
+                                        checked={dilution === '18'}
+                                        onChange={(e) => setDilution(e.target.value)}
+                                    />
+                                    <div className="dilution-label">
+                                        <span className="dilution-percentage">18% (Spirit-Driven Cocktails)</span>
+                                        <span className="dilution-description">Best for strong drinks containing mainly spirits.</span>
+                                    </div>
+                                </label>
+                                
+                                <label className="dilution-option">
+                                    <input
+                                        type="radio"
+                                        name="dilution"
+                                        value="25"
+                                        checked={dilution === '25'}
+                                        onChange={(e) => setDilution(e.target.value)}
+                                    />
+                                    <div className="dilution-label">
+                                        <span className="dilution-percentage">25% (Shaken Cocktails)</span>
+                                        <span className="dilution-description">Ideal for cocktails containing fruit juices, dairy, or eggs.</span>
+                                    </div>
+                                </label>
+                                
+                                <label className="dilution-option">
+                                    <input
+                                        type="radio"
+                                        name="dilution"
+                                        value="custom"
+                                        checked={dilution === 'custom'}
+                                        onChange={(e) => setDilution(e.target.value)}
+                                    />
+                                    <div className="dilution-label">
+                                        <span className="dilution-percentage">Custom:</span>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem'}}>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                value={customDilution}
+                                                onChange={(e) => setCustomDilution(e.target.value)}
+                                                className="form-input"
+                                                style={{width: '80px'}}
+                                                placeholder="0"
+                                            />
+                                            <span>%</span>
+                                        </div>
+                                    </div>
+                                </label>
                             </div>
                         </div>
+
                         {scaleMethod === 'volume' && (
                             <div className="servings-info">
                                 <div>This batch will make approximately</div>
                                 <div className="servings-count">{scaledResult.servings} servings</div>
                             </div>
                         )}
+                        
                         <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Scaled Ingredients</h3>
                         <ul className="ingredients-list">
                             {scaledResult.ingredients.map((ingredient, index) => (
@@ -2234,8 +2752,11 @@
                                 </li>
                             ))}
                         </ul>
+                        
                         <div className="buttons-row">
-                            <button className="button" onClick={onClose}>Close</button>
+                            <button className="button" onClick={onClose}>
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2260,6 +2781,8 @@
                 const initializeSync = async () => {
                     try {
                         await CloudStorage.initialize();
+                        
+                        // Load initial data from cloud
                         const cloudData = await CloudStorage.loadFromCloud();
                         if (cloudData) {
                             mockRecipes = cloudData.recipes || mockRecipes;
@@ -2270,14 +2793,18 @@
                             saveToStorage('cocktailSyrups', mockSyrups);
                             saveToStorage('cocktailSettings', mockSettings);
                             
-                            setSyncStatus({ type: 'success', message: '✅ Synced with cloud data' });
+                            setSyncStatus({
+                                type: 'success',
+                                message: '✅ Synced with cloud data'
+                            });
                             setLastSync(cloudData.lastUpdated || Date.now());
-                        } else {
-                            setSyncStatus({ type: 'info', message: '🔄 Using local storage - set up Firebase for cross-device sync' });
                         }
                     } catch (error) {
                         console.error('Sync initialization failed:', error);
-                        setSyncStatus({ type: 'error', message: '❌ Cloud sync unavailable - using local data' });
+                        setSyncStatus({
+                            type: 'error', 
+                            message: '❌ Cloud sync unavailable - using local data'
+                        });
                     }
                 };
                 
@@ -2292,6 +2819,7 @@
                             const cloudLastUpdate = cloudData.lastUpdated || 0;
                             
                             if (cloudLastUpdate > localLastSync) {
+                                // Cloud has newer data, update local
                                 mockRecipes = cloudData.recipes || mockRecipes;
                                 mockSyrups = cloudData.syrups || mockSyrups;
                                 mockSettings = cloudData.settings || mockSettings;
@@ -2301,15 +2829,20 @@
                                 saveToStorage('cocktailSettings', mockSettings);
                                 saveToStorage('lastCloudSync', cloudLastUpdate);
                                 
-                                setSyncStatus({ type: 'success', message: '✅ Auto-synced with latest changes' });
+                                setSyncStatus({
+                                    type: 'success',
+                                    message: '✅ Auto-synced with latest changes'
+                                });
                                 setLastSync(cloudLastUpdate);
+                                
+                                // Force re-render
                                 setCurrentPage(currentPage => currentPage);
                             }
                         }
                     } catch (error) {
                         console.error('Periodic sync failed:', error);
                     }
-                }, 10000);
+                }, 10000); // Check every 10 seconds
                 
                 return () => clearInterval(syncInterval);
             }, []);
@@ -2329,17 +2862,30 @@
                         const syncTime = Date.now();
                         saveToStorage('lastCloudSync', syncTime);
                         setLastSync(syncTime);
-                        setSyncStatus({ type: 'success', message: '✅ Changes saved to cloud' });
+                        setSyncStatus({
+                            type: 'success',
+                            message: '✅ Changes saved to cloud'
+                        });
                         
+                        // Clear status after 3 seconds
                         setTimeout(() => {
-                            setSyncStatus({ type: 'info', message: '🔄 Auto-syncing every 10 seconds' });
+                            setSyncStatus({
+                                type: 'info',
+                                message: '🔄 Auto-syncing every 10 seconds'
+                            });
                         }, 3000);
                     } else {
-                        setSyncStatus({ type: 'error', message: '❌ Failed to save to cloud' });
+                        setSyncStatus({
+                            type: 'error',
+                            message: '❌ Failed to save to cloud'
+                        });
                     }
                 } catch (error) {
                     console.error('Cloud save failed:', error);
-                    setSyncStatus({ type: 'error', message: '❌ Cloud sync error' });
+                    setSyncStatus({
+                        type: 'error',
+                        message: '❌ Cloud sync error'
+                    });
                 }
             };
             
@@ -2387,7 +2933,9 @@
             const handleSaveRecipe = (recipeData) => {
                 if (isEditing && editingItem) {
                     const index = mockRecipes.findIndex(r => r.id === editingItem.id);
-                    if (index !== -1) mockRecipes[index] = recipeData;
+                    if (index !== -1) {
+                        mockRecipes[index] = recipeData;
+                    }
                 } else {
                     mockRecipes.push(recipeData);
                 }
@@ -2401,7 +2949,9 @@
             const handleSaveSyrup = (syrupData) => {
                 if (isEditing && editingItem) {
                     const index = mockSyrups.findIndex(s => s.id === editingItem.id);
-                    if (index !== -1) mockSyrups[index] = syrupData;
+                    if (index !== -1) {
+                        mockSyrups[index] = syrupData;
+                    }
                 } else {
                     mockSyrups.push(syrupData);
                 }
@@ -2426,43 +2976,143 @@
             };
             
             const renderPage = () => {
-                if (!user) return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                if (!user) {
+                    return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                }
                 
                 switch(currentPage) {
-                    case 'home': return <HomePage onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} onDeleteRecipe={handleDeleteRecipe} isAdmin={user.isAdmin} onCreateRecipe={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-recipe'); }} syncStatus={syncStatus} lastSync={lastSync} />;
-                    case 'view-recipe': return <ViewRecipePage recipe={selectedRecipe} onBack={() => navigateTo('home')} onScale={() => setShowScaleModal(true)} isAdmin={user.isAdmin} onDeleteRecipe={handleDeleteRecipe} onEditRecipe={handleEditRecipe} />;
-                    case 'create-recipe': return <CreateEditRecipePage recipe={editingItem} onBack={() => navigateTo('home')} onSave={handleSaveRecipe} isEdit={isEditing} />;
-                    case 'syrups': return <SyrupsPage onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)} onCreateSyrup={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-syrup'); }} onDeleteSyrup={handleDeleteSyrup} isAdmin={user.isAdmin} syncStatus={syncStatus} lastSync={lastSync} />;
-                    case 'view-syrup': return <ViewSyrupPage syrup={selectedSyrup} onBack={() => navigateTo('syrups')} isAdmin={user.isAdmin} onDeleteSyrup={handleDeleteSyrup} onEditSyrup={handleEditSyrup} />;
-                    case 'create-syrup': return <CreateEditSyrupPage syrup={editingItem} onBack={() => navigateTo('syrups')} onSave={handleSaveSyrup} isEdit={isEditing} />;
-                    case 'settings': return <SettingsPage onBack={() => navigateTo('home')} isAdmin={user.isAdmin} syncStatus={syncStatus} lastSync={lastSync} />;
-                    default: return <HomePage onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} onDeleteRecipe={handleDeleteRecipe} isAdmin={user.isAdmin} onCreateRecipe={() => navigateTo('create-recipe')} syncStatus={syncStatus} lastSync={lastSync} />;
+                    case 'home':
+                        return <HomePage 
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
+                            onDeleteRecipe={handleDeleteRecipe}
+                            isAdmin={user.isAdmin}
+                            onCreateRecipe={() => {
+                                setIsEditing(false);
+                                setEditingItem(null);
+                                navigateTo('create-recipe');
+                            }}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
+                        />;
+                    case 'view-recipe':
+                        return <ViewRecipePage 
+                            recipe={selectedRecipe} 
+                            onBack={() => navigateTo('home')}
+                            onScale={() => setShowScaleModal(true)}
+                            isAdmin={user.isAdmin}
+                            onDeleteRecipe={handleDeleteRecipe}
+                            onEditRecipe={handleEditRecipe}
+                        />;
+                    case 'create-recipe':
+                        return <CreateEditRecipePage 
+                            recipe={editingItem}
+                            onBack={() => navigateTo('home')} 
+                            onSave={handleSaveRecipe}
+                            isEdit={isEditing}
+                        />;
+                    case 'syrups':
+                        return <SyrupsPage 
+                            onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)}
+                            onCreateSyrup={() => {
+                                setIsEditing(false);
+                                setEditingItem(null);
+                                navigateTo('create-syrup');
+                            }}
+                            onDeleteSyrup={handleDeleteSyrup}
+                            isAdmin={user.isAdmin}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
+                        />;
+                    case 'view-syrup':
+                        return <ViewSyrupPage 
+                            syrup={selectedSyrup} 
+                            onBack={() => navigateTo('syrups')}
+                            isAdmin={user.isAdmin}
+                            onDeleteSyrup={handleDeleteSyrup}
+                            onEditSyrup={handleEditSyrup}
+                        />;
+                    case 'create-syrup':
+                        return <CreateEditSyrupPage 
+                            syrup={editingItem}
+                            onBack={() => navigateTo('syrups')}
+                            onSave={handleSaveSyrup}
+                            isEdit={isEditing}
+                        />;
+                    case 'settings':
+                        return <SettingsPage 
+                            onBack={() => navigateTo('home')} 
+                            isAdmin={user.isAdmin}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
+                        />;
+                    default:
+                        return <HomePage 
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
+                            onDeleteRecipe={handleDeleteRecipe}
+                            isAdmin={user.isAdmin}
+                            onCreateRecipe={() => navigateTo('create-recipe')}
+                            syncStatus={syncStatus}
+                            lastSync={lastSync}
+                        />;
                 }
             };
             
-            if (!user) return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+            if (!user) {
+                return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+            }
             
             return (
                 <div className="app">
                     <header className="header">
                         <div className="header-left">
-                            <button className={`menu-button ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
-                                <span className="menu-line"></span><span className="menu-line"></span><span className="menu-line"></span>
+                            <button 
+                                className={`menu-button ${menuOpen ? 'active' : ''}`}
+                                onClick={() => setMenuOpen(!menuOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
                             </button>
                         </div>
+                        
                         <div className="nav-user">
                             👤 {user.username}
                             {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
                             {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
-                            <button className="logout-btn" onClick={logout}>Logout</button>
+                            <button className="logout-btn" onClick={logout}>
+                                Logout
+                            </button>
                         </div>
                     </header>
-                    <HamburgerMenu isOpen={menuOpen} onToggle={setMenuOpen} currentPage={currentPage} onNavigate={navigateTo} isAdmin={user.isAdmin} />
-                    <main>{renderPage()}</main>
+                    
+                    <HamburgerMenu 
+                        isOpen={menuOpen}
+                        onToggle={setMenuOpen}
+                        currentPage={currentPage}
+                        onNavigate={navigateTo}
+                        isAdmin={user.isAdmin}
+                    />
+                    
+                    <main>
+                        {renderPage()}
+                    </main>
+
                     <footer className="footer">
-                        <p>Cocktail Codex © {new Date().getFullYear()} | <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">@suraj.gg87</a></p>
+                        <p>
+                            Cocktail Codex © {new Date().getFullYear()} | {' '}
+                            <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
+                                @suraj.gg87
+                            </a>
+                        </p>
                     </footer>
-                    {showScaleModal && selectedRecipe && <ScaleModal recipe={selectedRecipe} onClose={() => setShowScaleModal(false)} />}
+
+                    {showScaleModal && selectedRecipe && (
+                        <ScaleModal 
+                            recipe={selectedRecipe}
+                            onClose={() => setShowScaleModal(false)}
+                        />
+                    )}
                 </div>
             );
         }
