@@ -285,13 +285,6 @@
             margin-bottom: 1.5rem;
         }
         
-        @media (max-width: 768px) {
-            .recipes-grid {
-                grid-template-columns: repeat(3, 1fr); /* 3 columns = max 9 cocktails */
-                gap: 0.5rem;
-            }
-        }
-        
         .recipe-card {
             background: #1A1A1A;
             border-radius: 10px;
@@ -334,12 +327,12 @@
         .recipe-spirit {
             color: #FFB366;
             font-size: 0.8rem;
-            margin-bottom: 0.25rem;
         }
         
         .recipe-abv {
             color: #888;
             font-size: 0.7rem;
+            margin-top: 0.25rem;
         }
         
         .delete-overlay {
@@ -905,7 +898,7 @@
             }
             
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr); /* 3 columns = max 9 cocktails */
+                grid-template-columns: repeat(3, 1fr); /* Show 3 columns on mobile */
                 gap: 0.5rem;
             }
             
@@ -976,7 +969,7 @@
         
         @media (max-width: 480px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr); /* Keep 3 columns on very small screens */
+                grid-template-columns: repeat(3, 1fr); /* Show 3 columns on small mobile */
             }
             
             .recipe-image {
@@ -997,6 +990,13 @@
             
             .action-buttons {
                 flex-direction: column;
+            }
+        }
+        
+        /* Mobile optimizations for 9 cocktails display */
+        @media (max-width: 768px) {
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3x3 grid = 9 cocktails */
             }
         }
         
@@ -1088,150 +1088,6 @@
                 ],
                 instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
                 notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.'
-            },
-            {
-                id: '2',
-                name: 'Old Fashioned',
-                spirit_type: 'Whiskey',
-                venue: 'Main Bar',
-                glass_type: 'Rocks',
-                abv: 32,
-                pour_cost: 5.50,
-                image_url: '',
-                ingredients: [
-                    { name: 'Bourbon', amount: 60, unit: 'ml' },
-                    { name: 'Sugar Cube', amount: 1, unit: 'piece' },
-                    { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                    { name: 'Orange Twist', amount: 1, unit: 'piece' }
-                ],
-                instructions: 'Muddle sugar cube with bitters and a splash of water. Add bourbon and ice. Stir gently. Garnish with orange twist.',
-                notes: 'Classic whiskey cocktail.'
-            },
-            {
-                id: '3',
-                name: 'Margarita',
-                spirit_type: 'Tequila',
-                venue: 'Pool Bar',
-                glass_type: 'Rocks',
-                abv: 25,
-                pour_cost: 4.75,
-                image_url: '',
-                ingredients: [
-                    { name: 'Tequila', amount: 50, unit: 'ml' },
-                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                    { name: 'Triple Sec', amount: 20, unit: 'ml' },
-                    { name: 'Agave Syrup', amount: 15, unit: 'ml' }
-                ],
-                instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass over fresh ice.',
-                notes: 'Perfect balance of sweet and sour.'
-            },
-            {
-                id: '4',
-                name: 'Mojito',
-                spirit_type: 'Rum',
-                venue: 'Pool Bar',
-                glass_type: 'Highball',
-                abv: 15,
-                pour_cost: 5.25,
-                image_url: '',
-                ingredients: [
-                    { name: 'White Rum', amount: 50, unit: 'ml' },
-                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                    { name: 'Mint Leaves', amount: 8, unit: 'leaves' },
-                    { name: 'Simple Syrup', amount: 20, unit: 'ml' },
-                    { name: 'Soda Water', amount: 60, unit: 'ml' }
-                ],
-                instructions: 'Muddle mint with lime juice and syrup. Add rum and ice. Top with soda water. Stir gently.',
-                notes: 'Refreshing Cuban classic.'
-            },
-            {
-                id: '5',
-                name: 'Negroni',
-                spirit_type: 'Gin',
-                venue: 'Lounge',
-                glass_type: 'Rocks',
-                abv: 24,
-                pour_cost: 6.00,
-                image_url: '',
-                ingredients: [
-                    { name: 'Gin', amount: 30, unit: 'ml' },
-                    { name: 'Campari', amount: 30, unit: 'ml' },
-                    { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
-                    { name: 'Orange Twist', amount: 1, unit: 'piece' }
-                ],
-                instructions: 'Stir all ingredients with ice. Strain over large ice cube. Express orange twist over drink.',
-                notes: 'Bitter and complex Italian classic.'
-            },
-            {
-                id: '6',
-                name: 'Daiquiri',
-                spirit_type: 'Rum',
-                venue: 'Main Bar',
-                glass_type: 'Coupe',
-                abv: 20,
-                pour_cost: 4.50,
-                image_url: '',
-                ingredients: [
-                    { name: 'White Rum', amount: 60, unit: 'ml' },
-                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                    { name: 'Simple Syrup', amount: 20, unit: 'ml' }
-                ],
-                instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass.',
-                notes: 'Simple and refreshing rum classic.'
-            },
-            {
-                id: '7',
-                name: 'Whiskey Sour',
-                spirit_type: 'Whiskey',
-                venue: 'Main Bar',
-                glass_type: 'Rocks',
-                abv: 18,
-                pour_cost: 5.00,
-                image_url: '',
-                ingredients: [
-                    { name: 'Bourbon', amount: 60, unit: 'ml' },
-                    { name: 'Lemon Juice', amount: 25, unit: 'ml' },
-                    { name: 'Simple Syrup', amount: 20, unit: 'ml' },
-                    { name: 'Egg White', amount: 1, unit: 'piece' }
-                ],
-                instructions: 'Dry shake all ingredients without ice. Add ice and shake again. Strain into rocks glass.',
-                notes: 'Classic sour with silky texture.'
-            },
-            {
-                id: '8',
-                name: 'Espresso Martini',
-                spirit_type: 'Vodka',
-                venue: 'Lounge',
-                glass_type: 'Martini',
-                abv: 20,
-                pour_cost: 6.50,
-                image_url: '',
-                ingredients: [
-                    { name: 'Vodka', amount: 50, unit: 'ml' },
-                    { name: 'Coffee Liqueur', amount: 30, unit: 'ml' },
-                    { name: 'Fresh Espresso', amount: 30, unit: 'ml' },
-                    { name: 'Simple Syrup', amount: 10, unit: 'ml' }
-                ],
-                instructions: 'Shake all ingredients vigorously with ice. Strain into chilled martini glass.',
-                notes: 'Perfect after-dinner cocktail.'
-            },
-            {
-                id: '9',
-                name: 'French 75',
-                spirit_type: 'Gin',
-                venue: 'Restaurant',
-                glass_type: 'Champagne Flute',
-                abv: 12,
-                pour_cost: 7.00,
-                image_url: '',
-                ingredients: [
-                    { name: 'Gin', amount: 30, unit: 'ml' },
-                    { name: 'Lemon Juice', amount: 15, unit: 'ml' },
-                    { name: 'Simple Syrup', amount: 10, unit: 'ml' },
-                    { name: 'Champagne', amount: 60, unit: 'ml' }
-                ],
-                instructions: 'Shake gin, lemon juice, and syrup with ice. Strain into flute. Top with champagne.',
-                notes: 'Elegant and celebratory.'
             }
         ]);
 
@@ -1386,9 +1242,7 @@
                     <div className="recipe-info">
                         <div className="recipe-name">{recipe.name}</div>
                         <div className="recipe-spirit">{recipe.spirit_type}</div>
-                        {recipe.abv > 0 && (
-                            <div className="recipe-abv">{recipe.abv}% ABV</div>
-                        )}
+                        <div className="recipe-abv">{recipe.abv}% ABV</div>
                     </div>
                     {isAdmin && (
                         <button 
@@ -1431,9 +1285,7 @@
                                     <div className="recipe-meta">
                                         <div className="meta-item">{recipe.spirit_type}</div>
                                         <div className="meta-item">{recipe.glass_type} Glass</div>
-                                        {recipe.abv > 0 && (
-                                            <div className="meta-item">{recipe.abv}% ABV</div>
-                                        )}
+                                        <div className="meta-item">{recipe.abv}% ABV</div>
                                         <div className="meta-item">${recipe.pour_cost} Cost</div>
                                         <div className="meta-item">{recipe.venue}</div>
                                     </div>
@@ -2203,7 +2055,7 @@
         }
 
         // Draggable Settings Component
-        function DraggableSettingsList({ items, onReorder, onRemove, placeholder, onAddItem, inputValue, onInputChange, inputRef }) {
+        function DraggableSettingsList({ items, onReorder, onRemove, placeholder }) {
             const [draggedItem, setDraggedItem] = useState(null);
             
             const handleDragStart = (e, index) => {
@@ -2227,14 +2079,7 @@
                 setDraggedItem(null);
             };
             
-            const handleKeyPress = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    onAddItem();
-                }
-            };
-            
-            if (items.length === 0 && !inputValue) {
+            if (items.length === 0) {
                 return (
                     <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
                         {placeholder}
@@ -2243,48 +2088,28 @@
             }
             
             return (
-                <>
-                    <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            className="form-input"
-                            placeholder="Type and press Enter to add"
-                            value={inputValue}
-                            onChange={(e) => onInputChange(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            style={{flex: 1}}
-                        />
-                        <button 
-                            className="button" 
-                            onClick={onAddItem}
+                <ul className="settings-list">
+                    {items.map((item, index) => (
+                        <li 
+                            key={index}
+                            className={`settings-item ${draggedItem === index ? 'dragging' : ''}`}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, index)}
                         >
-                            Add
-                        </button>
-                    </div>
-                    <ul className="settings-list">
-                        {items.map((item, index) => (
-                            <li 
-                                key={index}
-                                className={`settings-item ${draggedItem === index ? 'dragging' : ''}`}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, index)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, index)}
-                            >
-                                <span>{item}</span>
-                                <div className="settings-actions">
-                                    <button 
-                                        className="icon-button delete"
-                                        onClick={() => onRemove(index)}
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </>
+                            <span>{item}</span>
+                            <div className="settings-actions">
+                                <button 
+                                    className="icon-button delete"
+                                    onClick={() => onRemove(index)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             );
         }
 
@@ -2296,10 +2121,6 @@
                 glass_types: '',
                 venues: ''
             });
-            
-            const spiritInputRef = useRef(null);
-            const glassInputRef = useRef(null);
-            const venueInputRef = useRef(null);
             
             // Save settings whenever they change
             useEffect(() => {
@@ -2324,15 +2145,6 @@
                     ...prev,
                     [type]: ''
                 }));
-                
-                // Focus back on the input
-                if (type === 'spirit_types' && spiritInputRef.current) {
-                    spiritInputRef.current.focus();
-                } else if (type === 'glass_types' && glassInputRef.current) {
-                    glassInputRef.current.focus();
-                } else if (type === 'venues' && venueInputRef.current) {
-                    venueInputRef.current.focus();
-                }
             };
             
             const handleRemoveItem = (type, index) => {
@@ -2372,42 +2184,78 @@
                         <>
                             <div className="settings-section">
                                 <h3 className="settings-title">Spirit Types</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new spirit type"
+                                        value={newItems.spirit_types}
+                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('spirit_types')}
+                                    >
+                                        Add
+                                    </button>
+                                </div>
                                 <DraggableSettingsList 
                                     items={settings.spirit_types}
                                     onReorder={(newItems) => handleReorderItems('spirit_types', newItems)}
                                     onRemove={(index) => handleRemoveItem('spirit_types', index)}
-                                    onAddItem={() => handleAddItem('spirit_types')}
-                                    inputValue={newItems.spirit_types}
-                                    onInputChange={(value) => handleInputChange('spirit_types', value)}
-                                    inputRef={spiritInputRef}
                                     placeholder="No spirit types added yet"
                                 />
                             </div>
                             
                             <div className="settings-section">
                                 <h3 className="settings-title">Glass Types</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new glass type"
+                                        value={newItems.glass_types}
+                                        onChange={(e) => handleInputChange('glass_types', e.target.value)}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('glass_types')}
+                                    >
+                                        Add
+                                    </button>
+                                </div>
                                 <DraggableSettingsList 
                                     items={settings.glass_types}
                                     onReorder={(newItems) => handleReorderItems('glass_types', newItems)}
                                     onRemove={(index) => handleRemoveItem('glass_types', index)}
-                                    onAddItem={() => handleAddItem('glass_types')}
-                                    inputValue={newItems.glass_types}
-                                    onInputChange={(value) => handleInputChange('glass_types', value)}
-                                    inputRef={glassInputRef}
                                     placeholder="No glass types added yet"
                                 />
                             </div>
                             
                             <div className="settings-section">
                                 <h3 className="settings-title">Venues</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add new venue"
+                                        value={newItems.venues}
+                                        onChange={(e) => handleInputChange('venues', e.target.value)}
+                                        style={{flex: 1}}
+                                    />
+                                    <button 
+                                        className="button" 
+                                        onClick={() => handleAddItem('venues')}
+                                    >
+                                        Add
+                                    </button>
+                                </div>
                                 <DraggableSettingsList 
                                     items={settings.venues}
                                     onReorder={(newItems) => handleReorderItems('venues', newItems)}
                                     onRemove={(index) => handleRemoveItem('venues', index)}
-                                    onAddItem={() => handleAddItem('venues')}
-                                    inputValue={newItems.venues}
-                                    onInputChange={(value) => handleInputChange('venues', value)}
-                                    inputRef={venueInputRef}
                                     placeholder="No venues added yet"
                                 />
                             </div>
@@ -2770,7 +2618,7 @@
             
             const navigateTo = (page, item = null) => {
                 // Prevent navigation to protected pages if not admin
-                if ((page === 'create-recipe' || currentPage === 'settings') && (!user || !user.isAdmin)) {
+                if ((page === 'create-recipe' || page === 'settings') && (!user || !user.isAdmin)) {
                     return;
                 }
                 setCurrentPage(page);
