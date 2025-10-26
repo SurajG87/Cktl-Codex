@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Cocktail Codex</title>
+    <title>Cocktail Menu</title>
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="The Cocktail Codex">
+    <meta name="apple-mobile-web-app-title" content="Cocktail Menu">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -28,7 +28,7 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -webkit-text-size-adjust: 100%;
-            font-size: 16px;
+            font-size: 14px; /* Changed from 16px to 14px */
         }
         
         .app {
@@ -192,7 +192,7 @@
             border-radius: 8px;
             cursor: pointer;
             text-align: left;
-            font-size: 1rem;
+            font-size: 1rem; /* Changed from 1rem to 14px base */
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
@@ -236,14 +236,14 @@
         }
         
         .page-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem; /* Reduced from 1.8rem */
             color: #FFB366;
         }
         
         /* Search and Filters */
         .search-section {
             background: #1A1A1A;
-            padding: 1.25rem;
+            padding: 1rem; /* Reduced from 1.25rem */
             border-radius: 10px;
             margin-bottom: 1.5rem;
             border: 1px solid #333;
@@ -251,13 +251,14 @@
         
         .search-box {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.5rem; /* Reduced from 0.75rem */
             background: #333;
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
             margin-bottom: 1rem;
-            font-size: 1rem;
+            font-size: 14px; /* Changed from 1rem to 14px */
+            height: 40px; /* Smaller height */
         }
         
         .filters {
@@ -267,14 +268,15 @@
         }
         
         .filter-select {
-            padding: 0.75rem;
+            padding: 0.5rem; /* Reduced from 0.75rem */
             background: #333;
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
             flex: 1;
             min-width: 140px;
-            font-size: 0.9rem;
+            font-size: 14px; /* Changed from 0.9rem to 14px */
+            height: 40px; /* Smaller height */
         }
         
         /* Recipe Grid */
@@ -320,18 +322,18 @@
         .recipe-name {
             font-weight: bold;
             margin-bottom: 0.25rem;
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* Adjusted for 14px base */
             line-height: 1.2;
         }
         
         .recipe-spirit {
             color: #FFB366;
-            font-size: 0.8rem;
+            font-size: 0.8rem; /* Adjusted for 14px base */
         }
         
         .recipe-abv {
             color: #888;
-            font-size: 0.7rem;
+            font-size: 0.7rem; /* Adjusted for 14px base */
             margin-top: 0.25rem;
         }
         
@@ -360,7 +362,7 @@
         }
         
         .letter-header {
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* Reduced from 1.5rem */
             color: #FFB366;
             margin-bottom: 0.75rem;
             padding-bottom: 0.5rem;
@@ -414,7 +416,7 @@
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
-            font-size: 16px; /* Prevent zoom on iOS */
+            font-size: 14px; /* Changed from 16px to 14px */
         }
         
         .form-textarea {
@@ -426,7 +428,7 @@
             color: white;
             min-height: 100px;
             resize: vertical;
-            font-size: 16px; /* Prevent zoom on iOS */
+            font-size: 14px; /* Changed from 16px to 14px */
             font-family: inherit;
         }
         
@@ -439,7 +441,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
-            font-size: 1rem;
+            font-size: 14px; /* Changed from 1rem to 14px */
         }
         
         .button:hover {
@@ -559,7 +561,7 @@
         }
         
         .recipe-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem; /* Reduced from 1.8rem */
             color: #FFB366;
             margin-bottom: 0.5rem;
         }
@@ -729,7 +731,7 @@
         }
         
         .settings-title {
-            font-size: 1.3rem;
+            font-size: 1.3rem; /* Reduced from 1.3rem */
             color: #FFB366;
             margin-bottom: 1rem;
         }
@@ -894,7 +896,7 @@
             }
             
             .page-title {
-                font-size: 1.5rem;
+                font-size: 1.3rem; /* Reduced from 1.5rem */
             }
             
             .recipes-grid {
@@ -981,7 +983,7 @@
             }
             
             .page-title {
-                font-size: 1.3rem;
+                font-size: 1.1rem; /* Reduced from 1.3rem */
             }
             
             .syrups-grid {
@@ -1002,8 +1004,8 @@
         
         /* Prevent zoom on mobile */
         input, select, textarea {
-            font-size: 16px !important;
-            max-height: 44px; /* Better touch targets */
+            font-size: 14px !important; /* Changed from 16px to 14px */
+            max-height: 40px; /* Better touch targets - reduced from 44px */
         }
         
         /* Hide scrollbar for side menu */
@@ -1023,18 +1025,18 @@
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .form-input, .form-textarea, .filter-select, .search-box {
-                font-size: 16px; /* Prevent iOS zoom */
-                padding: 1rem; /* Better touch targets */
+                font-size: 14px; /* Changed from 16px to 14px */
+                padding: 0.75rem; /* Reduced from 1rem */
             }
             
             .button {
-                padding: 1rem 1.5rem; /* Better touch targets */
-                min-height: 44px; /* Minimum touch target size */
+                padding: 0.75rem 1.25rem; /* Reduced padding */
+                min-height: 40px; /* Reduced from 44px */
             }
             
             .action-button {
-                padding: 1rem;
-                min-height: 44px;
+                padding: 0.75rem;
+                min-height: 40px;
             }
         }
     </style>
@@ -1193,7 +1195,7 @@
                     <div ref={menuRef} className={`side-menu ${isOpen ? 'active' : ''}`}>
                         <div className="side-menu-header">
                             <div className="side-menu-logo">🍸</div>
-                            <div className="side-menu-title">The Cocktail Codex</div>
+                            <div className="side-menu-title">Cocktail Menu</div>
                         </div>
                         
                         <nav className="side-menu-nav">
@@ -1201,8 +1203,17 @@
                                 className={`side-menu-button ${currentPage === 'home' ? 'active' : ''}`}
                                 onClick={() => handleNavigation('home')}
                             >
-                                📖 The Cocktail Codex
+                                📖 Cocktail Menu
                             </button>
+                            
+                            {isAdmin && (
+                                <button 
+                                    className={`side-menu-button ${currentPage === 'create-recipe' ? 'active' : ''}`}
+                                    onClick={() => handleNavigation('create-recipe')}
+                                >
+                                    ➕ Add Recipe
+                                </button>
+                            )}
                             
                             <button 
                                 className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
@@ -1211,15 +1222,14 @@
                                 🧪 Syrups & Infusions
                             </button>
                             
-                            <button 
-                                className={`side-menu-button ${currentPage === 'settings' ? 'active' : ''} ${
-                                    !isAdmin ? 'disabled' : ''
-                                }`}
-                                onClick={() => isAdmin && handleNavigation('settings')}
-                                title={!isAdmin ? 'Admin access required' : ''}
-                            >
-                                ⚙️ Settings
-                            </button>
+                            {isAdmin && (
+                                <button 
+                                    className={`side-menu-button ${currentPage === 'settings' ? 'active' : ''}`}
+                                    onClick={() => handleNavigation('settings')}
+                                >
+                                    ⚙️ Settings
+                                </button>
+                            )}
                         </nav>
                     </div>
                 </>
@@ -1380,7 +1390,7 @@
             return (
                 <div className="container">
                     <div className="page-header">
-                        <h1 className="page-title">The Cocktail Codex</h1>
+                        {/* Removed the "Cocktail Menu" title */}
                         {isAdmin && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
@@ -2147,6 +2157,14 @@
                 }));
             };
             
+            // Handle Enter key press in settings input fields
+            const handleKeyPress = (e, type) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddItem(type);
+                }
+            };
+            
             const handleRemoveItem = (type, index) => {
                 setSettings(prev => ({
                     ...prev,
@@ -2191,6 +2209,7 @@
                                         placeholder="Add new spirit type"
                                         value={newItems.spirit_types}
                                         onChange={(e) => handleInputChange('spirit_types', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')}
                                         style={{flex: 1}}
                                     />
                                     <button 
@@ -2217,6 +2236,7 @@
                                         placeholder="Add new glass type"
                                         value={newItems.glass_types}
                                         onChange={(e) => handleInputChange('glass_types', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'glass_types')}
                                         style={{flex: 1}}
                                     />
                                     <button 
@@ -2243,6 +2263,7 @@
                                         placeholder="Add new venue"
                                         value={newItems.venues}
                                         onChange={(e) => handleInputChange('venues', e.target.value)}
+                                        onKeyPress={(e) => handleKeyPress(e, 'venues')}
                                         style={{flex: 1}}
                                     />
                                     <button 
@@ -2283,7 +2304,7 @@
             return (
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
-                        <h1 className="page-title" style={{textAlign: 'center'}}>The Cocktail Codex</h1>
+                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Menu</h1>
                         
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
@@ -2779,15 +2800,17 @@
                 <div className="app">
                     <header className="header">
                         <div className="header-left">
-                            <button 
-                                className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle menu"
-                            >
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                            </button>
+                            {user.isAdmin && (
+                                <button 
+                                    className={`menu-button ${menuOpen ? 'active' : ''}`}
+                                    onClick={() => setMenuOpen(!menuOpen)}
+                                    aria-label="Toggle menu"
+                                >
+                                    <span className="menu-line"></span>
+                                    <span className="menu-line"></span>
+                                    <span className="menu-line"></span>
+                                </button>
+                            )}
                         </div>
                         
                         <div className="nav-user">
@@ -2800,13 +2823,15 @@
                         </div>
                     </header>
                     
-                    <HamburgerMenu 
-                        isOpen={menuOpen}
-                        onToggle={setMenuOpen}
-                        currentPage={currentPage}
-                        onNavigate={navigateTo}
-                        isAdmin={user.isAdmin}
-                    />
+                    {user.isAdmin && (
+                        <HamburgerMenu 
+                            isOpen={menuOpen}
+                            onToggle={setMenuOpen}
+                            currentPage={currentPage}
+                            onNavigate={navigateTo}
+                            isAdmin={user.isAdmin}
+                        />
+                    )}
                     
                     <main>
                         {renderPage()}
@@ -2814,7 +2839,7 @@
 
                     <footer className="footer">
                         <p>
-                            The Cocktail Codex © {new Date().getFullYear()} | Created by{' '}
+                            Cocktail Menu © {new Date().getFullYear()} | Created by{' '}
                             <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
                                 @suraj.gg87
                             </a>
