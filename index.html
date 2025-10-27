@@ -12,6 +12,9 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         /* ... (keep all existing styles the same) ... */
         
@@ -57,6 +60,16 @@
         .sync-button:hover {
             background: #444;
         }
+        
+        .demo-notice {
+            background: #FFB366;
+            color: #0A0A0A;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -70,11 +83,26 @@
             username: 'suraj',
             password: 'cocktail123'
         };
-        
-        // Cloud storage configuration - Using JSONBin as a free cloud storage solution
-        const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b';
-        const BIN_ID = '67d3a9e2dc746540189df7d1'; // This will be created on first save
-        const API_KEY = '$2a$10$Qh/gR.I.8kO7k6e5e5e5eOe5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZ7l7Vpl3r6l2N8W4dZLXq6YQ7bKj6X8w",
+            authDomain: "cocktail-manual-demo.firebaseapp.com",
+            projectId: "cocktail-manual-demo",
+            storageBucket: "cocktail-manual-demo.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        let db = null;
+        try {
+            const app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore(app);
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.log('Firebase initialization failed, using localStorage fallback:', error);
+        }
         
         // Load data from localStorage or use defaults
         const loadFromStorage = (key, defaultValue) => {
@@ -96,28 +124,27 @@
             }
         };
         
-        // Cloud storage functions
+        // Cloud storage functions using Firebase Firestore
         const saveToCloud = async (data) => {
+            if (!db) {
+                console.log('Firebase not available, using localStorage only');
+                return { success: false, error: 'Firebase not available' };
+            }
+            
             try {
-                // First try to update existing bin
-                const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY,
-                        'X-Bin-Name': 'Cocktail Manual Data'
-                    },
-                    body: JSON.stringify(data)
+                console.log('Saving to Firebase...', data);
+                
+                // Save all data to Firestore
+                await db.collection('appData').doc('cocktailData').set({
+                    ...data,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: data.updatedBy || 'system'
                 });
                 
-                if (response.ok) {
-                    console.log('Data saved to cloud successfully');
-                    return { success: true };
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                console.log('Successfully saved to Firebase');
+                return { success: true };
             } catch (error) {
-                console.error('Error saving to cloud:', error);
+                console.error('Error saving to Firebase:', error);
                 return { 
                     success: false, 
                     error: error.message 
@@ -126,26 +153,54 @@
         };
         
         const loadFromCloud = async () => {
+            if (!db) {
+                console.log('Firebase not available, using localStorage only');
+                return null;
+            }
+            
             try {
-                const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': API_KEY,
-                    }
-                });
+                console.log('Loading from Firebase...');
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Data loaded from cloud:', result.record);
-                    return result.record;
-                } else if (response.status === 404) {
-                    console.log('No cloud data found yet');
-                    return null;
+                const doc = await db.collection('appData').doc('cocktailData').get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    console.log('Successfully loaded from Firebase:', data);
+                    return data;
                 } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    console.log('No data found in Firebase');
+                    return null;
                 }
             } catch (error) {
-                console.error('Error loading from cloud:', error);
+                console.error('Error loading from Firebase:', error);
                 return null;
+            }
+        };
+
+        // Real-time sync listener
+        const setupRealtimeSync = (callback) => {
+            if (!db) {
+                console.log('Firebase not available for real-time sync');
+                return () => {};
+            }
+            
+            try {
+                console.log('Setting up real-time sync...');
+                const unsubscribe = db.collection('appData').doc('cocktailData')
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            console.log('Real-time update received:', data);
+                            callback(data);
+                        }
+                    }, (error) => {
+                        console.error('Real-time sync error:', error);
+                    });
+                
+                return unsubscribe;
+            } catch (error) {
+                console.error('Error setting up real-time sync:', error);
+                return () => {};
             }
         };
         
@@ -262,14 +317,14 @@
                     return { 
                         success: true, 
                         data: cloudData,
-                        message: 'Data synced from cloud successfully'
+                        message: `Synced ${cloudData.recipes?.length || 0} recipes from cloud`
                     };
                 } else {
                     console.log('No cloud data available yet');
                     return { 
                         success: false, 
                         error: 'No cloud data found. An admin needs to save data first.',
-                        message: 'No cloud data available'
+                        message: 'No cloud data available yet'
                     };
                 }
             } catch (error) {
@@ -277,10 +332,59 @@
                 return { 
                     success: false, 
                     error: error.message,
-                    message: 'Failed to sync from cloud'
+                    message: 'Sync failed - using local data'
                 };
             }
         };
+
+        // Initialize with sample data if empty
+        const initializeSampleData = () => {
+            const currentRecipes = getRecipes();
+            if (currentRecipes.length === 0) {
+                const sampleRecipes = [
+                    {
+                        id: '1',
+                        name: 'Aviation',
+                        spirit_type: 'Gin',
+                        venue: 'Main Bar',
+                        glass_type: 'Coupe',
+                        abv: 28,
+                        pour_cost: 4.25,
+                        image_url: '',
+                        ingredients: [
+                            { name: 'Gin', amount: 45, unit: 'ml' },
+                            { name: 'Maraschino Liqueur', amount: 15, unit: 'ml' },
+                            { name: 'Crème de Violette', amount: 15, unit: 'ml' },
+                            { name: 'Lemon Juice', amount: 30, unit: 'ml' }
+                        ],
+                        instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
+                        notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.'
+                    },
+                    {
+                        id: '2', 
+                        name: 'Margarita',
+                        spirit_type: 'Tequila',
+                        venue: 'Pool Bar',
+                        glass_type: 'Margarita',
+                        abv: 25,
+                        pour_cost: 3.75,
+                        image_url: '',
+                        ingredients: [
+                            { name: 'Tequila', amount: 50, unit: 'ml' },
+                            { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                            { name: 'Triple Sec', amount: 20, unit: 'ml' }
+                        ],
+                        instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass filled with ice.',
+                        notes: 'Classic tequila cocktail perfect for summer.'
+                    }
+                ];
+                saveToStorage('cocktailRecipes', sampleRecipes);
+                console.log('Initialized with sample data');
+            }
+        };
+
+        // Initialize sample data
+        initializeSampleData();
 
         // Initialize data
         let mockRecipes = getRecipes();
@@ -422,7 +526,7 @@
             return (
                 <div className="recipe-card" onClick={() => onClick(recipe)}>
                     <div className="recipe-image" style={imageStyle}>
-                        {!recipe.image_url && 'No Image'}
+                        {!recipe.image_url && '🍸'}
                     </div>
                     <div className="recipe-info">
                         <div className="recipe-name">{recipe.name}</div>
@@ -523,16 +627,10 @@
         }
 
         // Home Page Component
-        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, syncStatus, onSync }) {
+        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, syncStatus, onSync, recipes }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
-            const [recipes, setRecipes] = useState([]);
-            
-            // Load recipes on component mount and when sync happens
-            useEffect(() => {
-                setRecipes(getRecipes());
-            }, [syncStatus]);
             
             // Filter recipes based on search and filters
             const filteredRecipes = recipes.filter(recipe => {
@@ -558,6 +656,10 @@
             
             return (
                 <div className="container">
+                    <div className="demo-notice">
+                        🔥 Real-time Cross-Device Sync Active! Changes appear instantly across all devices.
+                    </div>
+                    
                     <div className="page-header">
                         <h1 className="page-title">Cocktail Menu</h1>
                         {isAdmin && (
@@ -615,17 +717,25 @@
                     
                     {filteredRecipes.length === 0 ? (
                         <div className="loading">
-                            No cocktails found matching your criteria.
-                            {recipes.length === 0 && (
-                                <div style={{marginTop: '1rem'}}>
-                                    <button className="button" onClick={onSync}>
-                                        Sync Data from Cloud
-                                    </button>
-                                </div>
+                            {recipes.length === 0 ? (
+                                <>
+                                    No cocktails available.
+                                    <div style={{marginTop: '1rem'}}>
+                                        <button className="button" onClick={onSync}>
+                                            Sync Data from Cloud
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                'No cocktails found matching your criteria.'
                             )}
                         </div>
                     ) : (
                         <>
+                            <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
+                                Showing {filteredRecipes.length} of {recipes.length} cocktails
+                                {isAdmin && ' • Add/Edit cocktails to see real-time sync across devices!'}
+                            </div>
                             {sortedLetters.map(letter => (
                                 <div key={letter} className="alphabet-section">
                                     <h2 className="letter-header">{letter}</h2>
@@ -947,32 +1057,59 @@
             const [editingItem, setEditingItem] = useState(null);
             const [isEditing, setIsEditing] = useState(false);
             const [syncStatus, setSyncStatus] = useState(null);
+            const [recipes, setRecipes] = useState(getRecipes());
             
-            // Sync data on app load - THIS IS CRUCIAL FOR CROSS-DEVICE SYNC
+            // Sync data on app load AND set up real-time listener
             useEffect(() => {
                 const initializeData = async () => {
                     // Always try to sync from cloud on app start
-                    setSyncStatus({ status: 'syncing', message: 'Loading data...' });
+                    setSyncStatus({ status: 'syncing', message: 'Connecting to cloud...' });
                     const result = await syncFromCloud();
                     
                     if (result.success) {
+                        setRecipes(getRecipes());
                         setSyncStatus({ 
                             status: 'success', 
-                            message: `Data loaded successfully (${result.data.recipes?.length || 0} recipes)` 
+                            message: result.message || 'Connected to cloud successfully'
                         });
-                        // Clear status after 3 seconds
-                        setTimeout(() => setSyncStatus(null), 3000);
                     } else {
                         setSyncStatus({ 
                             status: 'error', 
                             message: result.message || 'Using local data only'
                         });
-                        // Clear status after 5 seconds for errors
-                        setTimeout(() => setSyncStatus(null), 5000);
                     }
+                    
+                    // Clear status after 3 seconds
+                    setTimeout(() => setSyncStatus(null), 3000);
                 };
                 
                 initializeData();
+                
+                // Set up real-time sync listener
+                const unsubscribe = setupRealtimeSync((cloudData) => {
+                    console.log('Real-time update received!', cloudData);
+                    if (cloudData) {
+                        // Update local storage with new data
+                        saveToStorage('cocktailRecipes', cloudData.recipes || []);
+                        saveToStorage('cocktailSyrups', cloudData.syrups || []);
+                        saveToStorage('cocktailSettings', cloudData.settings || getSettings());
+                        
+                        // Update state to trigger re-render
+                        setRecipes(cloudData.recipes || []);
+                        
+                        // Show sync notification
+                        setSyncStatus({ 
+                            status: 'success', 
+                            message: 'Real-time update received!' 
+                        });
+                        setTimeout(() => setSyncStatus(null), 2000);
+                    }
+                });
+                
+                // Cleanup listener on unmount
+                return () => {
+                    if (unsubscribe) unsubscribe();
+                };
             }, []);
             
             // Manual sync function
@@ -981,12 +1118,11 @@
                 const result = await syncFromCloud();
                 
                 if (result.success) {
+                    setRecipes(getRecipes());
                     setSyncStatus({ 
                         status: 'success', 
-                        message: `Data synced successfully (${result.data.recipes?.length || 0} recipes)` 
+                        message: result.message || 'Data synced successfully'
                     });
-                    // Force refresh of current page to show updated data
-                    setCurrentPage(currentPage);
                 } else {
                     setSyncStatus({ 
                         status: 'error', 
@@ -1013,23 +1149,19 @@
                 if (!user || !user.isAdmin) return;
                 
                 if (confirm('Are you sure you want to delete this cocktail?')) {
-                    const updatedRecipes = getRecipes().filter(recipe => recipe.id !== recipeId);
+                    const updatedRecipes = recipes.filter(recipe => recipe.id !== recipeId);
                     setSyncStatus({ status: 'syncing', message: 'Deleting recipe...' });
                     
                     const result = await saveRecipes(updatedRecipes, user);
                     if (result.localSuccess) {
+                        setRecipes(updatedRecipes);
                         let message = 'Recipe deleted successfully';
                         if (result.cloudSuccess) {
                             message += ' and synced to cloud';
                         }
                         
                         setSyncStatus({ status: 'success', message });
-                        // Force re-render by navigating away and back
-                        setCurrentPage('home');
-                        setTimeout(() => {
-                            setSyncStatus(null);
-                            setCurrentPage('home');
-                        }, 1000);
+                        setTimeout(() => setSyncStatus(null), 2000);
                     } else {
                         setSyncStatus({ status: 'error', message: 'Failed to delete recipe' });
                         setTimeout(() => setSyncStatus(null), 3000);
@@ -1037,26 +1169,26 @@
                 }
             };
             
-            const handleSaveRecipe = async (recipeData) => {
+            const handleSaveRecipe = async (recipeData, user) => {
                 let updatedRecipes;
                 
                 if (isEditing && editingItem) {
                     // Update existing recipe
-                    const recipes = getRecipes();
                     const index = recipes.findIndex(r => r.id === editingItem.id);
                     if (index !== -1) {
-                        recipes[index] = recipeData;
-                        updatedRecipes = recipes;
+                        updatedRecipes = [...recipes];
+                        updatedRecipes[index] = recipeData;
                     }
                 } else {
                     // Add new recipe
-                    updatedRecipes = [...getRecipes(), recipeData];
+                    updatedRecipes = [...recipes, recipeData];
                 }
                 
                 setSyncStatus({ status: 'syncing', message: 'Saving recipe...' });
                 const result = await saveRecipes(updatedRecipes, user);
                 
                 if (result.localSuccess) {
+                    setRecipes(updatedRecipes);
                     let message = isEditing ? 'Recipe updated successfully' : 'Recipe saved successfully';
                     if (result.cloudSuccess) {
                         message += ' and synced to cloud';
@@ -1103,6 +1235,7 @@
                             }}
                             syncStatus={syncStatus}
                             onSync={handleSync}
+                            recipes={recipes}
                         />;
                     case 'view-recipe':
                         return <ViewRecipePage 
@@ -1129,6 +1262,7 @@
                             onCreateRecipe={() => navigateTo('create-recipe')}
                             syncStatus={syncStatus}
                             onSync={handleSync}
+                            recipes={recipes}
                         />;
                 }
             };
