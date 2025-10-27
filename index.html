@@ -380,42 +380,6 @@
             border-bottom: 2px solid #FFB366;
         }
         
-        /* Admin Sync Button */
-        .sync-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-        
-        .sync-button:hover {
-            background: #45a049;
-        }
-        
-        .sync-button.syncing {
-            background: #666;
-            cursor: not-allowed;
-        }
-        
-        .sync-status {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 0.5rem;
-        }
-        
-        .sync-error {
-            color: #ff6b6b;
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
-        }
-        
         /* Footer */
         .footer {
             text-align: center;
@@ -493,6 +457,12 @@
         
         .button:hover {
             background: #FF8C42;
+        }
+        
+        .button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
         }
         
         .button-secondary {
@@ -1111,14 +1081,6 @@
             password: 'cocktail123'
         };
         
-        // Cloud Storage Configuration (Using GitHub Gists as free cloud storage)
-        const CLOUD_CONFIG = {
-            GIST_ID: null, // Will be set when admin creates cloud backup
-            GITHUB_TOKEN: null, // Will be set by admin
-            BACKUP_INTERVAL: 30000, // 30 seconds
-            SYNC_INTERVAL: 60000 // 60 seconds
-        };
-        
         // Load data from localStorage or use defaults
         const loadFromStorage = (key, defaultValue) => {
             try {
@@ -1137,173 +1099,96 @@
             }
         };
         
-        // Enhanced Cloud Storage Functions with Retry Logic and Error Handling
-        const CloudStorage = {
-            async saveToCloud(data, retries = 3) {
-                if (!CLOUD_CONFIG.GIST_ID || !CLOUD_CONFIG.GITHUB_TOKEN) {
-                    console.warn('Cloud storage not configured');
-                    return false;
-                }
-                
-                for (let attempt = 1; attempt <= retries; attempt++) {
-                    try {
-                        const response = await fetch(`https://api.github.com/gists/${CLOUD_CONFIG.GIST_ID}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Authorization': `token ${CLOUD_CONFIG.GITHUB_TOKEN}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                description: `Cocktail Codex Database Backup - ${new Date().toISOString()}`,
-                                files: {
-                                    'cocktail_data.json': {
-                                        content: JSON.stringify({
-                                            recipes: data.recipes,
-                                            syrups: data.syrups,
-                                            settings: data.settings,
-                                            version: Date.now(),
-                                            timestamp: new Date().toISOString(),
-                                            device: navigator.userAgent
-                                        }, null, 2)
-                                    }
-                                }
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            console.log('Data saved to cloud successfully');
-                            return true;
-                        } else if (response.status === 404 && attempt < retries) {
-                            // Gist might have been deleted, try to create new one
-                            console.log('Gist not found, attempting to create new backup...');
-                            const newGistId = await this.createBackup(data, CLOUD_CONFIG.GITHUB_TOKEN);
-                            if (newGistId) {
-                                CLOUD_CONFIG.GIST_ID = newGistId;
-                                saveToStorage('cocktailCloudConfig', CLOUD_CONFIG);
-                                continue;
-                            }
-                        }
-                        
-                        const errorText = await response.text();
-                        console.error(`Failed to save to cloud (attempt ${attempt}):`, errorText);
-                        
-                        if (attempt === retries) {
-                            throw new Error(`GitHub API error: ${response.status} - ${errorText}`);
-                        }
-                        
-                        // Wait before retry
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                        
-                    } catch (error) {
-                        console.error(`Error saving to cloud (attempt ${attempt}):`, error);
-                        if (attempt === retries) {
-                            return false;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                    }
-                }
-                return false;
+        // Initialize data
+        let mockRecipes = loadFromStorage('cocktailRecipes', [
+            {
+                id: '1',
+                name: 'Old Fashioned',
+                spirit_type: 'Whiskey',
+                venue: 'Bar',
+                glass_type: 'Rocks',
+                abv: 40,
+                pour_cost: 8.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Bourbon', amount: 60, unit: 'ml' },
+                    { name: 'Sugar Cube', amount: 1, unit: 'piece' },
+                    { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
+                    { name: 'Orange Peel', amount: 1, unit: 'piece' }
+                ],
+                instructions: 'Muddle sugar cube with bitters and a splash of water in a rocks glass. Add bourbon and ice. Stir gently. Garnish with orange peel.',
+                notes: 'Use high-quality bourbon for best results.'
             },
-            
-            async loadFromCloud(retries = 3) {
-                if (!CLOUD_CONFIG.GIST_ID) {
-                    console.warn('Cloud storage not configured');
-                    return null;
-                }
-                
-                for (let attempt = 1; attempt <= retries; attempt++) {
-                    try {
-                        const response = await fetch(`https://api.github.com/gists/${CLOUD_CONFIG.GIST_ID}`);
-                        
-                        if (response.ok) {
-                            const gist = await response.json();
-                            const content = gist.files['cocktail_data.json'].content;
-                            const data = JSON.parse(content);
-                            
-                            // Validate data structure
-                            if (this.validateData(data)) {
-                                return data;
-                            } else {
-                                throw new Error('Invalid data structure received from cloud');
-                            }
-                        } else if (response.status === 404 && attempt < retries) {
-                            console.log('Gist not found on attempt', attempt);
-                            continue;
-                        } else {
-                            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-                        }
-                    } catch (error) {
-                        console.error(`Error loading from cloud (attempt ${attempt}):`, error);
-                        if (attempt === retries) {
-                            return null;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                    }
-                }
-                return null;
+            {
+                id: '2',
+                name: 'Margarita',
+                spirit_type: 'Tequila',
+                venue: 'Bar',
+                glass_type: 'Margarita',
+                abv: 25,
+                pour_cost: 7.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Tequila', amount: 50, unit: 'ml' },
+                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                    { name: 'Triple Sec', amount: 20, unit: 'ml' },
+                    { name: 'Agave Syrup', amount: 15, unit: 'ml' }
+                ],
+                instructions: 'Shake all ingredients with ice. Strain into a salt-rimmed glass filled with ice. Garnish with lime wheel.',
+                notes: 'Use fresh lime juice for optimal flavor.'
             },
-            
-            validateData(data) {
-                return data && 
-                       Array.isArray(data.recipes) && 
-                       Array.isArray(data.syrups) && 
-                       data.settings && 
-                       data.version;
-            },
-            
-            // Create new cloud backup
-            async createBackup(data, githubToken) {
-                try {
-                    const response = await fetch('https://api.github.com/gists', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `token ${githubToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            description: 'Cocktail Codex Database Backup',
-                            public: false,
-                            files: {
-                                'cocktail_data.json': {
-                                    content: JSON.stringify({
-                                        recipes: data.recipes,
-                                        syrups: data.syrups,
-                                        settings: data.settings,
-                                        version: Date.now(),
-                                        timestamp: new Date().toISOString()
-                                    }, null, 2)
-                                }
-                            }
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const gist = await response.json();
-                        return gist.id;
-                    } else {
-                        console.error('Failed to create backup:', await response.text());
-                        return null;
-                    }
-                } catch (error) {
-                    console.error('Error creating backup:', error);
-                    return null;
-                }
+            {
+                id: '3',
+                name: 'Mojito',
+                spirit_type: 'Rum',
+                venue: 'Bar',
+                glass_type: 'Highball',
+                abv: 15,
+                pour_cost: 6.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'White Rum', amount: 50, unit: 'ml' },
+                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                    { name: 'Mint Leaves', amount: 8, unit: 'piece' },
+                    { name: 'Simple Syrup', amount: 20, unit: 'ml' },
+                    { name: 'Soda Water', amount: 60, unit: 'ml' }
+                ],
+                instructions: 'Muddle mint leaves with lime juice and simple syrup in a glass. Add rum and ice. Top with soda water. Stir gently. Garnish with mint sprig.',
+                notes: 'Be gentle when muddling mint to avoid bitterness.'
             }
-        };
+        ]);
         
-        // Initialize data - Load from localStorage first, then try cloud
-        let mockRecipes = loadFromStorage('cocktailRecipes', []);
-        let mockSyrups = loadFromStorage('cocktailSyrups', []);
+        let mockSyrups = loadFromStorage('cocktailSyrups', [
+            {
+                id: '1',
+                name: 'Simple Syrup',
+                cost: 0.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Sugar', amount: 200, unit: 'g' },
+                    { name: 'Water', amount: 200, unit: 'ml' }
+                ],
+                instructions: 'Heat water until hot but not boiling. Add sugar and stir until completely dissolved. Let cool before use.'
+            },
+            {
+                id: '2',
+                name: 'Ginger Syrup',
+                cost: 1.2,
+                image_url: '',
+                ingredients: [
+                    { name: 'Fresh Ginger', amount: 100, unit: 'g' },
+                    { name: 'Sugar', amount: 200, unit: 'g' },
+                    { name: 'Water', amount: 200, unit: 'ml' }
+                ],
+                instructions: 'Peel and grate ginger. Combine with water and sugar in a saucepan. Simmer for 15 minutes. Strain and cool.'
+            }
+        ]);
+        
         let mockSettings = loadFromStorage('cocktailSettings', {
-            spirit_types: [],
-            glass_types: [],
-            venues: []
+            spirit_types: ['Whiskey', 'Vodka', 'Gin', 'Rum', 'Tequila', 'Brandy', 'Mezcal', 'Absinthe'],
+            glass_types: ['Rocks', 'Highball', 'Coupe', 'Martini', 'Margarita', 'Collins', 'Tiki', 'Flute'],
+            venues: ['Bar', 'Restaurant', 'Home', 'Event', 'Catering']
         });
-        
-        // Load cloud configuration
-        const savedCloudConfig = loadFromStorage('cocktailCloudConfig', {});
-        if (savedCloudConfig.GIST_ID) CLOUD_CONFIG.GIST_ID = savedCloudConfig.GIST_ID;
-        if (savedCloudConfig.GITHUB_TOKEN) CLOUD_CONFIG.GITHUB_TOKEN = savedCloudConfig.GITHUB_TOKEN;
 
         // Utility function to convert image to base64
         const convertImageToBase64 = (file) => {
@@ -1313,25 +1198,6 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
-        };
-
-        // Local backup function
-        const createLocalBackup = () => {
-            const backup = {
-                recipes: mockRecipes,
-                syrups: mockSyrups,
-                settings: mockSettings,
-                timestamp: Date.now()
-            };
-            saveToStorage('cocktailBackup_' + Date.now(), backup);
-            
-            // Keep only last 5 backups
-            const backupKeys = Object.keys(localStorage)
-                .filter(key => key.startsWith('cocktailBackup_'))
-                .sort()
-                .slice(0, -5);
-            
-            backupKeys.forEach(key => localStorage.removeItem(key));
         };
 
         // Authentication Hook
@@ -1431,12 +1297,6 @@
                                     >
                                         ⚙️ Settings
                                     </button>
-                                    <button 
-                                        className={`side-menu-button ${currentPage === 'cloud-sync' ? 'active' : ''}`}
-                                        onClick={() => handleNavigation('cloud-sync')}
-                                    >
-                                        ☁️ Cloud Sync
-                                    </button>
                                 </>
                             )}
                         </nav>
@@ -1445,7 +1305,7 @@
             );
         }
 
-        // Recipe Card Component - REMOVED DELETE BUTTON AND ABV
+        // Recipe Card Component
         function RecipeCard({ recipe, onClick }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -1479,31 +1339,6 @@
                             {letter}
                         </div>
                     ))}
-                </div>
-            );
-        }
-
-        // Sync Status Component
-        function SyncStatus({ isAdmin, onSync, lastSync, isSyncing, syncError }) {
-            return (
-                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    {isAdmin && (
-                        <button 
-                            className={`sync-button ${isSyncing ? 'syncing' : ''}`}
-                            onClick={onSync}
-                            disabled={isSyncing}
-                        >
-                            {isSyncing ? '🔄 Syncing...' : '☁️ Sync to Cloud'}
-                        </button>
-                    )}
-                    <div className="sync-status">
-                        Last sync: {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
-                        {syncError && (
-                            <div className="sync-error">
-                                ❌ Last sync failed
-                            </div>
-                        )}
-                    </div>
                 </div>
             );
         }
@@ -1598,8 +1433,8 @@
             );
         }
 
-        // Home Page Component - ADDED ALPHABET QUICK ACCESS AND SYNC STATUS
-        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, onSync, lastSync, isSyncing, syncError }) {
+        // Home Page Component
+        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
@@ -1646,14 +1481,6 @@
                             </button>
                         )}
                     </div>
-                    
-                    <SyncStatus 
-                        isAdmin={isAdmin}
-                        onSync={onSync}
-                        lastSync={lastSync}
-                        isSyncing={isSyncing}
-                        syncError={syncError}
-                    />
                     
                     <div className="search-section">
                         <input 
@@ -1723,191 +1550,6 @@
             );
         }
 
-        // Cloud Sync Configuration Component
-        function CloudSyncPage({ onBack, isAdmin }) {
-            const [githubToken, setGithubToken] = useState(CLOUD_CONFIG.GITHUB_TOKEN || '');
-            const [gistId, setGistId] = useState(CLOUD_CONFIG.GIST_ID || '');
-            const [status, setStatus] = useState('');
-            const [isLoading, setIsLoading] = useState(false);
-            
-            const handleSaveConfig = async () => {
-                if (!githubToken) {
-                    setStatus('Please enter a GitHub token');
-                    return;
-                }
-                
-                setIsLoading(true);
-                setStatus('Saving configuration...');
-                
-                try {
-                    // If no Gist ID provided, create a new backup
-                    let finalGistId = gistId;
-                    if (!finalGistId) {
-                        setStatus('Creating new cloud backup...');
-                        finalGistId = await CloudStorage.createBackup({
-                            recipes: mockRecipes,
-                            syrups: mockSyrups,
-                            settings: mockSettings
-                        }, githubToken);
-                        
-                        if (!finalGistId) {
-                            setStatus('Failed to create cloud backup');
-                            setIsLoading(false);
-                            return;
-                        }
-                    }
-                    
-                    // Save configuration
-                    CLOUD_CONFIG.GIST_ID = finalGistId;
-                    CLOUD_CONFIG.GITHUB_TOKEN = githubToken;
-                    
-                    saveToStorage('cocktailCloudConfig', {
-                        GIST_ID: finalGistId,
-                        GITHUB_TOKEN: githubToken
-                    });
-                    
-                    setGistId(finalGistId);
-                    setStatus('Configuration saved successfully!');
-                    
-                    // Perform initial sync
-                    setStatus('Performing initial sync...');
-                    const success = await CloudStorage.saveToCloud({
-                        recipes: mockRecipes,
-                        syrups: mockSyrups,
-                        settings: mockSettings
-                    });
-                    
-                    if (success) {
-                        setStatus('Initial sync completed successfully!');
-                        saveToStorage('cocktailLastSync', Date.now());
-                    } else {
-                        setStatus('Initial sync failed, but configuration was saved');
-                    }
-                    
-                } catch (error) {
-                    setStatus('Error: ' + error.message);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
-            const handleSyncNow = async () => {
-                if (!CLOUD_CONFIG.GIST_ID || !CLOUD_CONFIG.GITHUB_TOKEN) {
-                    setStatus('Please configure cloud sync first');
-                    return;
-                }
-                
-                setIsLoading(true);
-                setStatus('Syncing to cloud...');
-                
-                try {
-                    const success = await CloudStorage.saveToCloud({
-                        recipes: mockRecipes,
-                        syrups: mockSyrups,
-                        settings: mockSettings
-                    });
-                    
-                    if (success) {
-                        setStatus('Sync completed successfully!');
-                        saveToStorage('cocktailLastSync', Date.now());
-                    } else {
-                        setStatus('Sync failed');
-                    }
-                } catch (error) {
-                    setStatus('Error: ' + error.message);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            
-            return (
-                <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back
-                    </button>
-                    
-                    <h1 className="page-title">Cloud Sync Configuration</h1>
-                    
-                    {!isAdmin ? (
-                        <div className="settings-section">
-                            <p>Admin access required to configure cloud sync.</p>
-                        </div>
-                    ) : (
-                        <div className="form">
-                            <div className="form-group">
-                                <label className="form-label">GitHub Personal Access Token</label>
-                                <input
-                                    type="password"
-                                    className="form-input"
-                                    value={githubToken}
-                                    onChange={(e) => setGithubToken(e.target.value)}
-                                    placeholder="Enter your GitHub token"
-                                />
-                                <small style={{color: '#888', fontSize: '0.8rem'}}>
-                                    Create a token at: GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-                                    <br/>Make sure to select the "gist" scope!
-                                </small>
-                            </div>
-                            
-                            <div className="form-group">
-                                <label className="form-label">Gist ID (Optional)</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={gistId}
-                                    onChange={(e) => setGistId(e.target.value)}
-                                    placeholder="Leave empty to create new backup"
-                                />
-                                <small style={{color: '#888', fontSize: '0.8rem'}}>
-                                    If you have an existing backup, enter the Gist ID here
-                                </small>
-                            </div>
-                            
-                            {status && (
-                                <div style={{
-                                    padding: '1rem',
-                                    background: status.includes('success') ? '#1b5e20' : '#b71c1c',
-                                    color: 'white',
-                                    borderRadius: '6px',
-                                    marginBottom: '1rem'
-                                }}>
-                                    {status}
-                                </div>
-                            )}
-                            
-                            <div className="buttons-row">
-                                <button 
-                                    className="button"
-                                    onClick={handleSaveConfig}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Saving...' : 'Save Configuration'}
-                                </button>
-                                
-                                {CLOUD_CONFIG.GIST_ID && (
-                                    <button 
-                                        className="button button-secondary"
-                                        onClick={handleSyncNow}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? 'Syncing...' : 'Sync Now'}
-                                    </button>
-                                )}
-                            </div>
-                            
-                            <div style={{marginTop: '2rem', padding: '1rem', background: '#333', borderRadius: '8px'}}>
-                                <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Cloud Sync Status</h3>
-                                <p><strong>Gist ID:</strong> {CLOUD_CONFIG.GIST_ID || 'Not configured'}</p>
-                                <p><strong>Last Sync:</strong> {loadFromStorage('cocktailLastSync') ? 
-                                    new Date(loadFromStorage('cocktailLastSync')).toLocaleString() : 'Never'}</p>
-                                <p><strong>Auto-sync:</strong> Every 60 seconds</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
         // Create/Edit Recipe Component
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
@@ -1926,6 +1568,14 @@
             );
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
+            const [isFormValid, setIsFormValid] = useState(false);
+            
+            // Check form validity whenever formData changes
+            useEffect(() => {
+                const isValid = formData.name.trim() !== '' && 
+                              formData.ingredients.every(ing => ing.name.trim() !== '' && ing.amount !== '');
+                setIsFormValid(isValid);
+            }, [formData]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -1982,8 +1632,8 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 
-                if (!formData.name) {
-                    alert('Please at least enter a cocktail name');
+                if (!isFormValid) {
+                    alert('Please fill in all required fields (name and ingredients)');
                     return;
                 }
                 
@@ -2015,6 +1665,7 @@
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 required
+                                placeholder="Enter cocktail name"
                             />
                         </div>
                         
@@ -2076,6 +1727,7 @@
                                         name="abv"
                                         value={formData.abv}
                                         onChange={handleInputChange}
+                                        placeholder="0.0"
                                     />
                                 </div>
                                 
@@ -2088,6 +1740,7 @@
                                         name="pour_cost"
                                         value={formData.pour_cost}
                                         onChange={handleInputChange}
+                                        placeholder="0.00"
                                     />
                                 </div>
                             </div>
@@ -2113,7 +1766,7 @@
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Ingredients</label>
+                            <label className="form-label">Ingredients *</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
                                     <input
@@ -2123,6 +1776,7 @@
                                         value={ingredient.name}
                                         onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
                                         style={{flex: 2}}
+                                        required
                                     />
                                     <input
                                         type="number"
@@ -2132,6 +1786,7 @@
                                         value={ingredient.amount}
                                         onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
                                         style={{flex: 1}}
+                                        required
                                     />
                                     <select
                                         className="form-input"
@@ -2169,6 +1824,7 @@
                                 name="instructions"
                                 value={formData.instructions}
                                 onChange={handleInputChange}
+                                placeholder="Enter preparation instructions..."
                             />
                         </div>
                         
@@ -2179,11 +1835,12 @@
                                 name="notes"
                                 value={formData.notes}
                                 onChange={handleInputChange}
+                                placeholder="Any additional notes..."
                             />
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
+                            <button type="submit" className="button" disabled={!isFormValid}>
                                 {isEdit ? 'Update Cocktail' : 'Save Cocktail'}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
@@ -2196,18 +1853,10 @@
         }
 
         // Syrups Page Component
-        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin, onSync, lastSync, isSyncing, syncError }) {
+        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin }) {
             return (
                 <div className="container">
                     <h1 className="page-title">Syrups & Infusions</h1>
-                    
-                    <SyncStatus 
-                        isAdmin={isAdmin}
-                        onSync={onSync}
-                        lastSync={lastSync}
-                        isSyncing={isSyncing}
-                        syncError={syncError}
-                    />
                     
                     {isAdmin && (
                         <div className="buttons-row">
@@ -2231,15 +1880,17 @@
                                 <div className="syrup-name">{syrup.name}</div>
                                 <div className="syrup-cost">Cost: ${syrup.cost}</div>
                                 {isAdmin && (
-                                    <button 
-                                        className="delete-overlay"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onDeleteSyrup(syrup.id);
-                                        }}
-                                    >
-                                        🗑️
-                                    </button>
+                                    <div style={{marginTop: '0.5rem'}}>
+                                        <button 
+                                            className="action-button delete"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteSyrup(syrup.id);
+                                            }}
+                                        >
+                                            🗑️ Delete
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -2323,6 +1974,14 @@
             );
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
+            const [isFormValid, setIsFormValid] = useState(false);
+            
+            // Check form validity whenever formData changes
+            useEffect(() => {
+                const isValid = formData.name.trim() !== '' && 
+                              formData.ingredients.every(ing => ing.name.trim() !== '' && ing.amount !== '');
+                setIsFormValid(isValid);
+            }, [formData]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -2379,8 +2038,8 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 
-                if (!formData.name) {
-                    alert('Please at least enter a syrup name');
+                if (!isFormValid) {
+                    alert('Please fill in all required fields (name and ingredients)');
                     return;
                 }
                 
@@ -2411,6 +2070,7 @@
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 required
+                                placeholder="Enter syrup name"
                             />
                         </div>
                         
@@ -2423,6 +2083,7 @@
                                 name="cost"
                                 value={formData.cost}
                                 onChange={handleInputChange}
+                                placeholder="0.00"
                             />
                         </div>
                         
@@ -2446,7 +2107,7 @@
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Ingredients</label>
+                            <label className="form-label">Ingredients *</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
                                     <input
@@ -2456,6 +2117,7 @@
                                         value={ingredient.name}
                                         onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
                                         style={{flex: 2}}
+                                        required
                                     />
                                     <input
                                         type="number"
@@ -2465,6 +2127,7 @@
                                         value={ingredient.amount}
                                         onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
                                         style={{flex: 1}}
+                                        required
                                     />
                                     <select
                                         className="form-input"
@@ -2501,11 +2164,12 @@
                                 name="instructions"
                                 value={formData.instructions}
                                 onChange={handleInputChange}
+                                placeholder="Enter preparation instructions..."
                             />
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
+                            <button type="submit" className="button" disabled={!isFormValid}>
                                 {isEdit ? 'Update Syrup' : 'Save Syrup'}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
@@ -2577,7 +2241,7 @@
         }
 
         // Settings Page Component
-        function SettingsPage({ onBack, isAdmin, onSync, lastSync, isSyncing, syncError }) {
+        function SettingsPage({ onBack, isAdmin }) {
             const [settings, setSettings] = useState(mockSettings);
             const [newItems, setNewItems] = useState({
                 spirit_types: '',
@@ -2644,14 +2308,6 @@
                     </button>
                     
                     <h1 className="page-title">Settings</h1>
-                    
-                    <SyncStatus 
-                        isAdmin={isAdmin}
-                        onSync={onSync}
-                        lastSync={lastSync}
-                        isSyncing={isSyncing}
-                        syncError={syncError}
-                    />
                     
                     {!isAdmin ? (
                         <div className="settings-section">
@@ -3081,161 +2737,16 @@
             const [menuOpen, setMenuOpen] = useState(false);
             const [editingItem, setEditingItem] = useState(null);
             const [isEditing, setIsEditing] = useState(false);
-            const [isSyncing, setIsSyncing] = useState(false);
-            const [lastSync, setLastSync] = useState(loadFromStorage('cocktailLastSync', null));
-            const [syncError, setSyncError] = useState(false);
-            
-            // Enhanced sync function with conflict resolution
-            const handleSyncToCloud = async () => {
-                if (!CLOUD_CONFIG.GIST_ID || !CLOUD_CONFIG.GITHUB_TOKEN) {
-                    alert('Please configure cloud sync first in the Cloud Sync settings');
-                    return;
-                }
-                
-                setIsSyncing(true);
-                setSyncError(false);
-                try {
-                    // First, check if there are any conflicts
-                    const cloudData = await CloudStorage.loadFromCloud();
-                    const localLastSync = loadFromStorage('cocktailLastSync', 0);
-                    
-                    if (cloudData && cloudData.version > localLastSync) {
-                        // Conflict detected - cloud has newer data
-                        if (confirm(
-                            'Cloud has newer data than your local version. ' +
-                            'Would you like to:\n\n' +
-                            '• "OK" - Download cloud version (lose local changes)\n' +
-                            '• "Cancel" - Upload local version (overwrite cloud)'
-                        )) {
-                            // User chose to download cloud version
-                            mockRecipes = cloudData.recipes || mockRecipes;
-                            mockSyrups = cloudData.syrups || mockSyrups;
-                            mockSettings = cloudData.settings || mockSettings;
-                            
-                            saveToStorage('cocktailRecipes', mockRecipes);
-                            saveToStorage('cocktailSyrups', mockSyrups);
-                            saveToStorage('cocktailSettings', mockSettings);
-                            saveToStorage('cocktailLastSync', cloudData.version);
-                            setLastSync(cloudData.version);
-                            
-                            alert('Cloud data downloaded successfully! Page will refresh.');
-                            window.location.reload();
-                            return;
-                        }
-                    }
-                    
-                    // Proceed with uploading local data to cloud
-                    const success = await CloudStorage.saveToCloud({
-                        recipes: mockRecipes,
-                        syrups: mockSyrups,
-                        settings: mockSettings
-                    });
-                    
-                    if (success) {
-                        const syncTime = Date.now();
-                        saveToStorage('cocktailLastSync', syncTime);
-                        setLastSync(syncTime);
-                        setSyncError(false);
-                        alert('Sync completed successfully! Changes are now available on all devices.');
-                    } else {
-                        setSyncError(true);
-                        alert('Sync failed. Please check your configuration.');
-                    }
-                } catch (error) {
-                    setSyncError(true);
-                    alert('Error syncing: ' + error.message);
-                } finally {
-                    setIsSyncing(false);
-                }
-            };
-
-            // Enhanced delete handlers with auto-backup
-            const handleDeleteRecipe = (recipeId) => {
-                if (!user || !user.isAdmin) return;
-                
-                if (confirm('Are you sure you want to delete this cocktail?')) {
-                    createLocalBackup(); // Backup before delete
-                    
-                    mockRecipes = mockRecipes.filter(recipe => recipe.id !== recipeId);
-                    saveToStorage('cocktailRecipes', mockRecipes);
-                    
-                    // Auto-sync after delete if cloud is configured
-                    if (CLOUD_CONFIG.GIST_ID && CLOUD_CONFIG.GITHUB_TOKEN) {
-                        handleSyncToCloud();
-                    }
-                    
-                    setCurrentPage('home');
-                }
-            };
-            
-            const handleDeleteSyrup = (syrupId) => {
-                if (!user || !user.isAdmin) return;
-                
-                if (confirm('Are you sure you want to delete this syrup?')) {
-                    createLocalBackup(); // Backup before delete
-                    
-                    mockSyrups = mockSyrups.filter(syrup => syrup.id !== syrupId);
-                    saveToStorage('cocktailSyrups', mockSyrups);
-                    
-                    // Auto-sync after delete if cloud is configured
-                    if (CLOUD_CONFIG.GIST_ID && CLOUD_CONFIG.GITHUB_TOKEN) {
-                        handleSyncToCloud();
-                    }
-                    
-                    setCurrentPage('syrups');
-                }
-            };
-            
-            // Auto-sync from cloud
-            useEffect(() => {
-                const checkForUpdates = async () => {
-                    if (!CLOUD_CONFIG.GIST_ID) return;
-                    
-                    try {
-                        const cloudData = await CloudStorage.loadFromCloud();
-                        if (cloudData) {
-                            const localLastSync = loadFromStorage('cocktailLastSync', 0);
-                            const cloudVersion = cloudData.version || 0;
-                            
-                            // If cloud has newer data, update local storage
-                            if (cloudVersion > localLastSync) {
-                                console.log('Updating from cloud...');
-                                mockRecipes = cloudData.recipes || mockRecipes;
-                                mockSyrups = cloudData.syrups || mockSyrups;
-                                mockSettings = cloudData.settings || mockSettings;
-                                
-                                saveToStorage('cocktailRecipes', mockRecipes);
-                                saveToStorage('cocktailSyrups', mockSyrups);
-                                saveToStorage('cocktailSettings', mockSettings);
-                                saveToStorage('cocktailLastSync', cloudVersion);
-                                setLastSync(cloudVersion);
-                                
-                                // Force refresh
-                                window.location.reload();
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error checking for updates:', error);
-                        setSyncError(true);
-                    }
-                };
-                
-                // Check for updates every minute
-                const interval = setInterval(checkForUpdates, CLOUD_CONFIG.SYNC_INTERVAL);
-                checkForUpdates(); // Initial check
-                
-                return () => clearInterval(interval);
-            }, []);
             
             // Redirect to login if not authenticated and trying to access protected pages
             useEffect(() => {
-                if (!user && (currentPage === 'create-recipe' || currentPage === 'settings' || currentPage === 'cloud-sync')) {
+                if (!user && (currentPage === 'create-recipe' || currentPage === 'settings')) {
                     setCurrentPage('home');
                 }
             }, [user, currentPage]);
             
             const navigateTo = (page, item = null) => {
-                if ((page === 'create-recipe' || page === 'settings' || page === 'cloud-sync') && (!user || !user.isAdmin)) {
+                if ((page === 'create-recipe' || page === 'settings') && (!user || !user.isAdmin)) {
                     return;
                 }
                 setCurrentPage(page);
@@ -3244,9 +2755,27 @@
                 setMenuOpen(false);
             };
             
-            const handleSaveRecipe = (recipeData) => {
-                createLocalBackup(); // Backup before save
+            const handleDeleteRecipe = (recipeId) => {
+                if (!user || !user.isAdmin) return;
                 
+                if (confirm('Are you sure you want to delete this cocktail?')) {
+                    mockRecipes = mockRecipes.filter(recipe => recipe.id !== recipeId);
+                    saveToStorage('cocktailRecipes', mockRecipes);
+                    setCurrentPage('home');
+                }
+            };
+            
+            const handleDeleteSyrup = (syrupId) => {
+                if (!user || !user.isAdmin) return;
+                
+                if (confirm('Are you sure you want to delete this syrup?')) {
+                    mockSyrups = mockSyrups.filter(syrup => syrup.id !== syrupId);
+                    saveToStorage('cocktailSyrups', mockSyrups);
+                    setCurrentPage('syrups');
+                }
+            };
+            
+            const handleSaveRecipe = (recipeData) => {
                 if (isEditing && editingItem) {
                     const index = mockRecipes.findIndex(r => r.id === editingItem.id);
                     if (index !== -1) {
@@ -3258,18 +2787,10 @@
                 saveToStorage('cocktailRecipes', mockRecipes);
                 setIsEditing(false);
                 setEditingItem(null);
-                
-                // Auto-sync after save if cloud is configured
-                if (CLOUD_CONFIG.GIST_ID && CLOUD_CONFIG.GITHUB_TOKEN) {
-                    handleSyncToCloud();
-                }
-                
                 navigateTo('home');
             };
             
             const handleSaveSyrup = (syrupData) => {
-                createLocalBackup(); // Backup before save
-                
                 if (isEditing && editingItem) {
                     const index = mockSyrups.findIndex(s => s.id === editingItem.id);
                     if (index !== -1) {
@@ -3281,12 +2802,6 @@
                 saveToStorage('cocktailSyrups', mockSyrups);
                 setIsEditing(false);
                 setEditingItem(null);
-                
-                // Auto-sync after save if cloud is configured
-                if (CLOUD_CONFIG.GIST_ID && CLOUD_CONFIG.GITHUB_TOKEN) {
-                    handleSyncToCloud();
-                }
-                
                 navigateTo('syrups');
             };
             
@@ -3319,10 +2834,6 @@
                                 setEditingItem(null);
                                 navigateTo('create-recipe');
                             }}
-                            onSync={handleSyncToCloud}
-                            lastSync={lastSync}
-                            isSyncing={isSyncing}
-                            syncError={syncError}
                         />;
                     case 'view-recipe':
                         return <ViewRecipePage 
@@ -3350,10 +2861,6 @@
                             }}
                             onDeleteSyrup={handleDeleteSyrup}
                             isAdmin={user.isAdmin}
-                            onSync={handleSyncToCloud}
-                            lastSync={lastSync}
-                            isSyncing={isSyncing}
-                            syncError={syncError}
                         />;
                     case 'view-syrup':
                         return <ViewSyrupPage 
@@ -3374,15 +2881,6 @@
                         return <SettingsPage 
                             onBack={() => navigateTo('home')} 
                             isAdmin={user.isAdmin}
-                            onSync={handleSyncToCloud}
-                            lastSync={lastSync}
-                            isSyncing={isSyncing}
-                            syncError={syncError}
-                        />;
-                    case 'cloud-sync':
-                        return <CloudSyncPage 
-                            onBack={() => navigateTo('home')} 
-                            isAdmin={user.isAdmin}
                         />;
                     default:
                         return <HomePage 
@@ -3390,10 +2888,6 @@
                             onDeleteRecipe={handleDeleteRecipe}
                             isAdmin={user.isAdmin}
                             onCreateRecipe={() => navigateTo('create-recipe')}
-                            onSync={handleSyncToCloud}
-                            lastSync={lastSync}
-                            isSyncing={isSyncing}
-                            syncError={syncError}
                         />;
                 }
             };
