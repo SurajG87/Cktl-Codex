@@ -2,252 +2,681 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cocktail Manual</title>
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cocktail Manual">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion/dist/framer-motion.js"></script>
     <style>
+        :root {
+            --background: #0A0A0A;
+            --foreground: #FFFFFF;
+            --card: #1A1A1A;
+            --primary: #FFB366;
+            --primary-foreground: #0A0A0A;
+            --border: rgba(255, 255, 255, 0.1);
+            --muted: rgba(255, 255, 255, 0.6);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #0A0A0A;
-            color: #FFFFFF;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.5;
         }
-        
-        .app {
+
+        .container {
+            display: flex;
             min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--background);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FFB366, #FF8C42);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-foreground);
+        }
+
+        .logo-text h1 {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .nav-links {
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
         }
-        
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: var(--muted);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 1.5rem;
+        }
+
         /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
-            background: #1A1A1A;
-            border-bottom: 1px solid #333;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            margin-bottom: 2rem;
         }
-        
-        .menu-button {
+
+        .mobile-menu-btn {
+            display: none;
             background: none;
             border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.5rem;
+            color: var(--foreground);
+            font-size: 1.25rem;
+        }
+
+        /* Search and Filters */
+        .search-filters {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-        }
-        
-        .menu-line {
-            width: 20px;
-            height: 2px;
-            background: white;
-        }
-        
-        .nav-user {
-            display: flex;
-            align-items: center;
             gap: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .logout-btn {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        
-        /* Login */
-        .login-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 1rem;
-            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
-        }
-        
-        .login-box {
-            background: #1A1A1A;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid #333;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        
-        .login-logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .login-title {
-            color: #FFB366;
             margin-bottom: 2rem;
-            font-size: 1.5rem;
         }
-        
-        .login-input {
-            width: 100%;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: #252525;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: white;
-        }
-        
-        .login-button {
-            width: 100%;
-            padding: 1rem;
-            background: #FFB366;
-            color: #0A0A0A;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 1rem;
-        }
-        
-        .guest-button {
-            width: 100%;
-            padding: 0.75rem;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        /* Main Content */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
+
+        .search-container {
+            position: relative;
             flex: 1;
         }
-        
-        .page-header {
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--foreground);
+            font-size: 0.875rem;
+        }
+
+        .search-input::placeholder {
+            color: var(--muted);
+        }
+
+        .filters {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+            gap: 0.5rem;
         }
-        
-        .page-title {
-            font-size: 2rem;
-            color: #FFB366;
-        }
-        
-        .button {
-            background: #FFB366;
-            color: #0A0A0A;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--foreground);
+            font-size: 0.875rem;
             cursor: pointer;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        /* Recipes Grid */
-        .recipes-grid {
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            min-width: 200px;
+            z-index: 10;
+            display: none;
+        }
+
+        .dropdown.active .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Recipe Grid */
+        .recipe-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
         }
-        
+
         .recipe-card {
-            background: #1A1A1A;
-            border-radius: 8px;
+            aspect-ratio: 3/4;
+            border-radius: 0.5rem;
             overflow: hidden;
-            cursor: pointer;
-            border: 1px solid #333;
+            background-color: rgba(255, 255, 255, 0.05);
+            position: relative;
         }
-        
+
         .recipe-image {
-            height: 120px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recipe-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            padding: 0.5rem;
+        }
+
+        .recipe-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .recipe-spirit {
+            font-size: 0.625rem;
+            color: var(--primary);
+            margin-top: 0.25rem;
+        }
+
+        /* Alphabet Navigation */
+        .alphabet-nav {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem 0 0 0.5rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            z-index: 20;
+        }
+
+        .alphabet-letter {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .alphabet-letter:hover {
+            color: var(--primary);
+        }
+
+        .alphabet-letter:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Form Styles */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-description {
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--muted);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            color: var(--foreground);
+            font-size: 0.875rem;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .ingredient-row {
+            display: grid;
+            grid-template-columns: 1fr 100px 120px auto;
+            gap: 0.5rem;
+            align-items: end;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .btn-primary:hover {
+            background-color: #FF8C42;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--foreground);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: rgba(239, 68, 68, 0.8);
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            background: #252525;
-        }
-        
-        .recipe-info {
+            z-index: 50;
             padding: 1rem;
         }
-        
-        .recipe-name {
-            font-weight: bold;
-            margin-bottom: 0.25rem;
+
+        .modal {
+            background-color: var(--card);
+            border-radius: 0.75rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        
-        .recipe-spirit {
-            font-size: 0.8rem;
-            color: #888;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: #888;
-            font-size: 1.1rem;
-        }
-        
-        .demo-notice {
-            background: #FFB366;
-            color: #0A0A0A;
-            padding: 0.75rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .sync-status {
+
+        .modal-header {
+            padding: 1.5rem 1.5rem 0;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            background: #1A1A1A;
         }
-        
-        .sync-button {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-left: auto;
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-actions {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Recipe View */
+        .recipe-view {
+            position: relative;
+            min-height: calc(100vh - 73px);
+        }
+
+        .recipe-hero {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+        }
+
+        .recipe-hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recipe-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent, var(--background) 70%);
+        }
+
+        .recipe-content {
+            position: relative;
+            z-index: 10;
+            padding-top: 250px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .recipe-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recipe-title {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .recipe-details {
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .details-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .detail-item {
+                text-align: left;
+            }
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .detail-value.primary {
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .ingredients-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .ingredient-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary);
+        }
+
+        .instructions {
+            font-size: 0.875rem;
+            color: var(--muted);
+            white-space: pre-wrap;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .notes {
+            font-size: 0.875rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .recipe-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .recipe-actions {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .py-8 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 40;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ingredient-row {
+                grid-template-columns: 1fr auto;
+                gap: 0.5rem;
+            }
+
+            .ingredient-row > div:first-child {
+                grid-column: 1 / -1;
+            }
+
+            .alphabet-nav {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -256,454 +685,1405 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        
-        // Authentication configuration
-        const ADMIN_CREDENTIALS = {
-            username: 'suraj',
-            password: 'cocktail123'
-        };
 
-        // Simple data management with localStorage
-        const loadFromStorage = (key, defaultValue) => {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : defaultValue;
-            } catch {
-                return defaultValue;
-            }
-        };
-        
-        const saveToStorage = (key, value) => {
-            try {
+        // Data storage functions
+        const storage = {
+            get: (key) => {
+                try {
+                    return JSON.parse(localStorage.getItem(key)) || [];
+                } catch (e) {
+                    return [];
+                }
+            },
+            set: (key, value) => {
                 localStorage.setItem(key, JSON.stringify(value));
-                return true;
-            } catch (error) {
-                console.error('Error saving to localStorage:', error);
-                return false;
             }
         };
 
-        // Default data
-        const getDefaultRecipes = () => {
-            return [
-                {
-                    id: '1',
-                    name: 'Aviation',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Coupe',
-                    abv: 28,
-                    pour_cost: 4.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 45, unit: 'ml' },
-                        { name: 'Maraschino Liqueur', amount: 15, unit: 'ml' },
-                        { name: 'Crème de Violette', amount: 15, unit: 'ml' },
-                        { name: 'Lemon Juice', amount: 30, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
-                    notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.'
-                },
-                {
-                    id: '2', 
-                    name: 'Margarita',
-                    spirit_type: 'Tequila',
-                    venue: 'Pool Bar',
-                    glass_type: 'Margarita',
-                    abv: 25,
-                    pour_cost: 3.75,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Tequila', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Triple Sec', amount: 20, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass filled with ice.',
-                    notes: 'Classic tequila cocktail perfect for summer.'
-                },
-                {
-                    id: '3',
-                    name: 'Old Fashioned',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 32,
-                    pour_cost: 4.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Bourbon Whiskey', amount: 60, unit: 'ml' },
-                        { name: 'Sugar Cube', amount: 1, unit: 'piece' },
-                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                        { name: 'Orange Twist', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Muddle sugar cube with bitters and a splash of water. Add whiskey and ice. Stir gently. Garnish with orange twist.',
-                    notes: 'Classic whiskey cocktail, one of the oldest known cocktails.'
-                }
-            ];
+        // Mock user data
+        const getUser = () => {
+            return { role: 'admin', email: 'admin@example.com' };
         };
 
-        const getDefaultSettings = () => {
-            return {
-                spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-            };
+        // Sample initial data
+        const initialRecipes = [
+            {
+                id: '1',
+                name: 'Margarita',
+                image_url: '',
+                spirit_type: 'Tequila',
+                venue: 'Main Bar',
+                pour_cost: 3.50,
+                glass_type: 'Margarita',
+                abv: 20,
+                ingredients: [
+                    { name: 'Tequila', amount: 50, unit: 'ml' },
+                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                    { name: 'Triple Sec', amount: 20, unit: 'ml' }
+                ],
+                instructions: 'Rub the rim of the glass with lime and dip in salt. Shake all ingredients with ice and strain into the glass.',
+                notes: 'For a sweeter version, add a splash of simple syrup.'
+            },
+            {
+                id: '2',
+                name: 'Old Fashioned',
+                image_url: '',
+                spirit_type: 'Whiskey',
+                venue: 'Main Bar',
+                pour_cost: 4.00,
+                glass_type: 'Rocks',
+                abv: 35,
+                ingredients: [
+                    { name: 'Bourbon', amount: 60, unit: 'ml' },
+                    { name: 'Sugar Cube', amount: 1, unit: 'piece' },
+                    { name: 'Angostura Bitters', amount: 2, unit: 'dash' }
+                ],
+                instructions: 'Muddle sugar cube with bitters and a splash of water. Add whiskey and ice, stir gently. Garnish with orange twist.',
+                notes: 'Use a high-quality bourbon for best results.'
+            }
+        ];
+
+        const initialSettings = {
+            spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Bourbon', 'Brandy'],
+            glass_types: ['Coupe', 'Martini', 'Highball', 'Rocks', 'Collins'],
+            venues: ['Main Bar', 'Pool Bar', 'Restaurant']
         };
 
-        // Data management
-        const getRecipes = () => {
-            return loadFromStorage('cocktailRecipes', getDefaultRecipes());
-        };
-        
-        const saveRecipes = async (recipes, user) => {
-            const localSuccess = saveToStorage('cocktailRecipes', recipes);
-            return { localSuccess, cloudSuccess: false };
-        };
-        
-        const getSettings = () => {
-            return loadFromStorage('cocktailSettings', getDefaultSettings());
-        };
-
-        // Authentication Hook
-        function useAuth() {
-            const [user, setUser] = useState(null);
-            
-            useEffect(() => {
-                const savedUser = localStorage.getItem('cocktailAppUser');
-                if (savedUser) {
-                    setUser(JSON.parse(savedUser));
-                }
-            }, []);
-            
-            const login = (username, password) => {
-                if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                    const userData = { username, isAdmin: true };
-                    setUser(userData);
-                    localStorage.setItem('cocktailAppUser', JSON.stringify(userData));
-                    return true;
-                }
-                return false;
-            };
-            
-            const loginAsGuest = () => {
-                const guestUser = { username: 'Guest', isAdmin: false };
-                setUser(guestUser);
-                localStorage.setItem('cocktailAppUser', JSON.stringify(guestUser));
-                return true;
-            };
-            
-            const logout = () => {
-                setUser(null);
-                localStorage.removeItem('cocktailAppUser');
-            };
-            
-            return { user, login, loginAsGuest, logout };
+        // Initialize data if not exists
+        if (!storage.get('cocktail-recipes').length) {
+            storage.set('cocktail-recipes', initialRecipes);
+        }
+        if (!storage.get('app-settings')) {
+            storage.set('app-settings', initialSettings);
+        }
+        if (!storage.get('syrups-infusions')) {
+            storage.set('syrups-infusions', []);
         }
 
-        // Login Page Component
-        function LoginPage({ onLogin, onGuestLogin }) {
-            const [username, setUsername] = useState('');
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
-            
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (onLogin(username, password)) {
-                    setError('');
-                } else {
-                    setError('Invalid credentials');
-                }
-            };
-            
+        // Components
+        const RecipeCard = ({ recipe, index }) => {
             return (
-                <div className="login-container">
-                    <div className="login-box">
-                        <div className="login-logo">🍸</div>
-                        <h1 className="login-title">Cocktail Manual</h1>
-                        
-                        <form onSubmit={handleSubmit}>
-                            <input
-                                type="text"
-                                className="login-input"
-                                placeholder="Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                className="login-input"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            {error && <div style={{color: '#f44336', marginBottom: '1rem'}}>{error}</div>}
-                            <button type="submit" className="login-button">
-                                Admin Login
-                            </button>
-                        </form>
-                        
-                        <div style={{margin: '1rem 0', color: '#666', textAlign: 'center'}}>or</div>
-                        
-                        <button className="guest-button" onClick={onGuestLogin}>
-                            Continue as Guest
-                        </button>
-                        
-                        <div style={{marginTop: '2rem', fontSize: '0.8rem', color: '#666'}}>
-                            <strong>Admin Demo:</strong><br/>
-                            Username: suraj<br/>
-                            Password: cocktail123
+                <div className="recipe-card">
+                    {recipe.image_url ? (
+                        <img src={recipe.image_url} alt={recipe.name} className="recipe-image" />
+                    ) : (
+                        <div className="recipe-image" style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1))'
+                        }}>
+                            <i className="fas fa-wine-glass-alt" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.2)' }}></i>
                         </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Recipe Card Component
-        function RecipeCard({ recipe, onClick, isAdmin }) {
-            const imageStyle = {
-                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-            };
-            
-            return (
-                <div className="recipe-card" onClick={() => onClick(recipe)}>
-                    <div className="recipe-image" style={imageStyle}>
-                        {!recipe.image_url && '🍸'}
-                    </div>
-                    <div className="recipe-info">
+                    )}
+                    <div className="recipe-overlay">
                         <div className="recipe-name">{recipe.name}</div>
-                        <div className="recipe-spirit">{recipe.spirit_type}</div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Home Page Component
-        function HomePage({ onRecipeClick, isAdmin, onCreateRecipe, syncStatus, onSync, recipes }) {
-            const [searchTerm, setSearchTerm] = useState('');
-            
-            const filteredRecipes = recipes.filter(recipe => 
-                recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            
-            return (
-                <div className="container">
-                    <div className="demo-notice">
-                        🍸 Cocktail Manual - Local Demo Version
-                    </div>
-                    
-                    <div className="page-header">
-                        <h1 className="page-title">Cocktail Menu</h1>
-                        {isAdmin && (
-                            <button className="button" onClick={onCreateRecipe}>
-                                + Add Recipe
-                            </button>
+                        {recipe.spirit_type && (
+                            <div className="recipe-spirit">{recipe.spirit_type}</div>
                         )}
                     </div>
-                    
-                    <div style={{marginBottom: '1rem'}}>
-                        <input 
-                            type="text"
-                            className="login-input"
-                            placeholder="Search cocktails..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{marginBottom: '0'}}
-                        />
-                    </div>
-                    
-                    {filteredRecipes.length === 0 ? (
-                        <div className="loading">
-                            No cocktails found matching your criteria.
+                </div>
+            );
+        };
+
+        const Home = () => {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeSpirit, setActiveSpirit] = useState('all');
+            const [activeVenue, setActiveVenue] = useState('all');
+            const [recipes, setRecipes] = useState([]);
+            const [settings, setSettings] = useState({});
+            const [isLoading, setIsLoading] = useState(true);
+
+            useEffect(() => {
+                // Load data from localStorage
+                setRecipes(storage.get('cocktail-recipes'));
+                setSettings(storage.get('app-settings')[0] || {});
+                setIsLoading(false);
+            }, []);
+
+            const filteredRecipes = recipes.filter(recipe => {
+                const searchMatch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const spiritMatch = activeSpirit === 'all' || recipe.spirit_type === activeSpirit;
+                const venueMatch = activeVenue === 'all' || recipe.venue === activeVenue;
+                return searchMatch && spiritMatch && venueMatch;
+            });
+
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            const recipeGroups = alphabet.reduce((acc, letter) => {
+                acc[letter] = filteredRecipes.filter(r => r.name.toUpperCase().startsWith(letter));
+                return acc;
+            }, {});
+
+            const scrollToLetter = (letter) => {
+                const element = document.getElementById(`letter-header-${letter}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            return (
+                <div className="p-4 md:p-8">
+                    <div className="mb-8 space-y-6">
+                        <div className="text-center md:text-left">
+                            <h1 className="text-2xl font-bold tracking-tight text-white">Cocktail Manual</h1>
                         </div>
-                    ) : (
-                        <>
-                            <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                Showing {filteredRecipes.length} of {recipes.length} cocktails
-                                {isAdmin && ' • Add new cocktails to expand the menu!'}
+                        <div className="flex flex-col md:flex-row gap-2">
+                            <div className="relative flex-1">
+                                <i className="fas fa-search search-icon"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Search recipes..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="search-input"
+                                />
                             </div>
-                            <div className="recipes-grid">
-                                {filteredRecipes.map(recipe => (
-                                    <RecipeCard 
-                                        key={recipe.id}
-                                        recipe={recipe}
-                                        onClick={onRecipeClick}
-                                        isAdmin={isAdmin}
-                                    />
+                            
+                            <div className="dropdown">
+                                <button className="filter-btn">
+                                    {activeSpirit === 'all' ? 'All Spirits' : activeSpirit}
+                                    <i className="fas fa-chevron-down"></i>
+                                </button>
+                                <div className="dropdown-content">
+                                    <div 
+                                        className="dropdown-item" 
+                                        onClick={() => setActiveSpirit('all')}
+                                    >
+                                        All Spirits
+                                    </div>
+                                    {settings.spirit_types?.map(spirit => (
+                                        <div 
+                                            key={spirit} 
+                                            className="dropdown-item"
+                                            onClick={() => setActiveSpirit(spirit)}
+                                        >
+                                            {spirit}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="dropdown">
+                                <button className="filter-btn">
+                                    {activeVenue === 'all' ? 'All Venues' : activeVenue}
+                                    <i className="fas fa-chevron-down"></i>
+                                </button>
+                                <div className="dropdown-content">
+                                    <div 
+                                        className="dropdown-item" 
+                                        onClick={() => setActiveVenue('all')}
+                                    >
+                                        All Venues
+                                    </div>
+                                    {settings.venues?.map(venue => (
+                                        <div 
+                                            key={venue} 
+                                            className="dropdown-item"
+                                            onClick={() => setActiveVenue(venue)}
+                                        >
+                                            {venue}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative">
+                        <div>
+                            {isLoading ? (
+                                <div className="recipe-grid">
+                                    {Array(12).fill(0).map((_, i) => (
+                                        <div key={i} className="recipe-card animate-pulse"></div>
+                                    ))}
+                                </div>
+                            ) : filteredRecipes.length > 0 ? (
+                                <div className="space-y-6">
+                                    {alphabet.map(letter => (
+                                        recipeGroups[letter].length > 0 && (
+                                            <div key={letter}>
+                                                <h2 id={`letter-header-${letter}`} className="text-2xl font-bold text-[#FFB366] mb-4 pl-1">{letter}</h2>
+                                                <div className="recipe-grid">
+                                                    {recipeGroups[letter].map((recipe, index) => (
+                                                        <div key={recipe.id} onClick={() => window.showRecipe(recipe.id)} style={{cursor: 'pointer'}}>
+                                                            <RecipeCard recipe={recipe} index={index} />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-20">
+                                    <i className="fas fa-wine-glass-alt" style={{fontSize: '4rem', color: 'rgba(255,255,255,0.2)', marginBottom: '1rem'}}></i>
+                                    <h3 className="text-xl font-semibold mb-2 text-white/80">No recipes found</h3>
+                                    <p className="text-white/40 mb-6">Your search or filter returned no results.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Alphabet Quick-Scroll */}
+                        {filteredRecipes.length > 0 && (
+                            <div className="alphabet-nav">
+                                {alphabet.map(letter => (
+                                    <button
+                                        key={letter}
+                                        onClick={() => scrollToLetter(letter)}
+                                        className="alphabet-letter"
+                                        disabled={recipeGroups[letter].length === 0}
+                                    >
+                                        {letter}
+                                    </button>
                                 ))}
                             </div>
-                        </>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ViewRecipe = ({ recipeId, onBack }) => {
+            const [recipe, setRecipe] = useState(null);
+            const [allRecipes, setAllRecipes] = useState([]);
+            const [showScaleModal, setShowScaleModal] = useState(false);
+            const [touchStartX, setTouchStartX] = useState(null);
+            const [touchEndX, setTouchEndX] = useState(null);
+
+            useEffect(() => {
+                const recipes = storage.get('cocktail-recipes');
+                setAllRecipes(recipes);
+                const foundRecipe = recipes.find(r => r.id === recipeId);
+                setRecipe(foundRecipe);
+            }, [recipeId]);
+
+            const user = getUser();
+            const isAdmin = user.role === 'admin';
+
+            const currentIndex = allRecipes.findIndex(r => r.id === recipeId);
+            const nextRecipeId = currentIndex < allRecipes.length - 1 ? allRecipes[currentIndex + 1].id : null;
+            const prevRecipeId = currentIndex > 0 ? allRecipes[currentIndex - 1].id : null;
+
+            const onTouchStart = (e) => {
+                setTouchEndX(null);
+                setTouchStartX(e.targetTouches[0].clientX);
+            };
+
+            const onTouchMove = (e) => setTouchEndX(e.targetTouches[0].clientX);
+
+            const onTouchEnd = () => {
+                if (!touchStartX || !touchEndX) return;
+                const distance = touchStartX - touchEndX;
+                const isLeftSwipe = distance > 50;
+                const isRightSwipe = distance < -50;
+
+                if (isLeftSwipe && nextRecipeId) {
+                    window.showRecipe(nextRecipeId);
+                } else if (isRightSwipe && prevRecipeId) {
+                    window.showRecipe(prevRecipeId);
+                }
+                setTouchStartX(null);
+                setTouchEndX(null);
+            };
+
+            const handleShare = () => {
+                if (!recipe) return;
+                let shareText = `Cocktail Recipe: ${recipe.name}\n\n`;
+                shareText += "Ingredients:\n";
+                recipe.ingredients.forEach(ing => {
+                    shareText += `- ${ing.amount || ''} ${ing.unit || ''} ${ing.name || ''}\n`;
+                });
+                shareText += `\nInstructions:\n${recipe.instructions}\n`;
+                if (recipe.notes) {
+                    shareText += `\nNotes:\n${recipe.notes}\n`;
+                }
+
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Recipe copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy recipe:', err);
+                    alert('Could not copy recipe.');
+                });
+            };
+
+            const handleDelete = () => {
+                if (confirm('Are you sure you want to delete this recipe?')) {
+                    const recipes = storage.get('cocktail-recipes');
+                    const updatedRecipes = recipes.filter(r => r.id !== recipeId);
+                    storage.set('cocktail-recipes', updatedRecipes);
+                    onBack();
+                }
+            };
+
+            if (!recipe) {
+                return (
+                    <div className="container mx-auto px-4 py-8 text-center">
+                        <p className="text-white/60">Recipe not found</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div 
+                    className="recipe-view"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                >
+                    {recipe.image_url && (
+                        <div className="recipe-hero">
+                            <img src={recipe.image_url} alt={recipe.name} className="recipe-hero-image" />
+                            <div className="recipe-hero-overlay"></div>
+                        </div>
+                    )}
+                    <div className="recipe-hero-overlay"></div>
+
+                    <div className="recipe-content">
+                        <div className="recipe-header">
+                            <button onClick={onBack} className="btn btn-outline" style={{borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                <i className="fas fa-arrow-left"></i>
+                            </button>
+                            <h1 className="recipe-title">{recipe.name}</h1>
+                        </div>
+
+                        <div className="recipe-details">
+                            <div className="details-grid">
+                                {recipe.spirit_type && (
+                                    <div className="detail-item">
+                                        <div className="detail-label">Spirit</div>
+                                        <div className="detail-value primary">{recipe.spirit_type}</div>
+                                    </div>
+                                )}
+                                {recipe.glass_type && (
+                                    <div className="detail-item">
+                                        <div className="detail-label">Glass</div>
+                                        <div className="detail-value">{recipe.glass_type}</div>
+                                    </div>
+                                )}
+                                {recipe.abv && (
+                                    <div className="detail-item">
+                                        <div className="detail-label">ABV</div>
+                                        <div className="detail-value">{recipe.abv}%</div>
+                                    </div>
+                                )}
+                                {recipe.pour_cost && (
+                                    <div className="detail-item">
+                                        <div className="detail-label">Cost</div>
+                                        <div className="detail-value">${recipe.pour_cost}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <h3 className="section-title">Ingredients</h3>
+                                <div className="ingredients-list">
+                                    {recipe.ingredients?.map((ing, i) => (
+                                        <div key={i} className="ingredient-item">
+                                            <div className="ingredient-bullet"></div>
+                                            <span className="font-medium">{ing.amount} {ing.unit}</span>
+                                            <span className="text-white/60">{ing.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="section-title">Instructions</h3>
+                                <p className="instructions">{recipe.instructions}</p>
+                            </div>
+
+                            {recipe.notes && (
+                                <div>
+                                    <h3 className="section-title">Notes</h3>
+                                    <p className="notes">{recipe.notes}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="recipe-actions">
+                            <button 
+                                onClick={() => setShowScaleModal(true)}
+                                className="btn btn-primary"
+                                style={{gridColumn: '1 / -1'}}
+                            >
+                                <i className="fas fa-balance-scale"></i>
+                                Scale Recipe
+                            </button>
+                            <button 
+                                onClick={handleShare}
+                                className="btn btn-outline"
+                                style={{gridColumn: '1 / -1'}}
+                            >
+                                <i className="fas fa-share"></i>
+                                Share
+                            </button>
+                            {isAdmin && (
+                                <>
+                                    <button 
+                                        onClick={() => window.showCreateRecipe(recipe.id)}
+                                        className="btn btn-outline"
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                        Edit
+                                    </button>
+                                    <button 
+                                        onClick={handleDelete}
+                                        className="btn btn-danger"
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                        Delete
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {showScaleModal && (
+                        <ScaleRecipeModal 
+                            recipe={recipe} 
+                            onClose={() => setShowScaleModal(false)} 
+                        />
                     )}
                 </div>
             );
-        }
+        };
 
-        // View Recipe Component
-        function ViewRecipePage({ recipe, onBack, isAdmin }) {
-            const backgroundStyle = {
-                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-            };
-            
-            return (
-                <div className="container">
-                    <button className="button" onClick={onBack} style={{background: '#333', color: 'white', marginBottom: '1rem'}}>
-                        ← Back to Cocktails
-                    </button>
+        const ScaleRecipeModal = ({ recipe, onClose }) => {
+            const [scalingMethod, setScalingMethod] = useState('servings');
+            const [quantity, setQuantity] = useState('1');
+            const [dilution, setDilution] = useState('0');
+            const [customDilution, setCustomDilution] = useState('');
+            const [scaledIngredients, setScaledIngredients] = useState(null);
+
+            const calculateScaled = () => {
+                const qty = parseFloat(quantity) || 1;
+                const dilutionPercent = dilution === 'custom' ? parseFloat(customDilution) || 0 : parseFloat(dilution);
+
+                let finalIngredients = [];
+                let totalVolumeOfIngredients = 0;
+                let finalDilutionAmount = 0;
+                let finalTotalVolume = 0;
+                let estimatedServings = 0;
+
+                if (dilutionPercent === 100) {
+                    finalIngredients = recipe.ingredients.map(ing => ({ ...ing, scaled_amount: 0 }));
+                    totalVolumeOfIngredients = 0;
                     
-                    <div style={{background: '#1A1A1A', borderRadius: '12px', overflow: 'hidden'}}>
-                        {recipe.image_url && (
-                            <div style={{height: '200px', ...backgroundStyle}}></div>
-                        )}
-                        
-                        <div style={{padding: '2rem'}}>
-                            <div style={{marginBottom: '2rem'}}>
-                                <h1 style={{fontSize: '2.5rem', color: '#FFB366', marginBottom: '1rem'}}>{recipe.name}</h1>
-                                <div style={{display: 'flex', flexWrap: 'wrap', gap: '1rem'}}>
-                                    <div style={{background: '#252525', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.9rem'}}>
-                                        {recipe.spirit_type}
-                                    </div>
-                                    <div style={{background: '#252525', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.9rem'}}>
-                                        {recipe.glass_type} Glass
-                                    </div>
-                                    <div style={{background: '#252525', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.9rem'}}>
-                                        {recipe.abv}% ABV
-                                    </div>
-                                    <div style={{background: '#252525', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.9rem'}}>
-                                        ${recipe.pour_cost} Cost
-                                    </div>
+                    if (scalingMethod === 'volume') {
+                        finalDilutionAmount = qty;
+                        finalTotalVolume = qty;
+                    } else {
+                        finalDilutionAmount = 0;
+                        finalTotalVolume = 0;
+                    }
+                    estimatedServings = 0;
+                } else if (scalingMethod === 'servings') {
+                    const multiplier = qty;
+                    finalIngredients = recipe.ingredients.map(ing => ({
+                        ...ing,
+                        scaled_amount: (ing.amount * multiplier)
+                    }));
+                    totalVolumeOfIngredients = finalIngredients.reduce((sum, ing) => sum + ing.scaled_amount, 0);
+
+                    finalDilutionAmount = (totalVolumeOfIngredients / (1 - (dilutionPercent / 100))) - totalVolumeOfIngredients;
+                    finalTotalVolume = totalVolumeOfIngredients + finalDilutionAmount;
+                    estimatedServings = qty;
+                } else {
+                    const totalOriginalIngredientVolume = recipe.ingredients.reduce((sum, ing) => sum + ing.amount, 0);
+
+                    if (totalOriginalIngredientVolume === 0) {
+                        setScaledIngredients({
+                            ingredients: recipe.ingredients.map(ing => ({...ing, scaled_amount: "0.0"})),
+                            dilution: "0.0",
+                            total: "0.0",
+                            servings: "0.0"
+                        });
+                        return;
+                    }
+                    
+                    const desiredFinalTotalVolume = qty;
+                    const preDilutionIngredientVolumeNeeded = desiredFinalTotalVolume * (1 - (dilutionPercent / 100));
+                    const scalingFactor = preDilutionIngredientVolumeNeeded / totalOriginalIngredientVolume;
+                    
+                    finalIngredients = recipe.ingredients.map(ing => ({
+                        ...ing,
+                        scaled_amount: (ing.amount * scalingFactor)
+                    }));
+                    totalVolumeOfIngredients = finalIngredients.reduce((sum, ing) => sum + ing.scaled_amount, 0);
+                    
+                    finalDilutionAmount = (totalVolumeOfIngredients / (1 - (dilutionPercent / 100))) - totalVolumeOfIngredients;
+                    finalTotalVolume = totalVolumeOfIngredients + finalDilutionAmount;
+                    estimatedServings = preDilutionIngredientVolumeNeeded / totalOriginalIngredientVolume;
+                }
+
+                setScaledIngredients({
+                    ingredients: finalIngredients.map(ing => ({...ing, scaled_amount: ing.scaled_amount.toFixed(1)})),
+                    dilution: finalDilutionAmount.toFixed(1),
+                    total: finalTotalVolume.toFixed(1),
+                    servings: estimatedServings.toFixed(1)
+                });
+            };
+
+            const handleShare = () => {
+                if (!scaledIngredients) return;
+                let shareText = `Scaled Recipe: ${recipe.name}\n`;
+                if(scalingMethod === 'volume') {
+                    shareText += `~${scaledIngredients.servings} servings\n\n`;
+                } else {
+                    shareText += `${scaledIngredients.servings} servings\n\n`;
+                }
+                
+                scaledIngredients.ingredients.forEach(ing => {
+                    shareText += `${ing.scaled_amount}${ing.unit || 'ml'} - ${ing.name}\n`;
+                });
+                if (parseFloat(scaledIngredients.dilution) > 0) {
+                    shareText += `${scaledIngredients.dilution}ml - Water (Dilution)\n`;
+                }
+                shareText += `\nTotal Volume: ${scaledIngredients.total}ml`;
+                
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert("Scaled recipe copied to clipboard!");
+                }).catch(err => {
+                    console.error("Failed to copy text: ", err);
+                    alert("Failed to copy recipe to clipboard. Please try again or copy manually.");
+                });
+            };
+
+            useEffect(() => {
+                calculateScaled();
+            }, [quantity, dilution, customDilution, scalingMethod, recipe]);
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal-header">
+                            <i className="fas fa-balance-scale" style={{color: '#FFB366'}}></i>
+                            <h2 className="modal-title">Scale Recipe: {recipe.name}</h2>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-group">
+                                <h3 className="section-title">Step 1: Choose Scaling Method</h3>
+                                <div>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '0.5rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="scalingMethod" 
+                                            value="servings" 
+                                            checked={scalingMethod === 'servings'}
+                                            onChange={(e) => setScalingMethod(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div>
+                                            <div style={{fontWeight: '500'}}>Scale by Number of Servings</div>
+                                            <div style={{fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem'}}>
+                                                Choose this option if you know how many servings you need.
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.75rem', borderRadius: '0.5rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="scalingMethod" 
+                                            value="volume" 
+                                            checked={scalingMethod === 'volume'}
+                                            onChange={(e) => setScalingMethod(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div>
+                                            <div style={{fontWeight: '500'}}>Scale by Total Volume (mL)</div>
+                                            <div style={{fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem'}}>
+                                                Ideal for filling a specific container or batch size.
+                                            </div>
+                                        </div>
+                                    </label>
                                 </div>
                             </div>
-                            
-                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem'}}>
+
+                            <div className="form-group">
+                                <h3 className="section-title">Step 2: Enter Quantity</h3>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(e.target.value)}
+                                        placeholder={scalingMethod === "servings" ? "Number of servings" : "Total volume (mL)"}
+                                        className="form-input"
+                                    />
+                                    <span style={{color: 'var(--muted)'}}>
+                                        {scalingMethod === "servings" ? "servings" : "mL"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <h3 className="section-title">Step 3: Add Dilution (Optional)</h3>
                                 <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
-                                    <div style={{listStyle: 'none'}}>
-                                        {recipe.ingredients.map((ingredient, index) => (
-                                            <div key={index} style={{display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid #333'}}>
-                                                <span>{ingredient.name}</span>
-                                                <span>{ingredient.amount} {ingredient.unit}</span>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.5rem', borderRadius: '0.5rem', marginBottom: '0.25rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="dilution" 
+                                            value="0" 
+                                            checked={dilution === '0'}
+                                            onChange={(e) => setDilution(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div>
+                                            <div style={{fontWeight: '500'}}>0% (No Dilution)</div>
+                                            <div style={{fontSize: '0.75rem', color: 'var(--muted)'}}>Best if you plan to shake or stir to order.</div>
+                                        </div>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.5rem', borderRadius: '0.5rem', marginBottom: '0.25rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="dilution" 
+                                            value="18" 
+                                            checked={dilution === '18'}
+                                            onChange={(e) => setDilution(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div>
+                                            <div style={{fontWeight: '500'}}>18% (Spirit-Driven)</div>
+                                            <div style={{fontSize: '0.75rem', color: 'var(--muted)'}}>Best for strong drinks containing mainly spirits.</div>
+                                        </div>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.5rem', borderRadius: '0.5rem', marginBottom: '0.25rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="dilution" 
+                                            value="25" 
+                                            checked={dilution === '25'}
+                                            onChange={(e) => setDilution(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div>
+                                            <div style={{fontWeight: '500'}}>25% (Shaken Cocktails)</div>
+                                            <div style={{fontSize: '0.75rem', color: 'var(--muted)'}}>Ideal for cocktails with fruit juices, dairy, or eggs.</div>
+                                        </div>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'start', gap: '0.75rem', padding: '0.5rem', borderRadius: '0.5rem'}}>
+                                        <input 
+                                            type="radio" 
+                                            name="dilution" 
+                                            value="custom" 
+                                            checked={dilution === 'custom'}
+                                            onChange={(e) => setDilution(e.target.value)}
+                                            style={{marginTop: '0.25rem'}}
+                                        />
+                                        <div style={{flex: 1}}>
+                                            <div style={{fontWeight: '500'}}>Custom Dilution</div>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                step="0.1"
+                                                value={customDilution}
+                                                onChange={(e) => setCustomDilution(e.target.value)}
+                                                placeholder="Enter %"
+                                                disabled={dilution !== "custom"}
+                                                className="form-input mt-2"
+                                            />
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={calculateScaled}
+                                className="btn btn-primary btn-full"
+                            >
+                                Calculate Scaled Recipe
+                            </button>
+
+                            {scaledIngredients && (
+                                <div className="form-card" style={{backgroundColor: 'rgba(255, 179, 102, 0.1)', borderColor: 'rgba(255, 179, 102, 0.2)'}}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
+                                        <h3 style={{fontWeight: '600', color: '#FFB366'}}>Scaled Ingredients</h3>
+                                        <button onClick={handleShare} className="btn btn-outline" style={{padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px'}}>
+                                            <i className="fas fa-share" style={{color: '#FFB366'}}></i>
+                                        </button>
+                                    </div>
+                                    <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                                        {scaledIngredients.ingredients.map((ing, i) => (
+                                            <div key={i} style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem'}}>
+                                                <span>{ing.name}</span>
+                                                <span style={{fontFamily: 'monospace', fontWeight: '500', color: '#FFB366'}}>
+                                                    {ing.scaled_amount} {ing.unit || 'ml'}
+                                                </span>
                                             </div>
                                         ))}
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
-                                    <div style={{background: '#252525', padding: '1.5rem', borderRadius: '8px', whiteSpace: 'pre-line', lineHeight: '1.8'}}>
-                                        {recipe.instructions}
-                                    </div>
-                                    
-                                    {recipe.notes && (
-                                        <>
-                                            <h3 style={{color: '#FFB366', marginBottom: '1rem', marginTop: '1.5rem'}}>Notes</h3>
-                                            <div style={{background: '#252525', padding: '1.5rem', borderRadius: '8px', whiteSpace: 'pre-line', lineHeight: '1.8'}}>
-                                                {recipe.notes}
+                                        {parseFloat(scaledIngredients.dilution) > 0 && (
+                                            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                                <span>Water (dilution)</span>
+                                                <span style={{fontFamily: 'monospace', fontWeight: '500', color: '#FFB366'}}>
+                                                    {scaledIngredients.dilution} ml
+                                                </span>
                                             </div>
-                                        </>
-                                    )}
+                                        )}
+                                        <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontWeight: '600'}}>
+                                            <span>{scalingMethod === 'servings' ? 'Total Volume' : 'Number of Servings'}</span>
+                                            <span style={{fontFamily: 'monospace', color: '#FFB366'}}>
+                                                {scalingMethod === 'servings' ? `${scaledIngredients.total} ml` : `~${scaledIngredients.servings}`}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+                        </div>
+                        <div className="modal-actions">
+                            <button onClick={onClose} className="btn btn-outline" style={{flex: 1}}>Close</button>
                         </div>
                     </div>
                 </div>
             );
-        }
+        };
 
-        // Main App Component
-        function App() {
-            const { user, login, loginAsGuest, logout } = useAuth();
-            const [currentPage, setCurrentPage] = useState('home');
-            const [selectedRecipe, setSelectedRecipe] = useState(null);
-            const [recipes, setRecipes] = useState(getRecipes());
-            
+        const CreateRecipe = ({ recipeId, onSave, onCancel }) => {
+            const [formData, setFormData] = useState({
+                name: '',
+                image_url: '',
+                spirit_type: '',
+                venue: '',
+                pour_cost: '',
+                glass_type: '',
+                abv: '',
+                ingredients: [{ name: '', amount: '', unit: 'ml' }],
+                instructions: '',
+                notes: '',
+            });
+            const [settings, setSettings] = useState({});
+            const isEdit = !!recipeId;
+
             useEffect(() => {
-                // Initialize with default data if empty
-                const currentRecipes = getRecipes();
-                if (currentRecipes.length === 0) {
-                    saveToStorage('cocktailRecipes', getDefaultRecipes());
-                    setRecipes(getDefaultRecipes());
+                if (recipeId) {
+                    const recipes = storage.get('cocktail-recipes');
+                    const recipe = recipes.find(r => r.id === recipeId);
+                    if (recipe) {
+                        setFormData(recipe);
+                    }
                 }
-            }, []);
-            
-            const navigateTo = (page, item = null) => {
-                setCurrentPage(page);
-                if (page === 'view-recipe') setSelectedRecipe(item);
+                const appSettings = storage.get('app-settings');
+                setSettings(appSettings[0] || {});
+            }, [recipeId]);
+
+            const spiritTypes = settings.spirit_types || ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey'];
+            const glassTypes = settings.glass_types || ['Coupe', 'Martini', 'Highball', 'Rocks'];
+            const venueTypes = settings.venues || ['Main Bar', 'Pool Bar', 'Restaurant'];
+
+            const addIngredient = () => {
+                setFormData(prev => ({
+                    ...prev,
+                    ingredients: [...prev.ingredients, { name: '', amount: '', unit: 'ml' }]
+                }));
             };
-            
-            const handleSaveRecipe = async (recipeData, user) => {
-                const updatedRecipes = [...recipes, recipeData];
-                const result = await saveRecipes(updatedRecipes, user);
+
+            const updateIngredient = (index, field, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    ingredients: prev.ingredients.map((ing, i) =>
+                        i === index ? { ...ing, [field]: value } : ing
+                    )
+                }));
+            };
+
+            const removeIngredient = (index) => {
+                setFormData(prev => ({
+                    ...prev,
+                    ingredients: prev.ingredients.filter((_, i) => i !== index)
+                }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const cleanedData = {
+                    ...formData,
+                    id: recipeId || Date.now().toString(),
+                    pour_cost: formData.pour_cost ? parseFloat(formData.pour_cost) : null,
+                    abv: formData.abv ? parseFloat(formData.abv) : null,
+                    ingredients: formData.ingredients.filter(ing => ing.name.trim() !== '').map(ing => ({
+                        ...ing,
+                        amount: parseFloat(ing.amount) || 0
+                    }))
+                };
+
+                const recipes = storage.get('cocktail-recipes');
+                let updatedRecipes;
                 
-                if (result.localSuccess) {
-                    setRecipes(updatedRecipes);
-                    navigateTo('home');
-                }
-            };
-            
-            const renderPage = () => {
-                if (!user) {
-                    return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                if (isEdit) {
+                    updatedRecipes = recipes.map(r => r.id === recipeId ? cleanedData : r);
+                } else {
+                    updatedRecipes = [...recipes, cleanedData];
                 }
                 
-                switch(currentPage) {
-                    case 'home':
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => navigateTo('create-recipe')}
-                            recipes={recipes}
-                        />;
-                    case 'view-recipe':
-                        return <ViewRecipePage 
-                            recipe={selectedRecipe} 
-                            onBack={() => navigateTo('home')}
-                            isAdmin={user.isAdmin}
-                        />;
-                    default:
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => navigateTo('create-recipe')}
-                            recipes={recipes}
-                        />;
-                }
+                storage.set('cocktail-recipes', updatedRecipes);
+                onSave();
             };
-            
+
             return (
-                <div className="app">
-                    {user && (
-                        <header className="header">
-                            <div className="header-left">
-                                <button className="menu-button">
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
+                <div className="form-container">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-card">
+                            <h2 className="form-title">
+                                {isEdit ? "Edit Recipe" : "Create New Recipe"}
+                            </h2>
+                            <p className="form-description">Share your signature cocktail with colleagues</p>
+
+                            <div className="form-group">
+                                <label className="form-label">Cocktail Image URL</label>
+                                {formData.image_url ? (
+                                    <div style={{position: 'relative', aspectRatio: '16/9', borderRadius: '0.5rem', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.05)'}}>
+                                        <img src={formData.image_url} alt="Preview" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                                            style={{position: 'absolute', top: '0.5rem', right: '0.5rem', padding: '0.5rem', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '50%', border: 'none', color: 'white'}}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', aspectRatio: '16/9', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', padding: '1rem'}}>
+                                        <i className="fas fa-image" style={{fontSize: '2rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}></i>
+                                        <p style={{fontSize: '0.875rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem', textAlign: 'center'}}>Paste an image URL below</p>
+                                        <div style={{width: '100%', position: 'relative'}}>
+                                            <i className="fas fa-link" style={{position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)'}}></i>
+                                            <input
+                                                type="text"
+                                                placeholder="https://example.com/image.jpg"
+                                                value={formData.image_url}
+                                                onChange={(e) => setFormData(prev => ({...prev, image_url: e.target.value}))}
+                                                style={{width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.375rem', color: 'white'}}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label className="form-label">Cocktail Name *</label>
+                                    <input
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder="e.g., Piña Colada"
+                                        className="form-input"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Spirit Type *</label>
+                                    <select
+                                        required
+                                        value={formData.spirit_type}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, spirit_type: e.target.value }))}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select spirit</option>
+                                        {spiritTypes.map(spirit => (
+                                            <option key={spirit} value={spirit}>{spirit}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Glass Type</label>
+                                    <select
+                                        value={formData.glass_type}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, glass_type: e.target.value }))}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select glass</option>
+                                        {glassTypes.map(glass => (
+                                            <option key={glass} value={glass}>{glass}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Venue</label>
+                                    <select
+                                        value={formData.venue}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))}
+                                        className="form-select"
+                                    >
+                                        <option value="">Select venue</option>
+                                        {venueTypes.map(venue => (
+                                            <option key={venue} value={venue}>{venue}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Pour Cost ($)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={formData.pour_cost}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, pour_cost: e.target.value }))}
+                                        placeholder="0.00"
+                                        className="form-input"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">ABV (%)</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={formData.abv}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, abv: e.target.value }))}
+                                        placeholder="0.0"
+                                        className="form-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" style={{fontSize: '1.125rem'}}>Ingredients *</label>
+                                <div style={{marginTop: '1rem'}}>
+                                    <div style={{display: 'none'}} className="hidden md:grid md:grid-cols-[1fr_90px_110px_40px] gap-x-2 px-1 text-sm text-white/60">
+                                        <div>Name</div>
+                                        <div>Qty</div>
+                                        <div>Unit</div>
+                                        <div></div>
+                                    </div>
+                                    {formData.ingredients.map((ing, i) => (
+                                        <div key={i} className="ingredient-row">
+                                            <div>
+                                                <div className="form-label" style={{display: 'block', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem'}}>Name</div>
+                                                <input
+                                                    placeholder="e.g., Tequila"
+                                                    value={ing.name}
+                                                    onChange={(e) => updateIngredient(i, 'name', e.target.value)}
+                                                    className="form-input"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <div className="form-label" style={{display: 'block', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem'}}>Qty</div>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    value={ing.amount}
+                                                    onChange={(e) => updateIngredient(i, 'amount', e.target.value)}
+                                                    className="form-input"
+                                                />
+                                            </div>
+
+                                            <div style={{display: 'flex', alignItems: 'end', gap: '0.5rem'}}>
+                                                <div style={{flex: 1}}>
+                                                    <div className="form-label" style={{display: 'block', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem'}}>Unit</div>
+                                                    <select
+                                                        value={ing.unit}
+                                                        onChange={(e) => updateIngredient(i, 'unit', e.target.value)}
+                                                        className="form-select"
+                                                    >
+                                                        <option value="ml">ml</option>
+                                                        <option value="oz">oz</option>
+                                                        <option value="dash">dash</option>
+                                                        <option value="piece">piece</option>
+                                                    </select>
+                                                </div>
+                                                {formData.ingredients.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeIngredient(i)}
+                                                        className="btn btn-danger"
+                                                        style={{padding: '0.5rem', borderRadius: '0.375rem', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={addIngredient}
+                                    className="btn btn-outline mt-4"
+                                    style={{color: '#FFB366', borderColor: 'rgba(255,255,255,0.1)'}}
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    Add Ingredient
                                 </button>
                             </div>
-                            
-                            <div className="nav-user">
-                                👤 {user.username}
-                                {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                                <button className="logout-btn" onClick={logout}>
-                                    Logout
-                                </button>
+
+                            <div className="form-group">
+                                <label className="form-label">Instructions *</label>
+                                <textarea
+                                    required
+                                    value={formData.instructions}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
+                                    placeholder="Describe how to prepare this cocktail..."
+                                    rows={5}
+                                    className="form-textarea"
+                                />
                             </div>
-                        </header>
-                    )}
-                    
-                    <main>
-                        {renderPage()}
-                    </main>
+
+                            <div className="form-group">
+                                <label className="form-label">Notes</label>
+                                <textarea
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                                    placeholder="Additional tips or variations..."
+                                    rows={3}
+                                    className="form-textarea"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="btn-group">
+                            <button
+                                type="button"
+                                onClick={onCancel}
+                                className="btn btn-outline"
+                                style={{flex: 1}}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                style={{flex: 1}}
+                            >
+                                {isEdit ? "Update Recipe" : "Create Recipe"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             );
-        }
+        };
 
-        // Render the app
+        const Settings = ({ onBack }) => {
+            const [settings, setSettings] = useState({
+                spirit_types: [],
+                glass_types: [],
+                venues: []
+            });
+
+            useEffect(() => {
+                const appSettings = storage.get('app-settings');
+                if (appSettings.length > 0) {
+                    setSettings(appSettings[0]);
+                }
+            }, []);
+
+            const updateSettings = (key, value) => {
+                const newSettings = { ...settings, [key]: value };
+                setSettings(newSettings);
+                storage.set('app-settings', [newSettings]);
+            };
+
+            const ListManager = ({ title, description, items, onUpdate, placeholder }) => {
+                const [newItem, setNewItem] = useState('');
+
+                const handleAdd = () => {
+                    if (!newItem.trim()) return;
+                    const updated = [...items, newItem.trim()];
+                    onUpdate(updated);
+                    setNewItem('');
+                };
+
+                const handleRemove = (index) => {
+                    const updated = items.filter((_, i) => i !== index);
+                    onUpdate(updated);
+                };
+
+                return (
+                    <div>
+                        <h3 style={{fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem'}}>{title}</h3>
+                        <p style={{fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '1rem'}}>{description}</p>
+
+                        <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                            <input
+                                value={newItem}
+                                onChange={(e) => setNewItem(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+                                placeholder={placeholder}
+                                className="form-input"
+                            />
+                            <button
+                                onClick={handleAdd}
+                                className="btn btn-primary"
+                                style={{padding: '0.75rem'}}
+                            >
+                                <i className="fas fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                            {items.map((item, index) => (
+                                <div key={index} style={{display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.05)'}}>
+                                    <i className="fas fa-grip-vertical" style={{color: 'rgba(255,255,255,0.4)'}}></i>
+                                    <span style={{flex: 1}}>{item}</span>
+                                    <button
+                                        onClick={() => handleRemove(index)}
+                                        className="btn btn-danger"
+                                        style={{padding: '0.5rem', borderRadius: '0.375rem'}}
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {items.length === 0 && (
+                            <p style={{textAlign: 'center', color: 'var(--muted)', padding: '2rem 0'}}>
+                                No items yet. Add your first one above.
+                            </p>
+                        )}
+                    </div>
+                );
+            };
+
+            return (
+                <div className="p-4 md:p-8">
+                    <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem'}}>
+                        <button onClick={onBack} className="btn btn-outline" style={{borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <i className="fas fa-arrow-left"></i>
+                        </button>
+                        <h1 className="text-2xl font-bold">Settings</h1>
+                    </div>
+
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem'}}>
+                        <div className="form-card">
+                            <ListManager
+                                title="Manage Spirit Types"
+                                description="Add, remove, or reorder spirit types for your recipes."
+                                items={settings.spirit_types || []}
+                                onUpdate={(types) => updateSettings('spirit_types', types)}
+                                placeholder="Add new spirit type..."
+                            />
+                        </div>
+                        <div className="form-card">
+                            <ListManager
+                                title="Manage Glass Types"
+                                description="Customize the list of available glass types."
+                                items={settings.glass_types || []}
+                                onUpdate={(types) => updateSettings('glass_types', types)}
+                                placeholder="Add new glass type..."
+                            />
+                        </div>
+                        <div className="form-card">
+                            <ListManager
+                                title="Manage Venues"
+                                description="Define the venues where cocktails are served."
+                                items={settings.venues || []}
+                                onUpdate={(venues) => updateSettings('venues', venues)}
+                                placeholder="Add new venue..."
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Syrups = ({ onBack, onViewSyrup, onCreateSyrup }) => {
+            const [syrups, setSyrups] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+
+            useEffect(() => {
+                const syrupsData = storage.get('syrups-infusions');
+                setSyrups(syrupsData);
+                setIsLoading(false);
+            }, []);
+
+            const user = getUser();
+            const isAdmin = user.role === 'admin';
+
+            return (
+                <div className="p-4 md:p-8">
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+                        <h1 className="text-2xl font-bold">Syrups & Infusions</h1>
+                        {isAdmin && (
+                            <button onClick={onCreateSyrup} className="btn btn-primary">
+                                Add New
+                            </button>
+                        )}
+                    </div>
+
+                    {isLoading ? (
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.5rem'}}>
+                            {Array(14).fill(0).map((_, i) => (
+                                <div key={i} className="recipe-card animate-pulse"></div>
+                            ))}
+                        </div>
+                    ) : syrups.length > 0 ? (
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.5rem'}}>
+                            {syrups.map((item) => (
+                                <div key={item.id} onClick={() => onViewSyrup(item.id)} style={{cursor: 'pointer'}}>
+                                    <div className="recipe-card">
+                                        {item.image_url ? (
+                                            <img src={item.image_url} alt={item.name} className="recipe-image" />
+                                        ) : (
+                                            <div className="recipe-image" style={{ 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center',
+                                                background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1))'
+                                            }}>
+                                                <i className="fas fa-flask" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.2)' }}></i>
+                                            </div>
+                                        )}
+                                        <div className="recipe-overlay">
+                                            <div className="recipe-name">{item.name}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{textAlign: 'center', padding: '5rem 0', border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '0.5rem'}}>
+                            <i className="fas fa-flask" style={{fontSize: '4rem', color: 'rgba(255,255,255,0.2)', marginBottom: '1rem'}}></i>
+                            <h3 style={{fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)'}}>No Syrups Yet</h3>
+                            <p style={{color: 'rgba(255,255,255,0.4)'}}>Add your first syrup or infusion recipe.</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [currentView, setCurrentView] = useState('home');
+            const [currentRecipeId, setCurrentRecipeId] = useState(null);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const user = getUser();
+            const isAdmin = user.role === 'admin';
+
+            const showHome = () => {
+                setCurrentView('home');
+                setCurrentRecipeId(null);
+            };
+
+            const showRecipe = (recipeId) => {
+                setCurrentView('recipe');
+                setCurrentRecipeId(recipeId);
+            };
+
+            const showCreateRecipe = (recipeId = null) => {
+                setCurrentView('create-recipe');
+                setCurrentRecipeId(recipeId);
+            };
+
+            const showSettings = () => {
+                setCurrentView('settings');
+            };
+
+            const showSyrups = () => {
+                setCurrentView('syrups');
+            };
+
+            const handleSaveRecipe = () => {
+                showHome();
+            };
+
+            const renderCurrentView = () => {
+                switch (currentView) {
+                    case 'home':
+                        return <Home />;
+                    case 'recipe':
+                        return <ViewRecipe recipeId={currentRecipeId} onBack={showHome} />;
+                    case 'create-recipe':
+                        return <CreateRecipe recipeId={currentRecipeId} onSave={handleSaveRecipe} onCancel={showHome} />;
+                    case 'settings':
+                        return <Settings onBack={showHome} />;
+                    case 'syrups':
+                        return <Syrups onBack={showHome} onViewSyrup={showRecipe} onCreateSyrup={() => showCreateRecipe()} />;
+                    default:
+                        return <Home />;
+                }
+            };
+
+            // Make functions available globally for onClick handlers
+            useEffect(() => {
+                window.showRecipe = showRecipe;
+                window.showCreateRecipe = showCreateRecipe;
+            }, []);
+
+            return (
+                <div className="container">
+                    {/* Sidebar */}
+                    <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+                        <div className="logo">
+                            <div className="logo-icon">
+                                <i className="fas fa-wine-glass-alt"></i>
+                            </div>
+                            <div className="logo-text">
+                                <h1>Cocktail Manual</h1>
+                                <p>- by Suraj</p>
+                            </div>
+                        </div>
+                        <nav className="nav-links">
+                            <a 
+                                href="#" 
+                                className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
+                                onClick={(e) => { e.preventDefault(); showHome(); setSidebarOpen(false); }}
+                            >
+                                <i className="fas fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                            <a 
+                                href="#" 
+                                className={`nav-link ${currentView === 'syrups' ? 'active' : ''}`}
+                                onClick={(e) => { e.preventDefault(); showSyrups(); setSidebarOpen(false); }}
+                            >
+                                <i className="fas fa-flask"></i>
+                                <span>Syrups & Infusions</span>
+                            </a>
+                            {isAdmin && (
+                                <>
+                                    <a 
+                                        href="#" 
+                                        className={`nav-link ${currentView === 'create-recipe' ? 'active' : ''}`}
+                                        onClick={(e) => { e.preventDefault(); showCreateRecipe(); setSidebarOpen(false); }}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>Add Recipe</span>
+                                    </a>
+                                    <a 
+                                        href="#" 
+                                        className="nav-link"
+                                        onClick={(e) => { e.preventDefault(); alert('Import feature would go here'); setSidebarOpen(false); }}
+                                    >
+                                        <i className="fas fa-file-upload"></i>
+                                        <span>Import Recipe</span>
+                                    </a>
+                                    <a 
+                                        href="#" 
+                                        className={`nav-link ${currentView === 'settings' ? 'active' : ''}`}
+                                        onClick={(e) => { e.preventDefault(); showSettings(); setSidebarOpen(false); }}
+                                    >
+                                        <i className="fas fa-cog"></i>
+                                        <span>Settings</span>
+                                    </a>
+                                </>
+                            )}
+                        </nav>
+                    </aside>
+
+                    {/* Main Content */}
+                    <div className="main-content">
+                        <header className="header">
+                            <button 
+                                className="mobile-menu-btn"
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                                <i className="fas fa-bars"></i>
+                            </button>
+                            <h1 style={{fontSize: '1rem', fontWeight: 'bold'}}>Cocktail Manual</h1>
+                            <div style={{width: '40px'}}></div>
+                        </header>
+                        <main>
+                            {renderCurrentView()}
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
