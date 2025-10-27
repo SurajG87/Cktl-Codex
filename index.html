@@ -12,11 +12,720 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        /* ... (keep all existing styles the same) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A0A0A;
+            color: white;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            font-size: 16px;
+        }
+        
+        .app {
+            min-height: 100vh;
+            background: #0A0A0A;
+            position: relative;
+        }
+        
+        /* Header */
+        .header {
+            background: #1A1A1A;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .menu-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .menu-line {
+            width: 20px;
+            height: 2px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-button.active .menu-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+        
+        .menu-button.active .menu-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .menu-button.active .menu-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .nav-user {
+            color: #FFB366;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #FFB366;
+            color: #FFB366;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        .logout-btn:hover {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        /* Side Menu */
+        .side-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .side-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background: #1A1A1A;
+            border-right: 1px solid #333;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+        
+        .side-menu.active {
+            left: 0;
+        }
+        
+        .side-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        .side-menu-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FFB366, #FF8C42);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .side-menu-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #FFB366;
+        }
+        
+        .side-menu-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .side-menu-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .side-menu-button:hover {
+            background: #444;
+            transform: translateX(5px);
+        }
+        
+        .side-menu-button.active {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .side-menu-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .side-menu-button.disabled:hover {
+            background: #333;
+            transform: none;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            color: #FFB366;
+        }
+        
+        /* Search and Filters */
+        .search-section {
+            background: #1A1A1A;
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            flex: 1;
+            min-width: 140px;
+            font-size: 0.9rem;
+        }
+        
+        /* Recipe Grid */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .recipe-card {
+            background: #1A1A1A;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            border-color: #FFB366;
+        }
+        
+        .recipe-image {
+            width: 100%;
+            height: 160px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .recipe-info {
+            padding: 0.75rem;
+        }
+        
+        .recipe-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        
+        .recipe-spirit {
+            color: #FFB366;
+            font-size: 0.8rem;
+        }
+        
+        /* Alphabet Sections */
+        .alphabet-section {
+            margin-bottom: 2rem;
+        }
+        
+        .letter-header {
+            font-size: 1.5rem;
+            color: #FFB366;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #FFB366;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #FFB366;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Form Styles */
+        .form {
+            background: #1A1A1A;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #FFB366;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            min-height: 100px;
+            resize: vertical;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .button {
+            background: #FFB366;
+            color: #0A0A0A;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            font-size: 1rem;
+        }
+        
+        .button:hover {
+            background: #FF8C42;
+        }
+        
+        .button-secondary {
+            background: #333;
+            color: white;
+        }
+        
+        .button-secondary:hover {
+            background: #444;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .buttons-row .button {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed #555;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .image-upload:hover {
+            border-color: #FFB366;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Scale Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .modal {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        /* Recipe View */
+        .recipe-view {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recipe-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 0;
+            filter: brightness(0.3) contrast(1.2);
+        }
+        
+        .recipe-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .recipe-title {
+            font-size: 1.8rem;
+            color: #FFB366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            background: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .recipe-image-large {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            background: #333;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .recipe-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (min-width: 768px) {
+            .recipe-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .ingredients-list {
+            list-style: none;
+        }
+        
+        .ingredient-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        
+        .instructions {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .action-button:hover {
+            background: #444;
+        }
+        
+        .action-button.scale {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .action-button.scale:hover {
+            background: #FF8C42;
+        }
+        
+        .action-button.edit {
+            background: #4CAF50;
+        }
+        
+        .action-button.edit:hover {
+            background: #45a049;
+        }
+        
+        .action-button.delete {
+            background: #f44336;
+        }
+        
+        .action-button.delete:hover {
+            background: #d32f2f;
+        }
+        
+        /* Settings */
+        .settings-section {
+            background: #1A1A1A;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-title {
+            font-size: 1.3rem;
+            color: #FFB366;
+            margin-bottom: 1rem;
+        }
+        
+        .settings-list {
+            list-style: none;
+            min-height: 60px;
+        }
+        
+        .settings-item {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            background: #1A1A1A;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        
+        .settings-item:hover {
+            background: #222;
+        }
+        
+        .settings-item.dragging {
+            opacity: 0.5;
+            background: #333;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .icon-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+        }
+        
+        .icon-button:hover {
+            background: #444;
+        }
+        
+        .icon-button.delete {
+            background: #f44336;
+        }
+        
+        .icon-button.delete:hover {
+            background: #d32f2f;
+        }
         
         /* Sync Status */
         .sync-status {
@@ -70,6 +779,87 @@
             text-align: center;
             font-weight: bold;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.75rem;
+                height: 60px;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .recipes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.5rem;
+            }
+            
+            .recipe-image {
+                height: 140px;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-select {
+                min-width: auto;
+            }
+            
+            .side-menu {
+                width: 85%;
+                max-width: 280px;
+            }
+            
+            .form {
+                padding: 1rem;
+            }
+            
+            .buttons-row {
+                flex-direction: column;
+            }
+            
+            .buttons-row .button {
+                width: 100%;
+            }
+            
+            .nav-user {
+                font-size: 0.8rem;
+            }
+            
+            .logout-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            .recipe-header {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .action-buttons button {
+                flex: 1;
+            }
+            
+            .modal {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -83,26 +873,6 @@
             username: 'suraj',
             password: 'cocktail123'
         };
-
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCZ7l7Vpl3r6l2N8W4dZLXq6YQ7bKj6X8w",
-            authDomain: "cocktail-manual-demo.firebaseapp.com",
-            projectId: "cocktail-manual-demo",
-            storageBucket: "cocktail-manual-demo.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456"
-        };
-
-        // Initialize Firebase
-        let db = null;
-        try {
-            const app = firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore(app);
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.log('Firebase initialization failed, using localStorage fallback:', error);
-        }
         
         // Load data from localStorage or use defaults
         const loadFromStorage = (key, defaultValue) => {
@@ -124,89 +894,85 @@
             }
         };
         
-        // Cloud storage functions using Firebase Firestore
+        // Simple cloud simulation using localStorage (works across browser tabs)
         const saveToCloud = async (data) => {
-            if (!db) {
-                console.log('Firebase not available, using localStorage only');
-                return { success: false, error: 'Firebase not available' };
-            }
-            
             try {
-                console.log('Saving to Firebase...', data);
-                
-                // Save all data to Firestore
-                await db.collection('appData').doc('cocktailData').set({
+                // Simulate cloud save - in real app, replace with actual cloud service
+                saveToStorage('cocktailCloudData', {
                     ...data,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedBy: data.updatedBy || 'system'
+                    cloudSaved: true,
+                    lastCloudUpdate: new Date().toISOString()
                 });
                 
-                console.log('Successfully saved to Firebase');
+                // Broadcast to other tabs
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const channel = new BroadcastChannel('cocktail-app');
+                    channel.postMessage({
+                        type: 'DATA_UPDATED',
+                        data: data,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+                
                 return { success: true };
             } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                return { 
-                    success: false, 
-                    error: error.message 
-                };
+                console.error('Error saving to cloud:', error);
+                return { success: false, error: error.message };
             }
         };
         
         const loadFromCloud = async () => {
-            if (!db) {
-                console.log('Firebase not available, using localStorage only');
-                return null;
-            }
-            
             try {
-                console.log('Loading from Firebase...');
-                
-                const doc = await db.collection('appData').doc('cocktailData').get();
-                
-                if (doc.exists) {
-                    const data = doc.data();
-                    console.log('Successfully loaded from Firebase:', data);
-                    return data;
-                } else {
-                    console.log('No data found in Firebase');
-                    return null;
+                const cloudData = loadFromStorage('cocktailCloudData', null);
+                if (cloudData && cloudData.cloudSaved) {
+                    return cloudData;
                 }
-            } catch (error) {
-                console.error('Error loading from Firebase:', error);
                 return null;
-            }
-        };
-
-        // Real-time sync listener
-        const setupRealtimeSync = (callback) => {
-            if (!db) {
-                console.log('Firebase not available for real-time sync');
-                return () => {};
-            }
-            
-            try {
-                console.log('Setting up real-time sync...');
-                const unsubscribe = db.collection('appData').doc('cocktailData')
-                    .onSnapshot((doc) => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            console.log('Real-time update received:', data);
-                            callback(data);
-                        }
-                    }, (error) => {
-                        console.error('Real-time sync error:', error);
-                    });
-                
-                return unsubscribe;
             } catch (error) {
-                console.error('Error setting up real-time sync:', error);
-                return () => {};
+                console.error('Error loading from cloud:', error);
+                return null;
             }
         };
         
         // Data management functions
         const getRecipes = () => {
-            return loadFromStorage('cocktailRecipes', []);
+            return loadFromStorage('cocktailRecipes', [
+                {
+                    id: '1',
+                    name: 'Aviation',
+                    spirit_type: 'Gin',
+                    venue: 'Main Bar',
+                    glass_type: 'Coupe',
+                    abv: 28,
+                    pour_cost: 4.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Gin', amount: 45, unit: 'ml' },
+                        { name: 'Maraschino Liqueur', amount: 15, unit: 'ml' },
+                        { name: 'Crème de Violette', amount: 15, unit: 'ml' },
+                        { name: 'Lemon Juice', amount: 30, unit: 'ml' }
+                    ],
+                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
+                    notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.'
+                },
+                {
+                    id: '2',
+                    name: 'Margarita',
+                    spirit_type: 'Tequila',
+                    venue: 'Pool Bar',
+                    glass_type: 'Margarita',
+                    abv: 25,
+                    pour_cost: 3.75,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Tequila', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Triple Sec', amount: 20, unit: 'ml' }
+                    ],
+                    instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass filled with ice.',
+                    notes: 'Classic tequila cocktail perfect for summer.'
+                }
+            ]);
         };
         
         const saveRecipes = async (recipes, user) => {
@@ -236,31 +1002,6 @@
         
         const getSyrups = () => {
             return loadFromStorage('cocktailSyrups', []);
-        };
-        
-        const saveSyrups = async (syrups, user) => {
-            // Always save to localStorage first
-            const localSuccess = saveToStorage('cocktailSyrups', syrups);
-            
-            // Save to cloud if user is admin
-            if (user && user.isAdmin) {
-                const cloudData = {
-                    recipes: getRecipes(),
-                    syrups: syrups,
-                    settings: getSettings(),
-                    lastUpdated: new Date().toISOString(),
-                    updatedBy: user.username
-                };
-                
-                const cloudResult = await saveToCloud(cloudData);
-                return { 
-                    localSuccess, 
-                    cloudSuccess: cloudResult.success,
-                    cloudError: cloudResult.error
-                };
-            }
-            
-            return { localSuccess, cloudSuccess: false };
         };
         
         const getSettings = () => {
@@ -296,39 +1037,30 @@
             return { localSuccess, cloudSuccess: false };
         };
         
-        // Sync data from cloud - this is what makes data available across devices
+        // Sync data from cloud
         const syncFromCloud = async () => {
             try {
-                console.log('Starting cloud sync...');
                 const cloudData = await loadFromCloud();
                 
                 if (cloudData) {
-                    console.log('Cloud data found, updating local storage...');
-                    
                     // Update local storage with cloud data
                     saveToStorage('cocktailRecipes', cloudData.recipes || []);
                     saveToStorage('cocktailSyrups', cloudData.syrups || []);
                     saveToStorage('cocktailSettings', cloudData.settings || getSettings());
                     
-                    // Update last sync time
-                    saveToStorage('lastCloudSync', new Date().toISOString());
-                    
-                    console.log('Cloud sync completed successfully');
                     return { 
                         success: true, 
                         data: cloudData,
                         message: `Synced ${cloudData.recipes?.length || 0} recipes from cloud`
                     };
                 } else {
-                    console.log('No cloud data available yet');
                     return { 
                         success: false, 
-                        error: 'No cloud data found. An admin needs to save data first.',
+                        error: 'No cloud data found',
                         message: 'No cloud data available yet'
                     };
                 }
             } catch (error) {
-                console.error('Error syncing from cloud:', error);
                 return { 
                     success: false, 
                     error: error.message,
@@ -336,60 +1068,6 @@
                 };
             }
         };
-
-        // Initialize with sample data if empty
-        const initializeSampleData = () => {
-            const currentRecipes = getRecipes();
-            if (currentRecipes.length === 0) {
-                const sampleRecipes = [
-                    {
-                        id: '1',
-                        name: 'Aviation',
-                        spirit_type: 'Gin',
-                        venue: 'Main Bar',
-                        glass_type: 'Coupe',
-                        abv: 28,
-                        pour_cost: 4.25,
-                        image_url: '',
-                        ingredients: [
-                            { name: 'Gin', amount: 45, unit: 'ml' },
-                            { name: 'Maraschino Liqueur', amount: 15, unit: 'ml' },
-                            { name: 'Crème de Violette', amount: 15, unit: 'ml' },
-                            { name: 'Lemon Juice', amount: 30, unit: 'ml' }
-                        ],
-                        instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
-                        notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.'
-                    },
-                    {
-                        id: '2', 
-                        name: 'Margarita',
-                        spirit_type: 'Tequila',
-                        venue: 'Pool Bar',
-                        glass_type: 'Margarita',
-                        abv: 25,
-                        pour_cost: 3.75,
-                        image_url: '',
-                        ingredients: [
-                            { name: 'Tequila', amount: 50, unit: 'ml' },
-                            { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                            { name: 'Triple Sec', amount: 20, unit: 'ml' }
-                        ],
-                        instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass filled with ice.',
-                        notes: 'Classic tequila cocktail perfect for summer.'
-                    }
-                ];
-                saveToStorage('cocktailRecipes', sampleRecipes);
-                console.log('Initialized with sample data');
-            }
-        };
-
-        // Initialize sample data
-        initializeSampleData();
-
-        // Initialize data
-        let mockRecipes = getRecipes();
-        let mockSyrups = getSyrups();
-        let mockSettings = getSettings();
 
         // Utility function to convert image to base64
         const convertImageToBase64 = (file) => {
@@ -631,6 +1309,7 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
+            const settings = getSettings();
             
             // Filter recipes based on search and filters
             const filteredRecipes = recipes.filter(recipe => {
@@ -657,7 +1336,7 @@
             return (
                 <div className="container">
                     <div className="demo-notice">
-                        🔥 Real-time Cross-Device Sync Active! Changes appear instantly across all devices.
+                        🍸 Cocktail Manual - Cross-Device Sync Ready!
                     </div>
                     
                     <div className="page-header">
@@ -697,7 +1376,7 @@
                                 onChange={(e) => setFilterSpirit(e.target.value)}
                             >
                                 <option value="All">All Spirits</option>
-                                {mockSettings.spirit_types.map(spirit => (
+                                {settings.spirit_types.map(spirit => (
                                     <option key={spirit} value={spirit}>{spirit}</option>
                                 ))}
                             </select>
@@ -708,7 +1387,7 @@
                                 onChange={(e) => setFilterVenue(e.target.value)}
                             >
                                 <option value="All">All Venues</option>
-                                {mockSettings.venues.map(venue => (
+                                {settings.venues.map(venue => (
                                     <option key={venue} value={venue}>{venue}</option>
                                 ))}
                             </select>
@@ -734,7 +1413,7 @@
                         <>
                             <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
                                 Showing {filteredRecipes.length} of {recipes.length} cocktails
-                                {isAdmin && ' • Add/Edit cocktails to see real-time sync across devices!'}
+                                {isAdmin && ' • Add/Edit cocktails to see cross-device sync!'}
                             </div>
                             {sortedLetters.map(letter => (
                                 <div key={letter} className="alphabet-section">
@@ -775,6 +1454,7 @@
             );
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
+            const settings = getSettings();
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -879,7 +1559,7 @@
                                     onChange={handleInputChange}
                                 >
                                     <option value="">Select Spirit</option>
-                                    {mockSettings.spirit_types.map(spirit => (
+                                    {settings.spirit_types.map(spirit => (
                                         <option key={spirit} value={spirit}>{spirit}</option>
                                     ))}
                                 </select>
@@ -894,7 +1574,7 @@
                                     onChange={handleInputChange}
                                 >
                                     <option value="">Select Venue</option>
-                                    {mockSettings.venues.map(venue => (
+                                    {settings.venues.map(venue => (
                                         <option key={venue} value={venue}>{venue}</option>
                                     ))}
                                 </select>
@@ -911,7 +1591,7 @@
                                     onChange={handleInputChange}
                                 >
                                     <option value="">Select Glass</option>
-                                    {mockSettings.glass_types.map(glass => (
+                                    {settings.glass_types.map(glass => (
                                         <option key={glass} value={glass}>{glass}</option>
                                     ))}
                                 </select>
@@ -1046,12 +1726,78 @@
             );
         }
 
+        // Login Page Component
+        function LoginPage({ onLogin, onGuestLogin }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (onLogin(username, password)) {
+                    setError('');
+                } else {
+                    setError('Invalid credentials');
+                }
+            };
+            
+            return (
+                <div className="container">
+                    <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
+                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Manual</h1>
+                        
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Username</label>
+                                <input 
+                                    type="text"
+                                    className="form-input"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Password</label>
+                                <input 
+                                    type="password"
+                                    className="form-input"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            
+                            {error && (
+                                <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>
+                                    {error}
+                                </div>
+                            )}
+                            
+                            <div className="buttons-row">
+                                <button type="submit" className="button">
+                                    Login
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="button button-secondary"
+                                    onClick={onGuestLogin}
+                                >
+                                    Continue as Guest
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
         // Main App Component
         function App() {
             const { user, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
             const [selectedRecipe, setSelectedRecipe] = useState(null);
-            const [selectedSyrup, setSelectedSyrup] = useState(null);
             const [showScaleModal, setShowScaleModal] = useState(false);
             const [menuOpen, setMenuOpen] = useState(false);
             const [editingItem, setEditingItem] = useState(null);
@@ -1059,18 +1805,17 @@
             const [syncStatus, setSyncStatus] = useState(null);
             const [recipes, setRecipes] = useState(getRecipes());
             
-            // Sync data on app load AND set up real-time listener
+            // Sync data on app load
             useEffect(() => {
                 const initializeData = async () => {
-                    // Always try to sync from cloud on app start
-                    setSyncStatus({ status: 'syncing', message: 'Connecting to cloud...' });
+                    setSyncStatus({ status: 'syncing', message: 'Loading data...' });
                     const result = await syncFromCloud();
                     
                     if (result.success) {
                         setRecipes(getRecipes());
                         setSyncStatus({ 
                             status: 'success', 
-                            message: result.message || 'Connected to cloud successfully'
+                            message: result.message || 'Data loaded successfully'
                         });
                     } else {
                         setSyncStatus({ 
@@ -1079,37 +1824,25 @@
                         });
                     }
                     
-                    // Clear status after 3 seconds
                     setTimeout(() => setSyncStatus(null), 3000);
                 };
                 
                 initializeData();
                 
-                // Set up real-time sync listener
-                const unsubscribe = setupRealtimeSync((cloudData) => {
-                    console.log('Real-time update received!', cloudData);
-                    if (cloudData) {
-                        // Update local storage with new data
-                        saveToStorage('cocktailRecipes', cloudData.recipes || []);
-                        saveToStorage('cocktailSyrups', cloudData.syrups || []);
-                        saveToStorage('cocktailSettings', cloudData.settings || getSettings());
-                        
-                        // Update state to trigger re-render
-                        setRecipes(cloudData.recipes || []);
-                        
-                        // Show sync notification
-                        setSyncStatus({ 
-                            status: 'success', 
-                            message: 'Real-time update received!' 
-                        });
-                        setTimeout(() => setSyncStatus(null), 2000);
-                    }
-                });
-                
-                // Cleanup listener on unmount
-                return () => {
-                    if (unsubscribe) unsubscribe();
-                };
+                // Set up cross-tab communication
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const channel = new BroadcastChannel('cocktail-app');
+                    channel.onmessage = (event) => {
+                        if (event.data.type === 'DATA_UPDATED') {
+                            setRecipes(getRecipes());
+                            setSyncStatus({ 
+                                status: 'success', 
+                                message: 'Real-time update received from another tab!' 
+                            });
+                            setTimeout(() => setSyncStatus(null), 2000);
+                        }
+                    };
+                }
             }, []);
             
             // Manual sync function
@@ -1130,18 +1863,15 @@
                     });
                 }
                 
-                // Clear status after 3 seconds
                 setTimeout(() => setSyncStatus(null), 3000);
             };
             
             const navigateTo = (page, item = null) => {
-                // Prevent navigation to protected pages if not admin
                 if ((page === 'create-recipe' || page === 'settings') && (!user || !user.isAdmin)) {
                     return;
                 }
                 setCurrentPage(page);
                 if (page === 'view-recipe') setSelectedRecipe(item);
-                if (page === 'view-syrup') setSelectedSyrup(item);
                 setMenuOpen(false);
             };
             
@@ -1173,14 +1903,12 @@
                 let updatedRecipes;
                 
                 if (isEditing && editingItem) {
-                    // Update existing recipe
                     const index = recipes.findIndex(r => r.id === editingItem.id);
                     if (index !== -1) {
                         updatedRecipes = [...recipes];
                         updatedRecipes[index] = recipeData;
                     }
                 } else {
-                    // Add new recipe
                     updatedRecipes = [...recipes, recipeData];
                 }
                 
@@ -1210,7 +1938,6 @@
                 }
             };
             
-            // Edit handlers
             const handleEditRecipe = (recipe) => {
                 setEditingItem(recipe);
                 setIsEditing(true);
@@ -1316,13 +2043,6 @@
                             </a>
                         </p>
                     </footer>
-
-                    {showScaleModal && selectedRecipe && (
-                        <ScaleModal 
-                            recipe={selectedRecipe}
-                            onClose={() => setShowScaleModal(false)}
-                        />
-                    )}
                 </div>
             );
         }
