@@ -1100,12 +1100,94 @@
         };
         
         // Initialize data
-        let mockRecipes = loadFromStorage('cocktailRecipes', []);
-        let mockSyrups = loadFromStorage('cocktailSyrups', []);
+        let mockRecipes = loadFromStorage('cocktailRecipes', [
+            {
+                id: '1',
+                name: 'Old Fashioned',
+                spirit_type: 'Whiskey',
+                venue: 'Bar',
+                glass_type: 'Rocks',
+                abv: 40,
+                pour_cost: 8.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Bourbon', amount: 60, unit: 'ml' },
+                    { name: 'Sugar Cube', amount: 1, unit: 'piece' },
+                    { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
+                    { name: 'Orange Peel', amount: 1, unit: 'piece' }
+                ],
+                instructions: 'Muddle sugar cube with bitters and a splash of water in a rocks glass. Add bourbon and ice. Stir gently. Garnish with orange peel.',
+                notes: 'Use high-quality bourbon for best results.'
+            },
+            {
+                id: '2',
+                name: 'Margarita',
+                spirit_type: 'Tequila',
+                venue: 'Bar',
+                glass_type: 'Margarita',
+                abv: 25,
+                pour_cost: 7.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Tequila', amount: 50, unit: 'ml' },
+                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                    { name: 'Triple Sec', amount: 20, unit: 'ml' },
+                    { name: 'Agave Syrup', amount: 15, unit: 'ml' }
+                ],
+                instructions: 'Shake all ingredients with ice. Strain into a salt-rimmed glass filled with ice. Garnish with lime wheel.',
+                notes: 'Use fresh lime juice for optimal flavor.'
+            },
+            {
+                id: '3',
+                name: 'Mojito',
+                spirit_type: 'Rum',
+                venue: 'Bar',
+                glass_type: 'Highball',
+                abv: 15,
+                pour_cost: 6.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'White Rum', amount: 50, unit: 'ml' },
+                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                    { name: 'Mint Leaves', amount: 8, unit: 'piece' },
+                    { name: 'Simple Syrup', amount: 20, unit: 'ml' },
+                    { name: 'Soda Water', amount: 60, unit: 'ml' }
+                ],
+                instructions: 'Muddle mint leaves with lime juice and simple syrup in a glass. Add rum and ice. Top with soda water. Stir gently. Garnish with mint sprig.',
+                notes: 'Be gentle when muddling mint to avoid bitterness.'
+            }
+        ]);
+        
+        let mockSyrups = loadFromStorage('cocktailSyrups', [
+            {
+                id: '1',
+                name: 'Simple Syrup',
+                cost: 0.5,
+                image_url: '',
+                ingredients: [
+                    { name: 'Sugar', amount: 200, unit: 'g' },
+                    { name: 'Water', amount: 200, unit: 'ml' }
+                ],
+                instructions: 'Heat water until hot but not boiling. Add sugar and stir until completely dissolved. Let cool before use.'
+            },
+            {
+                id: '2',
+                name: 'Ginger Syrup',
+                cost: 1.2,
+                image_url: '',
+                ingredients: [
+                    { name: 'Fresh Ginger', amount: 100, unit: 'g' },
+                    { name: 'Sugar', amount: 200, unit: 'g' },
+                    { name: 'Water', amount: 200, unit: 'ml' }
+                ],
+                instructions: 'Peel and grate ginger. Combine with water and sugar in a saucepan. Simmer for 15 minutes. Strain and cool.'
+            }
+        ]);
+        
         let mockSettings = loadFromStorage('cocktailSettings', {
-            spirit_types: [],
-            glass_types: [],
-            venues: []
+            spirit_types: ['Whiskey', 'Vodka', 'Gin', 'Rum', 'Tequila', 'Brandy', 'Mezcal', 'Absinthe'],
+            glass_types: ['Rocks', 'Highball', 'Coupe', 'Martini', 'Margarita', 'Collins', 'Tiki', 'Flute'],
+            venues: ['Bar', 'Restaurant', 'Home', 'Event', 'Catering']
         });
 
         // Utility function to convert image to base64
