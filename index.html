@@ -6,12 +6,21 @@
     <title>Cocktail Codex</title>
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
+    
+    <!-- iOS Specific Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Cocktail Codex">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0A0A0A">
+    
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -29,18 +38,49 @@
             -webkit-font-smoothing: antialiased;
             -webkit-text-size-adjust: 100%;
             font-size: 14px;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
         
         .app {
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             background: #0A0A0A;
             position: relative;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .app {
+                min-height: -webkit-fill-available;
+            }
+            
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+            
+            .side-menu {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        
+        /* iOS form fixes */
+        input, select, textarea {
+            -webkit-appearance: none;
+            -webkit-border-radius: 0;
+            border-radius: 0;
         }
         
         /* Header */
         .header {
             background: #1A1A1A;
-            padding: 1rem;
+            padding: max(1rem, env(safe-area-inset-top)) env(safe-area-inset-right) 1rem env(safe-area-inset-left);
             border-bottom: 1px solid #333;
             position: sticky;
             top: 0;
@@ -146,6 +186,10 @@
             transition: left 0.3s ease;
             overflow-y: auto;
             padding: 2rem 1rem;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
         
         .side-menu.active {
@@ -252,13 +296,13 @@
         
         .search-box {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             background: #333;
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
             margin-bottom: 1rem;
-            font-size: 14px;
+            font-size: 16px;
             height: 40px;
         }
         
@@ -269,14 +313,14 @@
         }
         
         .filter-select {
-            padding: 0.5rem;
+            padding: 0.75rem;
             background: #333;
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
             flex: 1;
             min-width: 140px;
-            font-size: 14px;
+            font-size: 16px;
             height: 40px;
         }
         
@@ -380,6 +424,39 @@
             border-bottom: 2px solid #FFB366;
         }
         
+        /* Sync Status */
+        .sync-status {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .sync-status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .sync-status.error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        
+        .sync-status.info {
+            background: rgba(255, 179, 102, 0.1);
+            color: #FFB366;
+            border: 1px solid #FFB366;
+        }
+        
+        .sync-status.offline {
+            background: rgba(158, 158, 158, 0.1);
+            color: #9E9E9E;
+            border: 1px solid #9E9E9E;
+        }
+        
         /* Footer */
         .footer {
             text-align: center;
@@ -427,7 +504,7 @@
             border: 1px solid #555;
             border-radius: 6px;
             color: white;
-            font-size: 14px;
+            font-size: 16px;
         }
         
         .form-textarea {
@@ -439,7 +516,7 @@
             color: white;
             min-height: 100px;
             resize: vertical;
-            font-size: 14px;
+            font-size: 16px;
             font-family: inherit;
         }
         
@@ -452,17 +529,11 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
-            font-size: 14px;
+            font-size: 16px;
         }
         
         .button:hover {
             background: #FF8C42;
-        }
-        
-        .button:disabled {
-            background: #666;
-            color: #999;
-            cursor: not-allowed;
         }
         
         .button-secondary {
@@ -901,10 +972,42 @@
             font-weight: bold;
         }
         
+        /* Role Badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        .role-badge.admin {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .role-badge.user {
+            background: #666;
+            color: white;
+        }
+        
+        /* Admin Only Elements */
+        .admin-only {
+            border-left: 3px solid #FFB366;
+            padding-left: 0.75rem;
+        }
+        
+        .user-view {
+            opacity: 1;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .header {
-                padding: 0.75rem;
+                padding: max(0.75rem, env(safe-area-inset-top)) env(safe-area-inset-right) 0.75rem env(safe-area-inset-left);
                 height: 60px;
             }
             
@@ -1032,7 +1135,7 @@
         
         /* Prevent zoom on mobile */
         input, select, textarea {
-            font-size: 14px !important;
+            font-size: 16px !important;
             max-height: 40px;
         }
         
@@ -1053,7 +1156,7 @@
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .form-input, .form-textarea, .filter-select, .search-box {
-                font-size: 14px;
+                font-size: 16px;
                 padding: 0.75rem;
             }
             
@@ -1081,6 +1184,17 @@
             password: 'cocktail123'
         };
         
+        // TODO: REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
+        const FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "YOUR_APP_ID"
+        };
+        
         // Load data from localStorage or use defaults
         const loadFromStorage = (key, defaultValue) => {
             try {
@@ -1099,96 +1213,134 @@
             }
         };
         
-        // Initialize data
-        let mockRecipes = loadFromStorage('cocktailRecipes', [
-            {
-                id: '1',
-                name: 'Old Fashioned',
-                spirit_type: 'Whiskey',
-                venue: 'Bar',
-                glass_type: 'Rocks',
-                abv: 40,
-                pour_cost: 8.5,
-                image_url: '',
-                ingredients: [
-                    { name: 'Bourbon', amount: 60, unit: 'ml' },
-                    { name: 'Sugar Cube', amount: 1, unit: 'piece' },
-                    { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                    { name: 'Orange Peel', amount: 1, unit: 'piece' }
-                ],
-                instructions: 'Muddle sugar cube with bitters and a splash of water in a rocks glass. Add bourbon and ice. Stir gently. Garnish with orange peel.',
-                notes: 'Use high-quality bourbon for best results.'
-            },
-            {
-                id: '2',
-                name: 'Margarita',
-                spirit_type: 'Tequila',
-                venue: 'Bar',
-                glass_type: 'Margarita',
-                abv: 25,
-                pour_cost: 7.5,
-                image_url: '',
-                ingredients: [
-                    { name: 'Tequila', amount: 50, unit: 'ml' },
-                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                    { name: 'Triple Sec', amount: 20, unit: 'ml' },
-                    { name: 'Agave Syrup', amount: 15, unit: 'ml' }
-                ],
-                instructions: 'Shake all ingredients with ice. Strain into a salt-rimmed glass filled with ice. Garnish with lime wheel.',
-                notes: 'Use fresh lime juice for optimal flavor.'
-            },
-            {
-                id: '3',
-                name: 'Mojito',
-                spirit_type: 'Rum',
-                venue: 'Bar',
-                glass_type: 'Highball',
-                abv: 15,
-                pour_cost: 6.5,
-                image_url: '',
-                ingredients: [
-                    { name: 'White Rum', amount: 50, unit: 'ml' },
-                    { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                    { name: 'Mint Leaves', amount: 8, unit: 'piece' },
-                    { name: 'Simple Syrup', amount: 20, unit: 'ml' },
-                    { name: 'Soda Water', amount: 60, unit: 'ml' }
-                ],
-                instructions: 'Muddle mint leaves with lime juice and simple syrup in a glass. Add rum and ice. Top with soda water. Stir gently. Garnish with mint sprig.',
-                notes: 'Be gentle when muddling mint to avoid bitterness.'
-            }
-        ]);
-        
-        let mockSyrups = loadFromStorage('cocktailSyrups', [
-            {
-                id: '1',
-                name: 'Simple Syrup',
-                cost: 0.5,
-                image_url: '',
-                ingredients: [
-                    { name: 'Sugar', amount: 200, unit: 'g' },
-                    { name: 'Water', amount: 200, unit: 'ml' }
-                ],
-                instructions: 'Heat water until hot but not boiling. Add sugar and stir until completely dissolved. Let cool before use.'
-            },
-            {
-                id: '2',
-                name: 'Ginger Syrup',
-                cost: 1.2,
-                image_url: '',
-                ingredients: [
-                    { name: 'Fresh Ginger', amount: 100, unit: 'g' },
-                    { name: 'Sugar', amount: 200, unit: 'g' },
-                    { name: 'Water', amount: 200, unit: 'ml' }
-                ],
-                instructions: 'Peel and grate ginger. Combine with water and sugar in a saucepan. Simmer for 15 minutes. Strain and cool.'
-            }
-        ]);
-        
+        // Initialize data - Load from localStorage
+        let mockRecipes = loadFromStorage('cocktailRecipes', []);
+        let mockSyrups = loadFromStorage('cocktailSyrups', []);
         let mockSettings = loadFromStorage('cocktailSettings', {
-            spirit_types: ['Whiskey', 'Vodka', 'Gin', 'Rum', 'Tequila', 'Brandy', 'Mezcal', 'Absinthe'],
-            glass_types: ['Rocks', 'Highball', 'Coupe', 'Martini', 'Margarita', 'Collins', 'Tiki', 'Flute'],
-            venues: ['Bar', 'Restaurant', 'Home', 'Event', 'Catering']
+            spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+            glass_types: ['Martini', 'Highball', 'Old Fashioned', 'Collins', 'Coupe', 'Margarita'],
+            venues: ['Bar', 'Restaurant', 'Event', 'Home']
         });
+
+        // Enhanced Cloud Storage with iOS support
+        const CloudStorage = {
+            async initialize() {
+                try {
+                    if (typeof firebase === 'undefined') {
+                        console.warn('Firebase not available, using localStorage only');
+                        return false;
+                    }
+                    
+                    if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
+                        console.warn('Firebase config not set, using localStorage only');
+                        return false;
+                    }
+                    
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(FIREBASE_CONFIG);
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Firebase initialization failed:', error);
+                    return false;
+                }
+            },
+            
+            async saveToCloud(data) {
+                try {
+                    const firebaseReady = await this.initialize();
+                    if (!firebaseReady) {
+                        return await this.saveToMockServer(data);
+                    }
+                    
+                    const syncData = {
+                        ...data,
+                        lastUpdated: Date.now(),
+                        device: this.getDeviceInfo(),
+                        syncId: this.generateSyncId()
+                    };
+                    
+                    await firebase.database().ref('cocktailData').set(syncData);
+                    return true;
+                } catch (error) {
+                    console.error('Cloud save failed:', error);
+                    return await this.saveToMockServer(data);
+                }
+            },
+            
+            async loadFromCloud() {
+                try {
+                    const firebaseReady = await this.initialize();
+                    if (!firebaseReady) {
+                        return await this.loadFromMockServer();
+                    }
+                    
+                    const snapshot = await firebase.database().ref('cocktailData').once('value');
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        const localLastSync = loadFromStorage('lastCloudSync', 0);
+                        if (data.lastUpdated > localLastSync) {
+                            return data;
+                        }
+                    }
+                    return null;
+                } catch (error) {
+                    console.error('Cloud load failed:', error);
+                    return await this.loadFromMockServer();
+                }
+            },
+            
+            getDeviceInfo() {
+                return {
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    timestamp: Date.now()
+                };
+            },
+            
+            generateSyncId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            },
+            
+            async saveToMockServer(data) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        try {
+                            const cloudData = {
+                                ...data,
+                                timestamp: Date.now(),
+                                source: 'mock-server',
+                                syncId: this.generateSyncId()
+                            };
+                            localStorage.setItem('cocktailCloudData', JSON.stringify(cloudData));
+                            localStorage.setItem('cocktailCloudBackup', JSON.stringify(cloudData));
+                            resolve(true);
+                        } catch (error) {
+                            console.error('Mock server save failed:', error);
+                            resolve(false);
+                        }
+                    }, 50);
+                });
+            },
+            
+            async loadFromMockServer() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        try {
+                            let cloudData = localStorage.getItem('cocktailCloudData');
+                            if (!cloudData) {
+                                cloudData = localStorage.getItem('cocktailCloudBackup');
+                            }
+                            resolve(cloudData ? JSON.parse(cloudData) : null);
+                        } catch (error) {
+                            console.error('Mock server load failed:', error);
+                            resolve(null);
+                        }
+                    }, 50);
+                });
+            }
+        };
 
         // Utility function to convert image to base64
         const convertImageToBase64 = (file) => {
@@ -1205,7 +1357,6 @@
             const [user, setUser] = useState(null);
             
             useEffect(() => {
-                // Check if user is logged in from localStorage
                 const savedUser = localStorage.getItem('cocktailAppUser');
                 if (savedUser) {
                     setUser(JSON.parse(savedUser));
@@ -1290,14 +1441,12 @@
                             </button>
                             
                             {isAdmin && (
-                                <>
-                                    <button 
-                                        className={`side-menu-button ${currentPage === 'settings' ? 'active' : ''}`}
-                                        onClick={() => handleNavigation('settings')}
-                                    >
-                                        ⚙️ Settings
-                                    </button>
-                                </>
+                                <button 
+                                    className={`side-menu-button ${currentPage === 'settings' ? 'active' : ''}`}
+                                    onClick={() => handleNavigation('settings')}
+                                >
+                                    ⚙️ Settings
+                                </button>
                             )}
                         </nav>
                     </div>
@@ -1306,7 +1455,7 @@
         }
 
         // Recipe Card Component
-        function RecipeCard({ recipe, onClick }) {
+        function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
                 backgroundSize: 'cover',
@@ -1339,6 +1488,26 @@
                             {letter}
                         </div>
                     ))}
+                </div>
+            );
+        }
+
+        // Enhanced Sync Status Component
+        function SyncStatus({ status, lastSync, isOnline = true, isAdmin }) {
+            if (!status) return null;
+            
+            return (
+                <div className={`sync-status ${status.type || 'info'} ${!isOnline ? 'offline' : ''}`}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                        <span>{status.message}</span>
+                        {!isOnline && <span style={{fontSize: '0.7rem'}}>(Offline)</span>}
+                    </div>
+                    {lastSync && (
+                        <div style={{fontSize: '0.7rem', marginTop: '0.25rem'}}>
+                            Last sync: {new Date(lastSync).toLocaleString()}
+                            {isAdmin && <span style={{marginLeft: '0.5rem', color: '#FFB366'}}>Admin Mode</span>}
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1408,11 +1577,7 @@
                                             <>
                                                 <button 
                                                     className="action-button edit"
-                                                    onClick={() => {
-                                                        if (onEditRecipe) {
-                                                            onEditRecipe(recipe);
-                                                        }
-                                                    }}
+                                                    onClick={() => onEditRecipe(recipe)}
                                                 >
                                                     ✏️ Edit
                                                 </button>
@@ -1434,53 +1599,52 @@
         }
 
         // Home Page Component
-        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe }) {
+        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, syncStatus, lastSync, isOnline }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
             
-            // Filter recipes based on search and filters
             const filteredRecipes = mockRecipes.filter(recipe => {
                 const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesSpirit = filterSpirit === 'All' || recipe.spirit_type === filterSpirit;
                 const matchesVenue = filterVenue === 'All' || recipe.venue === filterVenue;
-                
                 return matchesSearch && matchesSpirit && matchesVenue;
             });
             
-            // Group recipes by first letter
             const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
                 const firstLetter = recipe.name.charAt(0).toUpperCase();
-                if (!groups[firstLetter]) {
-                    groups[firstLetter] = [];
-                }
+                if (!groups[firstLetter]) groups[firstLetter] = [];
                 groups[firstLetter].push(recipe);
                 return groups;
             }, {});
             
-            // Sort the groups alphabetically
             const sortedLetters = Object.keys(groupedRecipes).sort();
-            
-            // Create alphabet array for quick access
             const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             
-            // Scroll to letter section
             const scrollToLetter = (letter) => {
                 const element = document.getElementById(`letter-${letter}`);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
             
             return (
                 <div className="container">
                     <div className="page-header">
+                        <h1 className="page-title">
+                            Cocktail Codex
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
                         {isAdmin && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
                             </button>
                         )}
                     </div>
+                    
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
                     
                     <div className="search-section">
                         <input 
@@ -1516,7 +1680,6 @@
                         </div>
                     </div>
                     
-                    {/* Alphabet Quick Access */}
                     {filteredRecipes.length > 0 && (
                         <AlphabetQuickAccess 
                             letters={alphabet.filter(letter => sortedLetters.includes(letter))}
@@ -1526,72 +1689,58 @@
                     
                     {filteredRecipes.length === 0 ? (
                         <div className="loading">
-                            No cocktails found matching your criteria.
+                            {mockRecipes.length === 0 ? (
+                                <div>
+                                    <p>No cocktails found.</p>
+                                    {isAdmin && (
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add Recipe" to create your first cocktail!
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                'No cocktails found matching your criteria.'
+                            )}
                         </div>
                     ) : (
-                        <>
-                            {sortedLetters.map(letter => (
-                                <div key={letter} id={`letter-${letter}`} className="alphabet-section">
-                                    <h2 className="letter-header">{letter}</h2>
-                                    <div className="recipes-grid">
-                                        {groupedRecipes[letter].map(recipe => (
-                                            <RecipeCard 
-                                                key={recipe.id}
-                                                recipe={recipe}
-                                                onClick={onRecipeClick}
-                                            />
-                                        ))}
-                                    </div>
+                        sortedLetters.map(letter => (
+                            <div key={letter} id={`letter-${letter}`} className="alphabet-section">
+                                <h2 className="letter-header">{letter}</h2>
+                                <div className="recipes-grid">
+                                    {groupedRecipes[letter].map(recipe => (
+                                        <RecipeCard 
+                                            key={recipe.id} 
+                                            recipe={recipe} 
+                                            onClick={onRecipeClick}
+                                            isAdmin={isAdmin}
+                                        />
+                                    ))}
                                 </div>
-                            ))}
-                        </>
+                            </div>
+                        ))
                     )}
                 </div>
             );
         }
 
         // Create/Edit Recipe Component
-        function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
-            const [formData, setFormData] = useState(
-                recipe || {
-                    name: '',
-                    spirit_type: '',
-                    venue: '',
-                    glass_type: '',
-                    abv: '',
-                    pour_cost: '',
-                    image_url: '',
-                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
-                    instructions: '',
-                    notes: ''
-                }
-            );
+        function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false, isAdmin }) {
+            const [formData, setFormData] = useState(recipe || {
+                name: '', spirit_type: '', venue: '', glass_type: '', abv: '', pour_cost: '', 
+                image_url: '', ingredients: [{ name: '', amount: '', unit: 'ml' }], instructions: '', notes: ''
+            });
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
-            const [isFormValid, setIsFormValid] = useState(false);
-            
-            // Check form validity whenever formData changes
-            useEffect(() => {
-                const isValid = formData.name.trim() !== '' && 
-                              formData.ingredients.every(ing => ing.name.trim() !== '' && ing.amount !== '');
-                setIsFormValid(isValid);
-            }, [formData]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
-                setFormData(prev => ({
-                    ...prev,
-                    [name]: value
-                }));
+                setFormData(prev => ({ ...prev, [name]: value }));
             };
             
             const handleIngredientChange = (index, field, value) => {
                 const updatedIngredients = [...formData.ingredients];
                 updatedIngredients[index][field] = value;
-                setFormData(prev => ({
-                    ...prev,
-                    ingredients: updatedIngredients
-                }));
+                setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
             };
             
             const addIngredient = () => {
@@ -1605,10 +1754,7 @@
                 if (formData.ingredients.length > 1) {
                     const updatedIngredients = [...formData.ingredients];
                     updatedIngredients.splice(index, 1);
-                    setFormData(prev => ({
-                        ...prev,
-                        ingredients: updatedIngredients
-                    }));
+                    setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
                 }
             };
             
@@ -1617,10 +1763,7 @@
                 if (file) {
                     try {
                         const base64 = await convertImageToBase64(file);
-                        setFormData(prev => ({
-                            ...prev,
-                            image_url: base64
-                        }));
+                        setFormData(prev => ({ ...prev, image_url: base64 }));
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
@@ -1631,221 +1774,120 @@
             
             const handleSubmit = (e) => {
                 e.preventDefault();
-                
-                if (!isFormValid) {
-                    alert('Please fill in all required fields (name and ingredients)');
+                if (!formData.name) {
+                    alert('Please at least enter a cocktail name');
                     return;
                 }
-                
                 const recipeData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
                     abv: parseFloat(formData.abv) || 0,
                     pour_cost: parseFloat(formData.pour_cost) || 0
                 };
-                
                 onSave(recipeData);
             };
             
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                        <div className="recipe-view">
+                            <h2 style={{color: '#f44336', textAlign: 'center', padding: '2rem'}}>
+                                ⚠️ Admin Access Required
+                            </h2>
+                            <p style={{textAlign: 'center', color: '#666'}}>
+                                Only administrators can create or edit recipes.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+            
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
-                    </button>
-                    
-                    <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
-                    
+                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                    <h1 className="page-title">
+                        {isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}
+                        <span className="role-badge admin">ADMIN</span>
+                    </h1>
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="Enter cocktail name"
-                            />
+                            <input type="text" className="form-input" name="name" value={formData.name} onChange={handleInputChange} required />
                         </div>
-                        
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                             <div className="form-group">
                                 <label className="form-label">Spirit Type</label>
-                                <select
-                                    className="form-input"
-                                    name="spirit_type"
-                                    value={formData.spirit_type}
-                                    onChange={handleInputChange}
-                                >
+                                <select className="form-input" name="spirit_type" value={formData.spirit_type} onChange={handleInputChange}>
                                     <option value="">Select Spirit</option>
-                                    {mockSettings.spirit_types.map(spirit => (
-                                        <option key={spirit} value={spirit}>{spirit}</option>
-                                    ))}
+                                    {mockSettings.spirit_types.map(spirit => <option key={spirit} value={spirit}>{spirit}</option>)}
                                 </select>
                             </div>
-                            
                             <div className="form-group">
                                 <label className="form-label">Venue</label>
-                                <select
-                                    className="form-input"
-                                    name="venue"
-                                    value={formData.venue}
-                                    onChange={handleInputChange}
-                                >
+                                <select className="form-input" name="venue" value={formData.venue} onChange={handleInputChange}>
                                     <option value="">Select Venue</option>
-                                    {mockSettings.venues.map(venue => (
-                                        <option key={venue} value={venue}>{venue}</option>
-                                    ))}
+                                    {mockSettings.venues.map(venue => <option key={venue} value={venue}>{venue}</option>)}
                                 </select>
                             </div>
                         </div>
-                        
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                             <div className="form-group">
                                 <label className="form-label">Glass Type</label>
-                                <select
-                                    className="form-input"
-                                    name="glass_type"
-                                    value={formData.glass_type}
-                                    onChange={handleInputChange}
-                                >
+                                <select className="form-input" name="glass_type" value={formData.glass_type} onChange={handleInputChange}>
                                     <option value="">Select Glass</option>
-                                    {mockSettings.glass_types.map(glass => (
-                                        <option key={glass} value={glass}>{glass}</option>
-                                    ))}
+                                    {mockSettings.glass_types.map(glass => <option key={glass} value={glass}>{glass}</option>)}
                                 </select>
                             </div>
-                            
                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                                 <div className="form-group">
                                     <label className="form-label">ABV (%)</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="form-input"
-                                        name="abv"
-                                        value={formData.abv}
-                                        onChange={handleInputChange}
-                                        placeholder="0.0"
-                                    />
+                                    <input type="number" step="0.1" className="form-input" name="abv" value={formData.abv} onChange={handleInputChange} />
                                 </div>
-                                
                                 <div className="form-group">
                                     <label className="form-label">Pour Cost ($)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        className="form-input"
-                                        name="pour_cost"
-                                        value={formData.pour_cost}
-                                        onChange={handleInputChange}
-                                        placeholder="0.00"
-                                    />
+                                    <input type="number" step="0.01" className="form-input" name="pour_cost" value={formData.pour_cost} onChange={handleInputChange} />
                                 </div>
                             </div>
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Cocktail Image</label>
                             <div className="image-upload">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    style={{display: 'none'}}
-                                    id="image-upload"
-                                />
+                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{display: 'none'}} id="image-upload" />
                                 <label htmlFor="image-upload" style={{cursor: 'pointer'}}>
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </label>
-                                {imagePreview && (
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                                )}
+                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
                             </div>
                         </div>
-                        
                         <div className="form-group">
-                            <label className="form-label">Ingredients *</label>
+                            <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Ingredient name"
-                                        value={ingredient.name}
-                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                        style={{flex: 2}}
-                                        required
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="form-input"
-                                        placeholder="Amount"
-                                        value={ingredient.amount}
-                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                                        style={{flex: 1}}
-                                        required
-                                    />
-                                    <select
-                                        className="form-input"
-                                        value={ingredient.unit}
-                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                        style={{flex: 1}}
-                                    >
-                                        <option value="ml">ml</option>
-                                        <option value="oz">oz</option>
-                                        <option value="dash">dash</option>
-                                        <option value="piece">piece</option>
-                                        <option value="slice">slice</option>
-                                        <option value="sprig">sprig</option>
+                                    <input type="text" className="form-input" placeholder="Ingredient name" value={ingredient.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} style={{flex: 2}} />
+                                    <input type="number" step="0.1" className="form-input" placeholder="Amount" value={ingredient.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} style={{flex: 1}} />
+                                    <select className="form-input" value={ingredient.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} style={{flex: 1}}>
+                                        <option value="ml">ml</option><option value="oz">oz</option><option value="dash">dash</option>
+                                        <option value="piece">piece</option><option value="slice">slice</option><option value="sprig">sprig</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="icon-button delete"
-                                            onClick={() => removeIngredient(index)}
-                                        >
-                                            ×
-                                        </button>
+                                        <button type="button" className="icon-button delete" onClick={() => removeIngredient(index)}>×</button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" className="button button-secondary" onClick={addIngredient}>
-                                + Add Ingredient
-                            </button>
+                            <button type="button" className="button button-secondary" onClick={addIngredient}>+ Add Ingredient</button>
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Instructions</label>
-                            <textarea
-                                className="form-textarea"
-                                name="instructions"
-                                value={formData.instructions}
-                                onChange={handleInputChange}
-                                placeholder="Enter preparation instructions..."
-                            />
+                            <textarea className="form-textarea" name="instructions" value={formData.instructions} onChange={handleInputChange} />
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Notes</label>
-                            <textarea
-                                className="form-textarea"
-                                name="notes"
-                                value={formData.notes}
-                                onChange={handleInputChange}
-                                placeholder="Any additional notes..."
-                            />
+                            <textarea className="form-textarea" name="notes" value={formData.notes} onChange={handleInputChange} />
                         </div>
-                        
                         <div className="buttons-row">
-                            <button type="submit" className="button" disabled={!isFormValid}>
-                                {isEdit ? 'Update Cocktail' : 'Save Cocktail'}
-                            </button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>
-                                Cancel
-                            </button>
+                            <button type="submit" className="button">{isEdit ? 'Update Cocktail' : 'Save Cocktail'}</button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -1853,47 +1895,57 @@
         }
 
         // Syrups Page Component
-        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin }) {
+        function SyrupsPage({ onSyrupClick, onCreateSyrup, onDeleteSyrup, isAdmin, syncStatus, lastSync, isOnline }) {
             return (
                 <div className="container">
-                    <h1 className="page-title">Syrups & Infusions</h1>
-                    
-                    {isAdmin && (
-                        <div className="buttons-row">
-                            <button className="button" onClick={onCreateSyrup}>
-                                + Add New Syrup
-                            </button>
-                        </div>
-                    )}
-                    
+                    <div className="page-header">
+                        <h1 className="page-title">
+                            Syrups & Infusions
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
+                        {isAdmin && (
+                            <button className="button" onClick={onCreateSyrup}>+ Add New Syrup</button>
+                        )}
+                    </div>
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
                     <div className="syrups-grid">
                         {mockSyrups.map(syrup => (
                             <div key={syrup.id} className="syrup-card" onClick={() => onSyrupClick(syrup)}>
-                                <div 
-                                    className="syrup-image"
-                                    style={{
-                                        backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'
-                                    }}
-                                >
+                                <div className="syrup-image" style={{backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'}}>
                                     {!syrup.image_url && 'No Image'}
                                 </div>
                                 <div className="syrup-name">{syrup.name}</div>
                                 <div className="syrup-cost">Cost: ${syrup.cost}</div>
                                 {isAdmin && (
-                                    <div style={{marginTop: '0.5rem'}}>
+                                    <div style={{position: 'absolute', top: '0.5rem', right: '0.5rem'}}>
                                         <button 
-                                            className="action-button delete"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDeleteSyrup(syrup.id);
-                                            }}
+                                            className="icon-button delete" 
+                                            onClick={(e) => { e.stopPropagation(); onDeleteSyrup(syrup.id); }}
                                         >
-                                            🗑️ Delete
+                                            ×
                                         </button>
                                     </div>
                                 )}
                             </div>
                         ))}
+                        {mockSyrups.length === 0 && (
+                            <div className="loading">
+                                {isAdmin ? (
+                                    <div>
+                                        <p>No syrups found.</p>
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add New Syrup" to create your first syrup!
+                                        </p>
+                                    </div>
+                                ) : (
+                                    'No syrups available.'
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -1903,10 +1955,7 @@
         function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Syrups
-                    </button>
-                    
+                    <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
                     <div className="recipe-view">
                         <div className="recipe-header">
                             <div>
@@ -1915,29 +1964,13 @@
                                     <div className="meta-item">Cost: ${syrup.cost}</div>
                                 </div>
                             </div>
-                            
                             {isAdmin && (
                                 <div className="action-buttons">
-                                    <button 
-                                        className="action-button edit"
-                                        onClick={() => {
-                                            if (onEditSyrup) {
-                                                onEditSyrup(syrup);
-                                            }
-                                        }}
-                                    >
-                                        ✏️ Edit
-                                    </button>
-                                    <button 
-                                        className="action-button delete"
-                                        onClick={() => onDeleteSyrup(syrup.id)}
-                                    >
-                                        🗑️ Delete
-                                    </button>
+                                    <button className="action-button edit" onClick={() => onEditSyrup(syrup)}>✏️ Edit</button>
+                                    <button className="action-button delete" onClick={() => onDeleteSyrup(syrup.id)}>🗑️ Delete</button>
                                 </div>
                             )}
                         </div>
-                        
                         <div className="recipe-details">
                             <div>
                                 <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
@@ -1950,7 +1983,6 @@
                                     ))}
                                 </ul>
                             </div>
-                            
                             <div>
                                 <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
                                 <div className="instructions">{syrup.instructions}</div>
@@ -1962,42 +1994,22 @@
         }
 
         // Create/Edit Syrup Component
-        function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
-            const [formData, setFormData] = useState(
-                syrup || {
-                    name: '',
-                    cost: '',
-                    image_url: '',
-                    ingredients: [{ name: '', amount: '', unit: 'g' }],
-                    instructions: ''
-                }
-            );
+        function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false, isAdmin }) {
+            const [formData, setFormData] = useState(syrup || {
+                name: '', cost: '', image_url: '', ingredients: [{ name: '', amount: '', unit: 'g' }], instructions: ''
+            });
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
-            const [isFormValid, setIsFormValid] = useState(false);
-            
-            // Check form validity whenever formData changes
-            useEffect(() => {
-                const isValid = formData.name.trim() !== '' && 
-                              formData.ingredients.every(ing => ing.name.trim() !== '' && ing.amount !== '');
-                setIsFormValid(isValid);
-            }, [formData]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
-                setFormData(prev => ({
-                    ...prev,
-                    [name]: value
-                }));
+                setFormData(prev => ({ ...prev, [name]: value }));
             };
             
             const handleIngredientChange = (index, field, value) => {
                 const updatedIngredients = [...formData.ingredients];
                 updatedIngredients[index][field] = value;
-                setFormData(prev => ({
-                    ...prev,
-                    ingredients: updatedIngredients
-                }));
+                setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
             };
             
             const addIngredient = () => {
@@ -2011,10 +2023,7 @@
                 if (formData.ingredients.length > 1) {
                     const updatedIngredients = [...formData.ingredients];
                     updatedIngredients.splice(index, 1);
-                    setFormData(prev => ({
-                        ...prev,
-                        ingredients: updatedIngredients
-                    }));
+                    setFormData(prev => ({ ...prev, ingredients: updatedIngredients }));
                 }
             };
             
@@ -2023,10 +2032,7 @@
                 if (file) {
                     try {
                         const base64 = await convertImageToBase64(file);
-                        setFormData(prev => ({
-                            ...prev,
-                            image_url: base64
-                        }));
+                        setFormData(prev => ({ ...prev, image_url: base64 }));
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
@@ -2037,144 +2043,84 @@
             
             const handleSubmit = (e) => {
                 e.preventDefault();
-                
-                if (!isFormValid) {
-                    alert('Please fill in all required fields (name and ingredients)');
+                if (!formData.name) {
+                    alert('Please at least enter a syrup name');
                     return;
                 }
-                
                 const syrupData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
                     cost: parseFloat(formData.cost) || 0
                 };
-                
                 onSave(syrupData);
             };
             
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
+                        <div className="recipe-view">
+                            <h2 style={{color: '#f44336', textAlign: 'center', padding: '2rem'}}>
+                                ⚠️ Admin Access Required
+                            </h2>
+                            <p style={{textAlign: 'center', color: '#666'}}>
+                                Only administrators can create or edit syrups.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+            
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Syrups
-                    </button>
-                    
-                    <h1 className="page-title">{isEdit ? 'Edit Syrup' : 'Add New Syrup'}</h1>
-                    
+                    <button className="button button-secondary" onClick={onBack}>← Back to Syrups</button>
+                    <h1 className="page-title">
+                        {isEdit ? 'Edit Syrup' : 'Add New Syrup'}
+                        <span className="role-badge admin">ADMIN</span>
+                    </h1>
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Syrup Name *</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                required
-                                placeholder="Enter syrup name"
-                            />
+                            <input type="text" className="form-input" name="name" value={formData.name} onChange={handleInputChange} required />
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Cost ($)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                className="form-input"
-                                name="cost"
-                                value={formData.cost}
-                                onChange={handleInputChange}
-                                placeholder="0.00"
-                            />
+                            <input type="number" step="0.01" className="form-input" name="cost" value={formData.cost} onChange={handleInputChange} />
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Syrup Image</label>
                             <div className="image-upload">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    style={{display: 'none'}}
-                                    id="syrup-image-upload"
-                                />
+                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{display: 'none'}} id="syrup-image-upload" />
                                 <label htmlFor="syrup-image-upload" style={{cursor: 'pointer'}}>
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </label>
-                                {imagePreview && (
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                                )}
+                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
                             </div>
                         </div>
-                        
                         <div className="form-group">
-                            <label className="form-label">Ingredients *</label>
+                            <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Ingredient name"
-                                        value={ingredient.name}
-                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                        style={{flex: 2}}
-                                        required
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="form-input"
-                                        placeholder="Amount"
-                                        value={ingredient.amount}
-                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                                        style={{flex: 1}}
-                                        required
-                                    />
-                                    <select
-                                        className="form-input"
-                                        value={ingredient.unit}
-                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                        style={{flex: 1}}
-                                    >
-                                        <option value="g">g</option>
-                                        <option value="ml">ml</option>
-                                        <option value="cup">cup</option>
-                                        <option value="tsp">tsp</option>
-                                        <option value="tbsp">tbsp</option>
+                                    <input type="text" className="form-input" placeholder="Ingredient name" value={ingredient.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} style={{flex: 2}} />
+                                    <input type="number" step="0.1" className="form-input" placeholder="Amount" value={ingredient.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} style={{flex: 1}} />
+                                    <select className="form-input" value={ingredient.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} style={{flex: 1}}>
+                                        <option value="g">g</option><option value="ml">ml</option><option value="cup">cup</option>
+                                        <option value="tsp">tsp</option><option value="tbsp">tbsp</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="icon-button delete"
-                                            onClick={() => removeIngredient(index)}
-                                        >
-                                            ×
-                                        </button>
+                                        <button type="button" className="icon-button delete" onClick={() => removeIngredient(index)}>×</button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" className="button button-secondary" onClick={addIngredient}>
-                                + Add Ingredient
-                            </button>
+                            <button type="button" className="button button-secondary" onClick={addIngredient}>+ Add Ingredient</button>
                         </div>
-                        
                         <div className="form-group">
                             <label className="form-label">Instructions</label>
-                            <textarea
-                                className="form-textarea"
-                                name="instructions"
-                                value={formData.instructions}
-                                onChange={handleInputChange}
-                                placeholder="Enter preparation instructions..."
-                            />
+                            <textarea className="form-textarea" name="instructions" value={formData.instructions} onChange={handleInputChange} />
                         </div>
-                        
                         <div className="buttons-row">
-                            <button type="submit" className="button" disabled={!isFormValid}>
-                                {isEdit ? 'Update Syrup' : 'Save Syrup'}
-                            </button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>
-                                Cancel
-                            </button>
+                            <button type="submit" className="button">{isEdit ? 'Update Syrup' : 'Save Syrup'}</button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -2182,10 +2128,11 @@
         }
 
         // Draggable Settings Component
-        function DraggableSettingsList({ items, onReorder, onRemove, placeholder }) {
+        function DraggableSettingsList({ items, onReorder, onRemove, placeholder, isAdmin }) {
             const [draggedItem, setDraggedItem] = useState(null);
             
             const handleDragStart = (e, index) => {
+                if (!isAdmin) return;
                 setDraggedItem(index);
                 e.dataTransfer.effectAllowed = 'move';
             };
@@ -2197,6 +2144,7 @@
             
             const handleDrop = (e, index) => {
                 e.preventDefault();
+                if (!isAdmin) return;
                 if (draggedItem !== null && draggedItem !== index) {
                     const newItems = [...items];
                     const [removed] = newItems.splice(draggedItem, 1);
@@ -2207,33 +2155,26 @@
             };
             
             if (items.length === 0) {
-                return (
-                    <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
-                        {placeholder}
-                    </div>
-                );
+                return <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>{placeholder}</div>;
             }
             
             return (
                 <ul className="settings-list">
                     {items.map((item, index) => (
                         <li 
-                            key={index}
-                            className={`settings-item ${draggedItem === index ? 'dragging' : ''}`}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragOver={handleDragOver}
+                            key={index} 
+                            className={`settings-item ${draggedItem === index ? 'dragging' : ''} ${!isAdmin ? 'user-view' : ''}`} 
+                            draggable={isAdmin}
+                            onDragStart={(e) => handleDragStart(e, index)} 
+                            onDragOver={handleDragOver} 
                             onDrop={(e) => handleDrop(e, index)}
                         >
                             <span>{item}</span>
-                            <div className="settings-actions">
-                                <button 
-                                    className="icon-button delete"
-                                    onClick={() => onRemove(index)}
-                                >
-                                    ×
-                                </button>
-                            </div>
+                            {isAdmin && (
+                                <div className="settings-actions">
+                                    <button className="icon-button delete" onClick={() => onRemove(index)}>×</button>
+                                </div>
+                            )}
                         </li>
                     ))}
                 </ul>
@@ -2241,36 +2182,24 @@
         }
 
         // Settings Page Component
-        function SettingsPage({ onBack, isAdmin }) {
+        function SettingsPage({ onBack, isAdmin, syncStatus, lastSync, isOnline }) {
             const [settings, setSettings] = useState(mockSettings);
-            const [newItems, setNewItems] = useState({
-                spirit_types: '',
-                glass_types: '',
-                venues: ''
-            });
+            const [newItems, setNewItems] = useState({ spirit_types: '', glass_types: '', venues: '' });
             
-            // Save settings whenever they change
             useEffect(() => {
                 saveToStorage('cocktailSettings', settings);
                 mockSettings = settings;
             }, [settings]);
             
             const handleAddItem = (type) => {
+                if (!isAdmin) return;
                 const value = newItems[type].trim();
                 if (!value) {
                     alert('Please enter a value');
                     return;
                 }
-                
-                setSettings(prev => ({
-                    ...prev,
-                    [type]: [...prev[type], value]
-                }));
-                
-                setNewItems(prev => ({
-                    ...prev,
-                    [type]: ''
-                }));
+                setSettings(prev => ({ ...prev, [type]: [...prev[type], value] }));
+                setNewItems(prev => ({ ...prev, [type]: '' }));
             };
             
             const handleKeyPress = (e, type) => {
@@ -2281,119 +2210,72 @@
             };
             
             const handleRemoveItem = (type, index) => {
-                setSettings(prev => ({
-                    ...prev,
-                    [type]: prev[type].filter((_, i) => i !== index)
-                }));
+                if (!isAdmin) return;
+                setSettings(prev => ({ ...prev, [type]: prev[type].filter((_, i) => i !== index) }));
             };
             
             const handleReorderItems = (type, newItems) => {
-                setSettings(prev => ({
-                    ...prev,
-                    [type]: newItems
-                }));
+                if (!isAdmin) return;
+                setSettings(prev => ({ ...prev, [type]: newItems }));
             };
             
             const handleInputChange = (type, value) => {
-                setNewItems(prev => ({
-                    ...prev,
-                    [type]: value
-                }));
+                setNewItems(prev => ({ ...prev, [type]: value }));
             };
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
-                    </button>
-                    
-                    <h1 className="page-title">Settings</h1>
+                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                    <h1 className="page-title">
+                        Settings
+                        {isAdmin ? (
+                            <span className="role-badge admin">ADMIN</span>
+                        ) : (
+                            <span className="role-badge user">VIEWER</span>
+                        )}
+                    </h1>
+                    <SyncStatus status={syncStatus} lastSync={lastSync} isOnline={isOnline} isAdmin={isAdmin} />
                     
                     {!isAdmin ? (
                         <div className="settings-section">
-                            <p>Admin access required to modify settings.</p>
+                            <h3 className="settings-title">View Only Mode</h3>
+                            <p style={{color: '#666', lineHeight: '1.6'}}>
+                                You are currently in <strong>Viewer Mode</strong>. To modify settings, 
+                                create recipes, or manage syrups, please log in as an administrator.
+                            </p>
+                            <div style={{marginTop: '1rem', padding: '1rem', background: '#333', borderRadius: '6px'}}>
+                                <p style={{color: '#FFB366', marginBottom: '0.5rem'}}>Admin Credentials:</p>
+                                <p style={{fontSize: '0.9rem', color: '#888'}}>
+                                    Username: <strong>suraj</strong><br/>
+                                    Password: <strong>cocktail123</strong>
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <>
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Spirit Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new spirit type"
-                                        value={newItems.spirit_types}
-                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('spirit_types')}
-                                    >
-                                        Add
-                                    </button>
+                                    <input type="text" className="form-input" placeholder="Add new spirit type" value={newItems.spirit_types} onChange={(e) => handleInputChange('spirit_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'spirit_types')} style={{flex: 1}} />
+                                    <button className="button" onClick={() => handleAddItem('spirit_types')}>Add</button>
                                 </div>
-                                <DraggableSettingsList 
-                                    items={settings.spirit_types}
-                                    onReorder={(newItems) => handleReorderItems('spirit_types', newItems)}
-                                    onRemove={(index) => handleRemoveItem('spirit_types', index)}
-                                    placeholder="No spirit types added yet"
-                                />
+                                <DraggableSettingsList items={settings.spirit_types} onReorder={(newItems) => handleReorderItems('spirit_types', newItems)} onRemove={(index) => handleRemoveItem('spirit_types', index)} placeholder="No spirit types added yet" isAdmin={isAdmin} />
                             </div>
-                            
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Glass Types</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new glass type"
-                                        value={newItems.glass_types}
-                                        onChange={(e) => handleInputChange('glass_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'glass_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('glass_types')}
-                                    >
-                                        Add
-                                    </button>
+                                    <input type="text" className="form-input" placeholder="Add new glass type" value={newItems.glass_types} onChange={(e) => handleInputChange('glass_types', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'glass_types')} style={{flex: 1}} />
+                                    <button className="button" onClick={() => handleAddItem('glass_types')}>Add</button>
                                 </div>
-                                <DraggableSettingsList 
-                                    items={settings.glass_types}
-                                    onReorder={(newItems) => handleReorderItems('glass_types', newItems)}
-                                    onRemove={(index) => handleRemoveItem('glass_types', index)}
-                                    placeholder="No glass types added yet"
-                                />
+                                <DraggableSettingsList items={settings.glass_types} onReorder={(newItems) => handleReorderItems('glass_types', newItems)} onRemove={(index) => handleRemoveItem('glass_types', index)} placeholder="No glass types added yet" isAdmin={isAdmin} />
                             </div>
-                            
-                            <div className="settings-section">
+                            <div className="settings-section admin-only">
                                 <h3 className="settings-title">Venues</h3>
                                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new venue"
-                                        value={newItems.venues}
-                                        onChange={(e) => handleInputChange('venues', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'venues')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('venues')}
-                                    >
-                                        Add
-                                    </button>
+                                    <input type="text" className="form-input" placeholder="Add new venue" value={newItems.venues} onChange={(e) => handleInputChange('venues', e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'venues')} style={{flex: 1}} />
+                                    <button className="button" onClick={() => handleAddItem('venues')}>Add</button>
                                 </div>
-                                <DraggableSettingsList 
-                                    items={settings.venues}
-                                    onReorder={(newItems) => handleReorderItems('venues', newItems)}
-                                    onRemove={(index) => handleRemoveItem('venues', index)}
-                                    placeholder="No venues added yet"
-                                />
+                                <DraggableSettingsList items={settings.venues} onReorder={(newItems) => handleReorderItems('venues', newItems)} onRemove={(index) => handleRemoveItem('venues', index)} placeholder="No venues added yet" isAdmin={isAdmin} />
                             </div>
                         </>
                     )}
@@ -2420,49 +2302,31 @@
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
                         <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
-                        
+                        <p style={{textAlign: 'center', color: '#666', marginBottom: '2rem'}}>
+                            Login as admin to manage recipes, or continue as guest to view.
+                        </p>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label className="form-label">Username</label>
-                                <input 
-                                    type="text"
-                                    className="form-input"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
-                                />
+                                <input type="text" className="form-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
                             </div>
-                            
                             <div className="form-group">
                                 <label className="form-label">Password</label>
-                                <input 
-                                    type="password"
-                                    className="form-input"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                                <input type="password" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
                             </div>
-                            
-                            {error && (
-                                <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>
-                                    {error}
-                                </div>
-                            )}
-                            
+                            {error && <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>{error}</div>}
                             <div className="buttons-row">
-                                <button type="submit" className="button">
-                                    Login
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="button button-secondary"
-                                    onClick={onGuestLogin}
-                                >
-                                    Continue as Guest
-                                </button>
+                                <button type="submit" className="button">Login as Admin</button>
+                                <button type="button" className="button button-secondary" onClick={onGuestLogin}>Continue as Guest</button>
                             </div>
                         </form>
+                        <div style={{marginTop: '2rem', padding: '1rem', background: '#333', borderRadius: '6px', textAlign: 'center'}}>
+                            <p style={{color: '#FFB366', fontSize: '0.9rem', marginBottom: '0.5rem'}}>Demo Admin Credentials:</p>
+                            <p style={{fontSize: '0.8rem', color: '#888'}}>
+                                Username: <strong>suraj</strong><br/>
+                                Password: <strong>cocktail123</strong>
+                            </p>
+                        </div>
                     </div>
                 </div>
             );
@@ -2478,11 +2342,8 @@
             
             const calculateOriginalVolume = () => {
                 return recipe.ingredients.reduce((total, ingredient) => {
-                    if (ingredient.unit === 'ml') {
-                        return total + parseFloat(ingredient.amount);
-                    } else if (ingredient.unit === 'oz') {
-                        return total + (parseFloat(ingredient.amount) * 29.5735);
-                    }
+                    if (ingredient.unit === 'ml') return total + parseFloat(ingredient.amount);
+                    if (ingredient.unit === 'oz') return total + (parseFloat(ingredient.amount) * 29.5735);
                     return total;
                 }, 0);
             };
@@ -2498,8 +2359,7 @@
             
             const calculateScaledIngredients = () => {
                 const originalVolume = calculateOriginalVolume();
-                let scaleFactor;
-                let servings = 1;
+                let scaleFactor, servings = 1;
                 
                 if (scaleMethod === 'servings') {
                     scaleFactor = quantity;
@@ -2514,14 +2374,10 @@
                 const totalScaledVolume = originalVolume * scaleFactor;
                 const dilutionWater = (totalScaledVolume * dilutionPercentage) / 100;
                 
-                const scaledIngredients = recipe.ingredients.map(ingredient => {
-                    let scaledAmount = ingredient.amount * scaleFactor;
-                    
-                    return {
-                        ...ingredient,
-                        scaledAmount: Math.round(scaledAmount * 10) / 10
-                    };
-                });
+                const scaledIngredients = recipe.ingredients.map(ingredient => ({
+                    ...ingredient,
+                    scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
+                }));
                 
                 if (dilutionWater > 0) {
                     scaledIngredients.push({
@@ -2531,11 +2387,7 @@
                     });
                 }
                 
-                return {
-                    ingredients: scaledIngredients,
-                    servings: servings,
-                    totalVolume: totalScaledVolume + dilutionWater
-                };
+                return { ingredients: scaledIngredients, servings, totalVolume: totalScaledVolume + dilutionWater };
             };
             
             const scaledResult = calculateScaledIngredients();
@@ -2543,170 +2395,78 @@
             return (
                 <div className="modal-overlay">
                     <div className="modal">
-                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>
-                            Scale: {recipe.name}
-                        </h2>
-                        
+                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>Scale: {recipe.name}</h2>
                         <div className="scale-option">
                             <h3 className="scale-option-title">Scale by Number of Servings</h3>
-                            <p className="scale-option-description">
-                                Choose this option if you know how many servings you need.
-                            </p>
+                            <p className="scale-option-description">Choose this option if you know how many servings you need.</p>
                             <div className="radio-group">
                                 <label className="radio-option">
-                                    <input
-                                        type="radio"
-                                        name="scaleMethod"
-                                        value="servings"
-                                        checked={scaleMethod === 'servings'}
-                                        onChange={(e) => setScaleMethod(e.target.value)}
-                                    />
+                                    <input type="radio" name="scaleMethod" value="servings" checked={scaleMethod === 'servings'} onChange={(e) => setScaleMethod(e.target.value)} />
                                     Scale by Servings
                                 </label>
                                 {scaleMethod === 'servings' && (
                                     <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                         <label>Enter Quantity:</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={quantity}
-                                            onChange={(e) => setQuantity(parseInt(e.target.value))}
-                                            className="form-input"
-                                            style={{width: '100px'}}
-                                        />
+                                        <input type="number" min="1" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value))} className="form-input" style={{width: '100px'}} />
                                         <span>servings</span>
                                     </div>
                                 )}
                             </div>
                         </div>
-                        
                         <div className="scale-option">
                             <h3 className="scale-option-title">Scale by Total Volume</h3>
-                            <p className="scale-option-description">
-                                Ideal for filling a specific container or batch size.
-                            </p>
+                            <p className="scale-option-description">Ideal for filling a specific container or batch size.</p>
                             <div className="radio-group">
                                 <label className="radio-option">
-                                    <input
-                                        type="radio"
-                                        name="scaleMethod"
-                                        value="volume"
-                                        checked={scaleMethod === 'volume'}
-                                        onChange={(e) => setScaleMethod(e.target.value)}
-                                    />
+                                    <input type="radio" name="scaleMethod" value="volume" checked={scaleMethod === 'volume'} onChange={(e) => setScaleMethod(e.target.value)} />
                                     Scale by Volume
                                 </label>
                                 {scaleMethod === 'volume' && (
                                     <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap'}}>
                                         <label>Enter Quantity:</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            step="0.1"
-                                            value={quantity}
-                                            onChange={(e) => setQuantity(parseFloat(e.target.value))}
-                                            className="form-input"
-                                            style={{width: '100px'}}
-                                        />
-                                        <select
-                                            value={volumeUnit}
-                                            onChange={(e) => setVolumeUnit(e.target.value)}
-                                            className="form-input"
-                                            style={{width: '120px'}}
-                                        >
-                                            <option value="ml">Milliliters</option>
-                                            <option value="oz">Ounces</option>
-                                            <option value="l">Liters</option>
-                                            <option value="gal">Gallons</option>
+                                        <input type="number" min="1" step="0.1" value={quantity} onChange={(e) => setQuantity(parseFloat(e.target.value))} className="form-input" style={{width: '100px'}} />
+                                        <select value={volumeUnit} onChange={(e) => setVolumeUnit(e.target.value)} className="form-input" style={{width: '120px'}}>
+                                            <option value="ml">Milliliters</option><option value="oz">Ounces</option>
+                                            <option value="l">Liters</option><option value="gal">Gallons</option>
                                         </select>
                                     </div>
                                 )}
                             </div>
                         </div>
-                        
                         <div className="scale-option">
                             <h3 className="scale-option-title">Add Dilution (Optional)</h3>
-                            <p className="scale-option-description">
-                                Choose a dilution percentage that suits your cocktail. Water will be added as a separate ingredient.
-                            </p>
+                            <p className="scale-option-description">Choose a dilution percentage that suits your cocktail.</p>
                             <div className="dilution-options">
-                                <label className="dilution-option">
-                                    <input
-                                        type="radio"
-                                        name="dilution"
-                                        value="0"
-                                        checked={dilution === '0'}
-                                        onChange={(e) => setDilution(e.target.value)}
-                                    />
-                                    <div className="dilution-label">
-                                        <span className="dilution-percentage">0% (No Dilution)</span>
-                                        <span className="dilution-description">Best if you plan to shake or stir your drinks to order.</span>
-                                    </div>
-                                </label>
-                                
-                                <label className="dilution-option">
-                                    <input
-                                        type="radio"
-                                        name="dilution"
-                                        value="18"
-                                        checked={dilution === '18'}
-                                        onChange={(e) => setDilution(e.target.value)}
-                                    />
-                                    <div className="dilution-label">
-                                        <span className="dilution-percentage">18% (Spirit-Driven Cocktails)</span>
-                                        <span className="dilution-description">Best for strong drinks containing mainly spirits.</span>
-                                    </div>
-                                </label>
-                                
-                                <label className="dilution-option">
-                                    <input
-                                        type="radio"
-                                        name="dilution"
-                                        value="25"
-                                        checked={dilution === '25'}
-                                        onChange={(e) => setDilution(e.target.value)}
-                                    />
-                                    <div className="dilution-label">
-                                        <span className="dilution-percentage">25% (Shaken Cocktails)</span>
-                                        <span className="dilution-description">Ideal for cocktails containing fruit juices, dairy, or eggs.</span>
-                                    </div>
-                                </label>
-                                
-                                <label className="dilution-option">
-                                    <input
-                                        type="radio"
-                                        name="dilution"
-                                        value="custom"
-                                        checked={dilution === 'custom'}
-                                        onChange={(e) => setDilution(e.target.value)}
-                                    />
-                                    <div className="dilution-label">
-                                        <span className="dilution-percentage">Custom:</span>
-                                        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem'}}>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                value={customDilution}
-                                                onChange={(e) => setCustomDilution(e.target.value)}
-                                                className="form-input"
-                                                style={{width: '80px'}}
-                                                placeholder="0"
-                                            />
-                                            <span>%</span>
+                                {['0', '18', '25', 'custom'].map(value => (
+                                    <label key={value} className="dilution-option">
+                                        <input type="radio" name="dilution" value={value} checked={dilution === value} onChange={(e) => setDilution(e.target.value)} />
+                                        <div className="dilution-label">
+                                            <span className="dilution-percentage">
+                                                {value === '0' ? '0% (No Dilution)' : value === 'custom' ? 'Custom:' : `${value}%`}
+                                            </span>
+                                            <span className="dilution-description">
+                                                {value === '0' ? 'Best if you plan to shake or stir your drinks to order.' :
+                                                 value === '18' ? 'Best for strong drinks containing mainly spirits.' :
+                                                 value === '25' ? 'Ideal for cocktails containing fruit juices, dairy, or eggs.' :
+                                                 'Enter custom dilution percentage'}
+                                            </span>
                                         </div>
+                                    </label>
+                                ))}
+                                {dilution === 'custom' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem'}}>
+                                        <input type="number" min="0" max="100" value={customDilution} onChange={(e) => setCustomDilution(e.target.value)} className="form-input" style={{width: '80px'}} placeholder="0" />
+                                        <span>%</span>
                                     </div>
-                                </label>
+                                )}
                             </div>
                         </div>
-
                         {scaleMethod === 'volume' && (
                             <div className="servings-info">
                                 <div>This batch will make approximately</div>
                                 <div className="servings-count">{scaledResult.servings} servings</div>
                             </div>
                         )}
-                        
                         <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Scaled Ingredients</h3>
                         <ul className="ingredients-list">
                             {scaledResult.ingredients.map((ingredient, index) => (
@@ -2716,11 +2476,8 @@
                                 </li>
                             ))}
                         </ul>
-                        
                         <div className="buttons-row">
-                            <button className="button" onClick={onClose}>
-                                Close
-                            </button>
+                            <button className="button" onClick={onClose}>Close</button>
                         </div>
                     </div>
                 </div>
@@ -2737,6 +2494,119 @@
             const [menuOpen, setMenuOpen] = useState(false);
             const [editingItem, setEditingItem] = useState(null);
             const [isEditing, setIsEditing] = useState(false);
+            const [syncStatus, setSyncStatus] = useState(null);
+            const [lastSync, setLastSync] = useState(null);
+            const [isOnline, setIsOnline] = useState(navigator.onLine);
+            
+            // Initialize cloud storage and start sync
+            useEffect(() => {
+                const initializeSync = async () => {
+                    try {
+                        await CloudStorage.initialize();
+                        const cloudData = await CloudStorage.loadFromCloud();
+                        if (cloudData) {
+                            mockRecipes = cloudData.recipes || mockRecipes;
+                            mockSyrups = cloudData.syrups || mockSyrups;
+                            mockSettings = cloudData.settings || mockSettings;
+                            
+                            saveToStorage('cocktailRecipes', mockRecipes);
+                            saveToStorage('cocktailSyrups', mockSyrups);
+                            saveToStorage('cocktailSettings', mockSettings);
+                            
+                            setSyncStatus({ type: 'success', message: '✅ Synced with cloud data' });
+                            setLastSync(cloudData.lastUpdated || Date.now());
+                        } else {
+                            setSyncStatus({ type: 'info', message: '🔄 Using local storage - set up Firebase for cross-device sync' });
+                        }
+                    } catch (error) {
+                        console.error('Sync initialization failed:', error);
+                        setSyncStatus({ type: 'error', message: '❌ Cloud sync unavailable - using local data' });
+                    }
+                };
+                
+                initializeSync();
+                
+                // Set up periodic sync every 10 seconds
+                const syncInterval = setInterval(async () => {
+                    try {
+                        const cloudData = await CloudStorage.loadFromCloud();
+                        if (cloudData) {
+                            const localLastSync = loadFromStorage('lastCloudSync', 0);
+                            const cloudLastUpdate = cloudData.lastUpdated || 0;
+                            
+                            if (cloudLastUpdate > localLastSync) {
+                                mockRecipes = cloudData.recipes || mockRecipes;
+                                mockSyrups = cloudData.syrups || mockSyrups;
+                                mockSettings = cloudData.settings || mockSettings;
+                                
+                                saveToStorage('cocktailRecipes', mockRecipes);
+                                saveToStorage('cocktailSyrups', mockSyrups);
+                                saveToStorage('cocktailSettings', mockSettings);
+                                saveToStorage('lastCloudSync', cloudLastUpdate);
+                                
+                                setSyncStatus({ type: 'success', message: '✅ Auto-synced with latest changes' });
+                                setLastSync(cloudLastUpdate);
+                                setCurrentPage(currentPage => currentPage);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Periodic sync failed:', error);
+                    }
+                }, 10000);
+                
+                return () => clearInterval(syncInterval);
+            }, []);
+            
+            // Network status detection
+            useEffect(() => {
+                const handleOnline = () => {
+                    setIsOnline(true);
+                    setSyncStatus({ type: 'success', message: '✅ Back online - syncing...' });
+                    setTimeout(saveToCloud, 1000);
+                };
+                
+                const handleOffline = () => {
+                    setIsOnline(false);
+                    setSyncStatus({ type: 'info', message: '🔄 Working offline - changes saved locally' });
+                };
+                
+                window.addEventListener('online', handleOnline);
+                window.addEventListener('offline', handleOffline);
+                
+                return () => {
+                    window.removeEventListener('online', handleOnline);
+                    window.removeEventListener('offline', handleOffline);
+                };
+            }, []);
+            
+            // Save data to cloud when admin makes changes
+            const saveToCloud = async () => {
+                if (!user || !user.isAdmin) return;
+                
+                try {
+                    const success = await CloudStorage.saveToCloud({
+                        recipes: mockRecipes,
+                        syrups: mockSyrups,
+                        settings: mockSettings
+                    });
+                    
+                    if (success) {
+                        const syncTime = Date.now();
+                        saveToStorage('lastCloudSync', syncTime);
+                        setLastSync(syncTime);
+                        setSyncStatus({ type: 'success', message: '✅ Changes saved to cloud' });
+                        
+                        setTimeout(() => {
+                            setSyncStatus({ type: 'info', message: '🔄 Auto-syncing every 10 seconds' });
+                        }, 3000);
+                    } else {
+                        setSyncStatus({ type: 'error', message: '❌ Failed to save to cloud' });
+                    }
+                } catch (error) {
+                    console.error('Cloud save failed:', error);
+                    setSyncStatus({ type: 'error', message: '❌ Cloud sync error' });
+                }
+            };
             
             // Redirect to login if not authenticated and trying to access protected pages
             useEffect(() => {
@@ -2761,7 +2631,9 @@
                 if (confirm('Are you sure you want to delete this cocktail?')) {
                     mockRecipes = mockRecipes.filter(recipe => recipe.id !== recipeId);
                     saveToStorage('cocktailRecipes', mockRecipes);
+                    saveToCloud();
                     setCurrentPage('home');
+                    setTimeout(() => setCurrentPage('home'), 100);
                 }
             };
             
@@ -2771,20 +2643,21 @@
                 if (confirm('Are you sure you want to delete this syrup?')) {
                     mockSyrups = mockSyrups.filter(syrup => syrup.id !== syrupId);
                     saveToStorage('cocktailSyrups', mockSyrups);
+                    saveToCloud();
                     setCurrentPage('syrups');
+                    setTimeout(() => setCurrentPage('syrups'), 100);
                 }
             };
             
             const handleSaveRecipe = (recipeData) => {
                 if (isEditing && editingItem) {
                     const index = mockRecipes.findIndex(r => r.id === editingItem.id);
-                    if (index !== -1) {
-                        mockRecipes[index] = recipeData;
-                    }
+                    if (index !== -1) mockRecipes[index] = recipeData;
                 } else {
                     mockRecipes.push(recipeData);
                 }
                 saveToStorage('cocktailRecipes', mockRecipes);
+                saveToCloud();
                 setIsEditing(false);
                 setEditingItem(null);
                 navigateTo('home');
@@ -2793,13 +2666,12 @@
             const handleSaveSyrup = (syrupData) => {
                 if (isEditing && editingItem) {
                     const index = mockSyrups.findIndex(s => s.id === editingItem.id);
-                    if (index !== -1) {
-                        mockSyrups[index] = syrupData;
-                    }
+                    if (index !== -1) mockSyrups[index] = syrupData;
                 } else {
                     mockSyrups.push(syrupData);
                 }
                 saveToStorage('cocktailSyrups', mockSyrups);
+                saveToCloud();
                 setIsEditing(false);
                 setEditingItem(null);
                 navigateTo('syrups');
@@ -2819,135 +2691,111 @@
             };
             
             const renderPage = () => {
-                if (!user) {
-                    return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
-                }
+                if (!user) return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                
+                const isAdmin = user.isAdmin;
                 
                 switch(currentPage) {
-                    case 'home':
+                    case 'home': 
                         return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => {
-                                setIsEditing(false);
-                                setEditingItem(null);
-                                navigateTo('create-recipe');
-                            }}
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            isAdmin={isAdmin} 
+                            onCreateRecipe={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-recipe'); }} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
                         />;
-                    case 'view-recipe':
+                    case 'view-recipe': 
                         return <ViewRecipePage 
                             recipe={selectedRecipe} 
-                            onBack={() => navigateTo('home')}
-                            onScale={() => setShowScaleModal(true)}
-                            isAdmin={user.isAdmin}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            onEditRecipe={handleEditRecipe}
-                        />;
-                    case 'create-recipe':
-                        return <CreateEditRecipePage 
-                            recipe={editingItem}
                             onBack={() => navigateTo('home')} 
-                            onSave={handleSaveRecipe}
-                            isEdit={isEditing}
+                            onScale={() => setShowScaleModal(true)} 
+                            isAdmin={isAdmin} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            onEditRecipe={handleEditRecipe} 
                         />;
-                    case 'syrups':
+                    case 'create-recipe': 
+                        return <CreateEditRecipePage 
+                            recipe={editingItem} 
+                            onBack={() => navigateTo('home')} 
+                            onSave={handleSaveRecipe} 
+                            isEdit={isEditing} 
+                            isAdmin={isAdmin}
+                        />;
+                    case 'syrups': 
                         return <SyrupsPage 
-                            onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)}
-                            onCreateSyrup={() => {
-                                setIsEditing(false);
-                                setEditingItem(null);
-                                navigateTo('create-syrup');
-                            }}
-                            onDeleteSyrup={handleDeleteSyrup}
-                            isAdmin={user.isAdmin}
+                            onSyrupClick={(syrup) => navigateTo('view-syrup', syrup)} 
+                            onCreateSyrup={() => { setIsEditing(false); setEditingItem(null); navigateTo('create-syrup'); }} 
+                            onDeleteSyrup={handleDeleteSyrup} 
+                            isAdmin={isAdmin} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
                         />;
-                    case 'view-syrup':
+                    case 'view-syrup': 
                         return <ViewSyrupPage 
                             syrup={selectedSyrup} 
-                            onBack={() => navigateTo('syrups')}
-                            isAdmin={user.isAdmin}
-                            onDeleteSyrup={handleDeleteSyrup}
-                            onEditSyrup={handleEditSyrup}
+                            onBack={() => navigateTo('syrups')} 
+                            isAdmin={isAdmin} 
+                            onDeleteSyrup={handleDeleteSyrup} 
+                            onEditSyrup={handleEditSyrup} 
                         />;
-                    case 'create-syrup':
+                    case 'create-syrup': 
                         return <CreateEditSyrupPage 
-                            syrup={editingItem}
-                            onBack={() => navigateTo('syrups')}
-                            onSave={handleSaveSyrup}
-                            isEdit={isEditing}
+                            syrup={editingItem} 
+                            onBack={() => navigateTo('syrups')} 
+                            onSave={handleSaveSyrup} 
+                            isEdit={isEditing} 
+                            isAdmin={isAdmin}
                         />;
-                    case 'settings':
+                    case 'settings': 
                         return <SettingsPage 
                             onBack={() => navigateTo('home')} 
-                            isAdmin={user.isAdmin}
+                            isAdmin={isAdmin} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
                         />;
-                    default:
+                    default: 
                         return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => navigateTo('create-recipe')}
+                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)} 
+                            onDeleteRecipe={handleDeleteRecipe} 
+                            isAdmin={isAdmin} 
+                            onCreateRecipe={() => navigateTo('create-recipe')} 
+                            syncStatus={syncStatus} 
+                            lastSync={lastSync} 
+                            isOnline={isOnline} 
                         />;
                 }
             };
             
-            if (!user) {
-                return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
-            }
+            if (!user) return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
             
             return (
                 <div className="app">
                     <header className="header">
                         <div className="header-left">
-                            <button 
-                                className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle menu"
-                            >
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
+                            <button className={`menu-button ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+                                <span className="menu-line"></span><span className="menu-line"></span><span className="menu-line"></span>
                             </button>
                         </div>
-                        
                         <div className="nav-user">
                             👤 {user.username}
-                            {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                            {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
-                            <button className="logout-btn" onClick={logout}>
-                                Logout
-                            </button>
+                            {user.isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                            <button className="logout-btn" onClick={logout}>Logout</button>
                         </div>
                     </header>
-                    
-                    <HamburgerMenu 
-                        isOpen={menuOpen}
-                        onToggle={setMenuOpen}
-                        currentPage={currentPage}
-                        onNavigate={navigateTo}
-                        isAdmin={user.isAdmin}
-                    />
-                    
-                    <main>
-                        {renderPage()}
-                    </main>
-
+                    <HamburgerMenu isOpen={menuOpen} onToggle={setMenuOpen} currentPage={currentPage} onNavigate={navigateTo} isAdmin={user.isAdmin} />
+                    <main>{renderPage()}</main>
                     <footer className="footer">
-                        <p>
-                            Cocktail Codex © {new Date().getFullYear()} | {' '}
-                            <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
-                                @suraj.gg87
-                            </a>
-                        </p>
+                        <p>Cocktail Codex © {new Date().getFullYear()} | <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">@suraj.gg87</a></p>
                     </footer>
-
-                    {showScaleModal && selectedRecipe && (
-                        <ScaleModal 
-                            recipe={selectedRecipe}
-                            onClose={() => setShowScaleModal(false)}
-                        />
-                    )}
+                    {showScaleModal && selectedRecipe && <ScaleModal recipe={selectedRecipe} onClose={() => setShowScaleModal(false)} />}
                 </div>
             );
         }
