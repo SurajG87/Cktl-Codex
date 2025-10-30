@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+        /* Your existing CSS remains exactly the same */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A0A; color: white; line-height: 1.6; }
         
@@ -226,7 +227,7 @@
         const ADMIN_CREDENTIALS = { username: 'suraj', password: 'cocktail123' };
         const GIST_FILENAME = 'cocktail-manual-data.json';
 
-        // Fixed GitHub Gist API Service
+        // Fixed GitHub Gist API Service - Uses Classic Tokens
         const githubService = {
             async loadData() {
                 const token = localStorage.getItem('github_token');
@@ -238,7 +239,7 @@
                     // Get user's gists
                     const response = await fetch('https://api.github.com/gists', {
                         headers: {
-                            'Authorization': `Bearer ${token}`,
+                            'Authorization': `token ${token}`,
                             'Accept': 'application/vnd.github.v3+json'
                         }
                     });
@@ -252,14 +253,16 @@
                     // Find our cocktail data gist
                     const cocktailGist = gists.find(gist => 
                         gist.files[GIST_FILENAME] || 
-                        gist.description?.includes('cocktail-manual')
+                        gist.description?.includes('cocktail-manual') ||
+                        gist.description?.includes('Cocktail Manual')
                     );
                     
                     if (cocktailGist && cocktailGist.files[GIST_FILENAME]) {
                         const dataFile = cocktailGist.files[GIST_FILENAME];
                         if (dataFile.content) {
-                            console.log('Loaded data from GitHub Gist');
-                            return JSON.parse(dataFile.content);
+                            console.log('Loaded data from GitHub Gist:', cocktailGist.id);
+                            const data = JSON.parse(dataFile.content);
+                            return { ...data, gistId: cocktailGist.id };
                         }
                     }
                     
@@ -287,31 +290,6 @@
                 }
 
                 try {
-                    // Get existing gist ID from data or find it
-                    let gistId = data.gistId;
-                    
-                    if (!gistId) {
-                        // Try to find existing gist
-                        const gistsResponse = await fetch('https://api.github.com/gists', {
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        });
-                        
-                        if (!gistsResponse.ok) throw new Error('Failed to fetch gists');
-                        
-                        const gists = await gistsResponse.json();
-                        const existingGist = gists.find(gist => 
-                            gist.files[GIST_FILENAME] || 
-                            gist.description?.includes('cocktail-manual')
-                        );
-                        
-                        if (existingGist) {
-                            gistId = existingGist.id;
-                        }
-                    }
-
                     const gistData = {
                         description: 'Cocktail Manual Data Sync',
                         public: false,
@@ -319,7 +297,6 @@
                             [GIST_FILENAME]: {
                                 content: JSON.stringify({
                                     ...data,
-                                    gistId: gistId || data.gistId,
                                     lastUpdated: new Date().toISOString()
                                 }, null, 2)
                             }
@@ -327,15 +304,13 @@
                     };
 
                     let response;
-                    let url;
                     
-                    if (gistId) {
+                    if (data.gistId) {
                         // Update existing gist
-                        url = `https://api.github.com/gists/${gistId}`;
-                        response = await fetch(url, {
+                        response = await fetch(`https://api.github.com/gists/${data.gistId}`, {
                             method: 'PATCH',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
+                                'Authorization': `token ${token}`,
                                 'Accept': 'application/vnd.github.v3+json',
                                 'Content-Type': 'application/json'
                             },
@@ -343,11 +318,10 @@
                         });
                     } else {
                         // Create new gist
-                        url = 'https://api.github.com/gists';
-                        response = await fetch(url, {
+                        response = await fetch('https://api.github.com/gists', {
                             method: 'POST',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
+                                'Authorization': `token ${token}`,
                                 'Accept': 'application/vnd.github.v3+json',
                                 'Content-Type': 'application/json'
                             },
@@ -357,8 +331,7 @@
 
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error('GitHub API error response:', errorText);
-                        throw new Error(`GitHub API error: ${response.status} - ${errorText}`);
+                        throw new Error(`GitHub API error: ${response.status}`);
                     }
 
                     const result = await response.json();
@@ -385,13 +358,18 @@
                     glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
                     venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
                 }));
+                const gistId = localStorage.getItem('cocktailGistId');
                 
-                return { recipes, settings, gistId: localStorage.getItem('cocktailGistId') };
+                return { recipes, settings, gistId };
             },
 
             saveData(data) {
-                localStorage.setItem('cocktailRecipes', JSON.stringify(data.recipes));
-                localStorage.setItem('cocktailSettings', JSON.stringify(data.settings));
+                localStorage.setItem('cocktailRecipes', JSON.stringify(data.recipes || []));
+                localStorage.setItem('cocktailSettings', JSON.stringify(data.settings || {
+                    spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+                    glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
+                    venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
+                }));
                 if (data.gistId) {
                     localStorage.setItem('cocktailGistId', data.gistId);
                 }
@@ -473,8 +451,7 @@
             
             return { 
                 ...result, 
-                recipe: isEdit ? recipe : updatedRecipes[updatedRecipes.length - 1],
-                data: result.data || updatedData
+                recipe: isEdit ? recipe : updatedRecipes[updatedRecipes.length - 1]
             };
         };
 
@@ -545,7 +522,7 @@
             return { user, login, loginAsGuest, logout };
         }
 
-        // GitHub Setup Component
+        // GitHub Setup Component - UPDATED FOR CLASSIC TOKENS
         function GitHubSetup({ onTokenSave, onSkip }) {
             const [token, setToken] = useState(localStorage.getItem('github_token') || '');
             const [saving, setSaving] = useState(false);
@@ -560,11 +537,23 @@
                 setSaving(true);
                 setError('');
                 try {
-                    // Test the token by trying to create a gist
-                    const testResponse = await fetch('https://api.github.com/gists', {
+                    // Test the token by making a simple API call
+                    const testResponse = await fetch('https://api.github.com/user', {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (!testResponse.ok) {
+                        throw new Error('Invalid token - please check your token');
+                    }
+                    
+                    // Test gist creation
+                    const gistResponse = await fetch('https://api.github.com/gists', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
+                            'Authorization': `token ${token}`,
                             'Accept': 'application/vnd.github.v3+json',
                             'Content-Type': 'application/json'
                         },
@@ -579,18 +568,17 @@
                         })
                     });
                     
-                    if (!testResponse.ok) {
-                        const errorData = await testResponse.json();
-                        throw new Error(errorData.message || 'Invalid token');
+                    if (!gistResponse.ok) {
+                        throw new Error('Token lacks gist permissions');
                     }
                     
-                    const testGist = await testResponse.json();
+                    const testGist = await gistResponse.json();
                     
                     // Clean up test gist
                     await fetch(`https://api.github.com/gists/${testGist.id}`, {
                         method: 'DELETE',
                         headers: {
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': `token ${token}`
                         }
                     });
                     
@@ -598,7 +586,7 @@
                     onTokenSave();
                 } catch (error) {
                     console.error('Token test failed:', error);
-                    setError(`Token validation failed: ${error.message}. Please check your token has "gist" permissions.`);
+                    setError(`Token validation failed: ${error.message}. Make sure you're using a Classic Token with "gist" scope.`);
                 } finally {
                     setSaving(false);
                 }
@@ -606,6 +594,7 @@
             
             const handleRemove = () => {
                 localStorage.removeItem('github_token');
+                localStorage.removeItem('cocktailGistId');
                 setToken('');
                 onTokenSave();
             };
@@ -631,19 +620,22 @@
                             
                             <ol className="setup-steps">
                                 <li>Go to <a href="https://github.com/settings/tokens" target="_blank" style={{color: '#FFB366'}}>GitHub Tokens</a></li>
-                                <li>Click "Generate new token" → "Fine-grained tokens"</li>
-                                <li><strong>Token name:</strong> "Cocktail Manual"</li>
+                                <li>Click <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
+                                <li><strong>Note:</strong> "Cocktail Manual Sync"</li>
                                 <li><strong>Expiration:</strong> 1 year (recommended)</li>
-                                <li><strong>Resource owner:</strong> Your username</li>
-                                <li><strong>Repository access:</strong> "All repositories"</li>
-                                <li><strong>Permissions > Account permissions > Gists:</strong> Read and Write</li>
+                                <li><strong>Select scopes:</strong> Check <strong>"gist"</strong> ONLY</li>
                                 <li>Click "Generate token" and paste it below</li>
                             </ol>
+                            
+                            <div style={{background: '#333', padding: '1rem', borderRadius: '6px', marginBottom: '1rem'}}>
+                                <strong>⚠️ Important:</strong> You MUST use a <strong>Classic Token</strong> with <strong>"gist" scope</strong>.
+                                Fine-grained tokens don't work with the Gist API.
+                            </div>
                             
                             <input
                                 type="password"
                                 className="github-token-input"
-                                placeholder="Paste your GitHub token here"
+                                placeholder="Paste your GitHub Classic Token here"
                                 value={token}
                                 onChange={(e) => setToken(e.target.value)}
                             />
@@ -655,7 +647,7 @@
                             )}
                             
                             <div className="token-help">
-                                <strong>Note:</strong> Fine-grained tokens are recommended. Your token is stored locally and only used to sync your recipe data.
+                                Your token is stored locally and only used to sync your recipe data via GitHub Gists.
                             </div>
                             
                             <div className="buttons-row" style={{justifyContent: 'center', marginTop: '1.5rem'}}>
@@ -696,7 +688,7 @@
             );
         }
 
-        // Hamburger Menu Component
+        // Hamburger Menu Component (same as before)
         function HamburgerMenu({ isOpen, onToggle, currentPage, onNavigate, isAdmin }) {
             const menuRef = useRef(null);
             
@@ -766,7 +758,7 @@
             );
         }
 
-        // Recipe Card Component
+        // Recipe Card Component (same as before)
         function RecipeCard({ recipe, onClick }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -787,7 +779,7 @@
             );
         }
 
-        // View Recipe Component
+        // View Recipe Component (same as before)
         function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const backgroundStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -870,7 +862,7 @@
             );
         }
 
-        // Home Page Component
+        // Home Page Component (same as before)
         function HomePage({ onRecipeClick, isAdmin, onCreateRecipe, onSyncStatus }) {
             const [recipes, setRecipes] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -1014,7 +1006,7 @@
             );
         }
 
-        // Create/Edit Recipe Component
+        // Create/Edit Recipe Component (same as before)
         function CreateEditRecipePage({ recipe, onBack, isEdit = false, onSyncStatus }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -1106,7 +1098,7 @@
                     
                     if (result.synced) {
                         onSyncStatus('success', 'Recipe saved and synced');
-                    setTimeout(() => onBack(), 1000);
+                        setTimeout(() => onBack(), 1000);
                     } else if (localStorage.getItem('github_token')) {
                         onSyncStatus('error', 'Sync failed but saved locally');
                         setTimeout(() => onBack(), 2000);
@@ -1134,6 +1126,7 @@
                     <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
                     
                     <form className="form" onSubmit={handleSubmit}>
+                        {/* Form content remains exactly the same */}
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
                             <input
@@ -1323,7 +1316,7 @@
             );
         }
 
-        // Settings Page Component
+        // Settings Page Component (same as before)
         function SettingsPage({ onBack, isAdmin, onSyncStatus }) {
             const [settings, setSettings] = useState(null);
             const [newItems, setNewItems] = useState({
@@ -1558,7 +1551,7 @@
             );
         }
 
-        // Login Page Component
+        // Login Page Component (same as before)
         function LoginPage({ onLogin, onGuestLogin }) {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
@@ -1625,7 +1618,7 @@
             );
         }
 
-        // Main App Component
+        // Main App Component (same as before)
         function App() {
             const { user, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
