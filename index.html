@@ -492,95 +492,98 @@
         }
 
         // GitHub Setup Component
-        function GitHubSetup({ onTokenSave, onSkip }) {
-            const [token, setToken] = useState(localStorage.getItem('github_token') || '');
-            const [saving, setSaving] = useState(false);
-            
-            const handleSave = async () => {
-                if (!token.trim()) {
-                    alert('Please enter a GitHub token');
-                    return;
-                }
-                
-                setSaving(true);
-                try {
-                    // Test the token
-                    const response = await fetch('https://api.github.com/user', {
-                        headers: {
-                            'Authorization': `token ${token}`
-                        }
-                    });
-                    
-                    if (!response.ok) throw new Error('Invalid token');
-                    
-                    localStorage.setItem('github_token', token);
-                    onTokenSave();
-                } catch (error) {
-                    alert('Invalid GitHub token. Please check your token and try again.');
-                } finally {
-                    setSaving(false);
-                }
-            };
-            
-            const handleRemove = () => {
-                localStorage.removeItem('github_token');
-                setToken('');
-                onTokenSave();
-            };
-            
-            return (
-                <div className="setup-section">
-                    <h2 className="setup-title">Enable Cross-Device Sync</h2>
-                    
-                    {localStorage.getItem('github_token') ? (
-                        <div>
-                            <p style={{color: '#4CAF50', marginBottom: '1rem'}}>
-                                ✅ GitHub sync is enabled! Your recipes will sync across all devices.
-                            </p>
-                            <button className="button button-secondary" onClick={handleRemove}>
-                                Remove GitHub Sync
-                            </button>
-                        </div>
-                    ) : (
-                        <div>
-                            <p style={{marginBottom: '1rem'}}>
-                                Set up GitHub sync to access your recipes from any device:
-                            </p>
-                            
-                            <ol className="setup-steps">
-                                <li>Go to <a href="https://github.com/settings/tokens" target="_blank" style={{color: '#FFB366'}}>GitHub Tokens</a></li>
-                                <li>Click "Generate new token"</li>
-                                <li>Give it a name like "Cocktail Manual"</li>
-                                <li>Check the "gist" permission</li>
-                                <li>Click "Generate token" and paste it below</li>
-                            </ol>
-                            
-                            <input
-                                type="password"
-                                className="github-token-input"
-                                placeholder="Paste your GitHub token here"
-                                value={token}
-                                onChange={(e) => setToken(e.target.value)}
-                            />
-                            
-                            <div className="token-help">
-                                Your token is stored locally and only used to sync your recipe data.
-                            </div>
-                            
-                            <div className="buttons-row" style={{justifyContent: 'center', marginTop: '1.5rem'}}>
-                                <button className="button" onClick={handleSave} disabled={saving}>
-                                    {saving ? 'Testing...' : 'Enable Sync'}
-                                </button>
-                                <button className="button button-secondary" onClick={onSkip}>
-                                    Skip for Now
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
+function GitHubSetup({ onTokenSave, onSkip }) {
+    const [token, setToken] = useState(localStorage.getItem('github_token') || '');
+    const [saving, setSaving] = useState(false);
+    
+    const handleSave = async () => {
+        if (!token.trim()) {
+            alert('Please enter a GitHub token');
+            return;
         }
-
+        
+        setSaving(true);
+        try {
+            // Test the token
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${token}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Invalid token');
+            
+            localStorage.setItem('github_token', token);
+            onTokenSave();
+        } catch (error) {
+            alert('Invalid GitHub token. Please check your token and try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+    
+    const handleRemove = () => {
+        localStorage.removeItem('github_token');
+        setToken('');
+        onTokenSave();
+    };
+    
+    return (
+        <div className="setup-section">
+            <h2 className="setup-title">Enable Cross-Device Sync</h2>
+            
+            {localStorage.getItem('github_token') ? (
+                <div>
+                    <p style={{color: '#4CAF50', marginBottom: '1rem'}}>
+                        ✅ GitHub sync is enabled! Your recipes will sync across all devices.
+                    </p>
+                    <button className="button button-secondary" onClick={handleRemove}>
+                        Remove GitHub Sync
+                    </button>
+                </div>
+            ) : (
+                <div>
+                    <p style={{marginBottom: '1rem'}}>
+                        Set up GitHub sync to access your recipes from any device:
+                    </p>
+                    
+                    <ol className="setup-steps">
+                        <li>Go to <a href="https://github.com/settings/tokens?type=fine-grained" target="_blank" style={{color: '#FFB366'}}>GitHub Fine-grained Tokens</a></li>
+                        <li>Click "Generate new token"</li>
+                        <li><strong>Token name:</strong> "Cocktail Manual"</li>
+                        <li><strong>Expiration:</strong> 1 year (recommended)</li>
+                        <li><strong>Resource owner:</strong> Your username</li>
+                        <li><strong>Repository access:</strong> "All repositories"</li>
+                        <li><strong>Permissions > Account permissions > Gists:</strong> Read and Write</li>
+                        <li>Click "Generate token" and paste it below</li>
+                    </ol>
+                    
+                    <input
+                        type="password"
+                        className="github-token-input"
+                        placeholder="Paste your GitHub Fine-grained token here"
+                        value={token}
+                        onChange={(e) => setToken(e.target.value)}
+                    />
+                    
+                    <div className="token-help">
+                        <strong>Why Fine-grained tokens?</strong> They're more secure and give you better control over permissions.
+                        Your token is stored locally and only used to sync your recipe data.
+                    </div>
+                    
+                    <div className="buttons-row" style={{justifyContent: 'center', marginTop: '1.5rem'}}>
+                        <button className="button" onClick={handleSave} disabled={saving}>
+                            {saving ? 'Testing...' : 'Enable Sync'}
+                        </button>
+                        <button className="button button-secondary" onClick={onSkip}>
+                            Skip for Now
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
         // Sync Status Component
         function SyncStatus({ status, message, isOnline }) {
             if (!status && isOnline) return null;
