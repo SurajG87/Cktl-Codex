@@ -227,7 +227,7 @@
         const ADMIN_CREDENTIALS = { username: 'suraj', password: 'cocktail123' };
         const GIST_FILENAME = 'cocktail-manual-data.json';
 
-        // Fixed GitHub Gist API Service - Uses Classic Tokens
+        // Fixed GitHub Gist API Service
         const githubService = {
             async loadData() {
                 const token = localStorage.getItem('github_token');
@@ -260,7 +260,7 @@
                     if (cocktailGist && cocktailGist.files[GIST_FILENAME]) {
                         const dataFile = cocktailGist.files[GIST_FILENAME];
                         if (dataFile.content) {
-                            console.log('Loaded data from GitHub Gist:', cocktailGist.id);
+                            console.log('✅ Loaded data from GitHub Gist:', cocktailGist.id);
                             const data = JSON.parse(dataFile.content);
                             return { ...data, gistId: cocktailGist.id };
                         }
@@ -307,6 +307,7 @@
                     
                     if (data.gistId) {
                         // Update existing gist
+                        console.log('🔄 Updating existing gist:', data.gistId);
                         response = await fetch(`https://api.github.com/gists/${data.gistId}`, {
                             method: 'PATCH',
                             headers: {
@@ -318,6 +319,7 @@
                         });
                     } else {
                         // Create new gist
+                        console.log('🆕 Creating new gist');
                         response = await fetch('https://api.github.com/gists', {
                             method: 'POST',
                             headers: {
@@ -335,7 +337,7 @@
                     }
 
                     const result = await response.json();
-                    console.log('Data saved to GitHub Gist:', result.id);
+                    console.log('✅ Data saved to GitHub Gist:', result.id);
                     
                     // Return the updated data with new gist ID
                     return {
@@ -343,7 +345,7 @@
                         gistId: result.id
                     };
                 } catch (error) {
-                    console.error('GitHub API error:', error);
+                    console.error('❌ GitHub API error:', error);
                     throw error;
                 }
             }
@@ -352,28 +354,57 @@
         // Local storage service
         const localStorageService = {
             loadData() {
-                const recipes = JSON.parse(localStorage.getItem('cocktailRecipes') || '[]');
-                const settings = JSON.parse(localStorage.getItem('cocktailSettings') || JSON.stringify({
-                    spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                    glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                    venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-                }));
-                const gistId = localStorage.getItem('cocktailGistId');
-                
-                return { recipes, settings, gistId };
+                try {
+                    const recipes = JSON.parse(localStorage.getItem('cocktailRecipes') || '[]');
+                    const settings = JSON.parse(localStorage.getItem('cocktailSettings') || JSON.stringify({
+                        spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+                        glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
+                        venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
+                    }));
+                    const gistId = localStorage.getItem('cocktailGistId');
+                    
+                    console.log('📥 Loaded from localStorage:', { 
+                        recipesCount: recipes.length,
+                        settings,
+                        gistId 
+                    });
+                    
+                    return { recipes, settings, gistId };
+                } catch (error) {
+                    console.error('Error loading from localStorage:', error);
+                    return {
+                        recipes: [],
+                        settings: {
+                            spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+                            glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
+                            venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
+                        },
+                        gistId: null
+                    };
+                }
             },
 
             saveData(data) {
-                localStorage.setItem('cocktailRecipes', JSON.stringify(data.recipes || []));
-                localStorage.setItem('cocktailSettings', JSON.stringify(data.settings || {
-                    spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                    glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                    venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-                }));
-                if (data.gistId) {
-                    localStorage.setItem('cocktailGistId', data.gistId);
+                try {
+                    localStorage.setItem('cocktailRecipes', JSON.stringify(data.recipes || []));
+                    localStorage.setItem('cocktailSettings', JSON.stringify(data.settings || {
+                        spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+                        glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
+                        venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
+                    }));
+                    if (data.gistId) {
+                        localStorage.setItem('cocktailGistId', data.gistId);
+                    }
+                    console.log('💾 Saved to localStorage:', { 
+                        recipesCount: (data.recipes || []).length,
+                        settings: data.settings,
+                        gistId: data.gistId 
+                    });
+                    return true;
+                } catch (error) {
+                    console.error('Error saving to localStorage:', error);
+                    return false;
                 }
-                return true;
             }
         };
 
@@ -383,6 +414,7 @@
                 const token = localStorage.getItem('github_token');
                 if (token) {
                     try {
+                        console.log('🌐 Loading from GitHub...');
                         const data = await githubService.loadData();
                         // Save to localStorage as backup
                         localStorageService.saveData(data);
@@ -392,27 +424,32 @@
                         return localStorageService.loadData();
                     }
                 } else {
+                    console.log('💾 Loading from localStorage only');
                     return localStorageService.loadData();
                 }
             },
 
             async saveData(data) {
+                console.log('💾 Saving data locally first...');
                 // Always save to localStorage first for immediate response
                 localStorageService.saveData(data);
                 
                 const token = localStorage.getItem('github_token');
                 if (token) {
                     try {
+                        console.log('🌐 Syncing to GitHub...');
                         const updatedData = await githubService.saveData(data);
                         // Update localStorage with the new gist ID if created
                         localStorageService.saveData(updatedData);
+                        console.log('✅ Sync successful');
                         return { success: true, synced: true, data: updatedData };
                     } catch (error) {
-                        console.warn('GitHub sync failed, data saved locally:', error);
+                        console.warn('❌ GitHub sync failed, data saved locally:', error);
                         return { success: true, synced: false, error: error.message };
                     }
                 }
                 
+                console.log('💾 Saved locally only (no token)');
                 return { success: true, synced: false };
             }
         };
@@ -433,6 +470,7 @@
         };
 
         const saveRecipe = async (recipe, isEdit = false) => {
+            console.log('💾 Saving recipe:', { name: recipe.name, isEdit });
             const data = await dataService.loadData();
             let updatedRecipes;
             
@@ -456,6 +494,7 @@
         };
 
         const deleteRecipe = async (recipeId) => {
+            console.log('🗑️ Deleting recipe:', recipeId);
             const data = await dataService.loadData();
             const updatedRecipes = (data.recipes || []).filter(recipe => recipe.id !== recipeId);
             
@@ -469,6 +508,7 @@
         };
 
         const saveSettings = async (settings) => {
+            console.log('⚙️ Saving settings:', settings);
             const data = await dataService.loadData();
             const result = await dataService.saveData({
                 ...data,
@@ -522,7 +562,7 @@
             return { user, login, loginAsGuest, logout };
         }
 
-        // GitHub Setup Component - UPDATED FOR CLASSIC TOKENS
+        // GitHub Setup Component
         function GitHubSetup({ onTokenSave, onSkip }) {
             const [token, setToken] = useState(localStorage.getItem('github_token') || '');
             const [saving, setSaving] = useState(false);
@@ -688,7 +728,68 @@
             );
         }
 
-        // Hamburger Menu Component (same as before)
+        // Data Context for global state management
+        const DataContext = React.createContext();
+
+        function DataProvider({ children }) {
+            const [recipes, setRecipes] = useState([]);
+            const [settings, setSettings] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            const loadAllData = async () => {
+                try {
+                    setLoading(true);
+                    console.log('🔄 Loading all data...');
+                    const [recipesData, settingsData] = await Promise.all([
+                        getRecipes(),
+                        getSettings()
+                    ]);
+                    setRecipes(recipesData);
+                    setSettings(settingsData);
+                    console.log('✅ Data loaded:', { 
+                        recipes: recipesData.length,
+                        settings: settingsData 
+                    });
+                } catch (error) {
+                    console.error('❌ Error loading data:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const refreshData = async () => {
+                await loadAllData();
+            };
+
+            useEffect(() => {
+                loadAllData();
+            }, []);
+
+            const value = {
+                recipes,
+                settings,
+                loading,
+                refreshData,
+                setRecipes,
+                setSettings
+            };
+
+            return (
+                <DataContext.Provider value={value}>
+                    {children}
+                </DataContext.Provider>
+            );
+        }
+
+        function useData() {
+            const context = React.useContext(DataContext);
+            if (!context) {
+                throw new Error('useData must be used within a DataProvider');
+            }
+            return context;
+        }
+
+        // Hamburger Menu Component
         function HamburgerMenu({ isOpen, onToggle, currentPage, onNavigate, isAdmin }) {
             const menuRef = useRef(null);
             
@@ -758,7 +859,7 @@
             );
         }
 
-        // Recipe Card Component (same as before)
+        // Recipe Card Component
         function RecipeCard({ recipe, onClick }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -779,7 +880,7 @@
             );
         }
 
-        // View Recipe Component (same as before)
+        // View Recipe Component
         function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const backgroundStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -862,38 +963,13 @@
             );
         }
 
-        // Home Page Component (same as before)
+        // Home Page Component - UPDATED with proper state management
         function HomePage({ onRecipeClick, isAdmin, onCreateRecipe, onSyncStatus }) {
-            const [recipes, setRecipes] = useState([]);
-            const [loading, setLoading] = useState(true);
+            const { recipes, settings, loading, refreshData } = useData();
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
-            const [settings, setSettings] = useState(null);
             const [showSetup, setShowSetup] = useState(!localStorage.getItem('github_token'));
-            
-            useEffect(() => {
-                loadData();
-            }, []);
-            
-            const loadData = async () => {
-                try {
-                    setLoading(true);
-                    onSyncStatus('syncing', 'Loading recipes...');
-                    const [recipesData, settingsData] = await Promise.all([
-                        getRecipes(),
-                        getSettings()
-                    ]);
-                    setRecipes(recipesData);
-                    setSettings(settingsData);
-                    onSyncStatus('success', 'Recipes loaded');
-                } catch (error) {
-                    console.error('Error loading data:', error);
-                    onSyncStatus('error', 'Failed to load recipes');
-                } finally {
-                    setLoading(false);
-                }
-            };
             
             // Filter recipes based on search and filters
             const filteredRecipes = recipes.filter(recipe => {
@@ -923,7 +999,7 @@
                         <GitHubSetup 
                             onTokenSave={() => {
                                 setShowSetup(false);
-                                loadData();
+                                refreshData();
                             }}
                             onSkip={() => setShowSetup(false)}
                         />
@@ -1006,8 +1082,9 @@
             );
         }
 
-        // Create/Edit Recipe Component (same as before)
+        // Create/Edit Recipe Component - UPDATED with proper state refresh
         function CreateEditRecipePage({ recipe, onBack, isEdit = false, onSyncStatus }) {
+            const { refreshData } = useData();
             const [formData, setFormData] = useState(
                 recipe || {
                     name: '',
@@ -1096,6 +1173,9 @@
                     
                     const result = await saveRecipe(recipeData, isEdit);
                     
+                    // Refresh the global data state
+                    await refreshData();
+                    
                     if (result.synced) {
                         onSyncStatus('success', 'Recipe saved and synced');
                         setTimeout(() => onBack(), 1000);
@@ -1126,7 +1206,7 @@
                     <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
                     
                     <form className="form" onSubmit={handleSubmit}>
-                        {/* Form content remains exactly the same */}
+                        {/* Form content remains the same */}
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
                             <input
@@ -1316,24 +1396,15 @@
             );
         }
 
-        // Settings Page Component (same as before)
+        // Settings Page Component - UPDATED with proper state refresh
         function SettingsPage({ onBack, isAdmin, onSyncStatus }) {
-            const [settings, setSettings] = useState(null);
+            const { settings, refreshData } = useData();
             const [newItems, setNewItems] = useState({
                 spirit_types: '',
                 glass_types: '',
                 venues: ''
             });
             const [loading, setLoading] = useState(false);
-            
-            useEffect(() => {
-                loadSettings();
-            }, []);
-            
-            const loadSettings = async () => {
-                const settingsData = await getSettings();
-                setSettings(settingsData);
-            };
             
             const handleKeyPress = (e, type) => {
                 if (e.key === 'Enter') {
@@ -1358,11 +1429,13 @@
                 onSyncStatus('syncing', 'Saving settings...');
                 try {
                     const result = await saveSettings(updatedSettings);
-                    setSettings(updatedSettings);
                     setNewItems(prev => ({
                         ...prev,
                         [type]: ''
                     }));
+                    
+                    // Refresh the global data state
+                    await refreshData();
                     
                     if (result.synced) {
                         onSyncStatus('success', 'Settings saved and synced');
@@ -1388,7 +1461,9 @@
                 onSyncStatus('syncing', 'Saving settings...');
                 try {
                     const result = await saveSettings(updatedSettings);
-                    setSettings(updatedSettings);
+                    
+                    // Refresh the global data state
+                    await refreshData();
                     
                     if (result.synced) {
                         onSyncStatus('success', 'Settings saved and synced');
@@ -1551,7 +1626,7 @@
             );
         }
 
-        // Login Page Component (same as before)
+        // Login Page Component
         function LoginPage({ onLogin, onGuestLogin }) {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
@@ -1618,7 +1693,7 @@
             );
         }
 
-        // Main App Component (same as before)
+        // Main App Component - UPDATED with DataProvider
         function App() {
             const { user, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
@@ -1751,57 +1826,59 @@
             }
             
             return (
-                <div className="app">
-                    <header className="header">
-                        <div className="header-left">
-                            <button 
-                                className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle menu"
-                            >
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                            </button>
-                        </div>
+                <DataProvider>
+                    <div className="app">
+                        <header className="header">
+                            <div className="header-left">
+                                <button 
+                                    className={`menu-button ${menuOpen ? 'active' : ''}`}
+                                    onClick={() => setMenuOpen(!menuOpen)}
+                                    aria-label="Toggle menu"
+                                >
+                                    <span className="menu-line"></span>
+                                    <span className="menu-line"></span>
+                                    <span className="menu-line"></span>
+                                </button>
+                            </div>
+                            
+                            <div className="nav-user">
+                                👤 {user.username}
+                                {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
+                                {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
+                                <button className="logout-btn" onClick={logout}>
+                                    Logout
+                                </button>
+                            </div>
+                        </header>
                         
-                        <div className="nav-user">
-                            👤 {user.username}
-                            {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                            {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
-                            <button className="logout-btn" onClick={logout}>
-                                Logout
-                            </button>
-                        </div>
-                    </header>
-                    
-                    <SyncStatus 
-                        status={syncStatus.status} 
-                        message={syncStatus.message} 
-                        isOnline={isOnline}
-                    />
-                    
-                    <HamburgerMenu 
-                        isOpen={menuOpen}
-                        onToggle={setMenuOpen}
-                        currentPage={currentPage}
-                        onNavigate={navigateTo}
-                        isAdmin={user.isAdmin}
-                    />
-                    
-                    <main>
-                        {renderPage()}
-                    </main>
+                        <SyncStatus 
+                            status={syncStatus.status} 
+                            message={syncStatus.message} 
+                            isOnline={isOnline}
+                        />
+                        
+                        <HamburgerMenu 
+                            isOpen={menuOpen}
+                            onToggle={setMenuOpen}
+                            currentPage={currentPage}
+                            onNavigate={navigateTo}
+                            isAdmin={user.isAdmin}
+                        />
+                        
+                        <main>
+                            {renderPage()}
+                        </main>
 
-                    <footer className="footer">
-                        <p>
-                            Cocktail Manual © {new Date().getFullYear()} | Created by{' '}
-                            <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
-                                @suraj.gg87
-                            </a>
-                        </p>
-                    </footer>
-                </div>
+                        <footer className="footer">
+                            <p>
+                                Cocktail Manual © {new Date().getFullYear()} | Created by{' '}
+                                <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
+                                    @suraj.gg87
+                                </a>
+                            </p>
+                        </footer>
+                    </div>
+                </DataProvider>
             );
         }
 
