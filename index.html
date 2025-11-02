@@ -2,168 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cocktail Manual - User Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cocktail Codex</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- iOS Specific Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cocktail Codex">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0A0A0A">
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A0A; color: white; line-height: 1.6; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
         
-        .app { min-height: 100vh; background: #0A0A0A; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A0A0A;
+            color: white;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            font-size: 14px;
+        }
         
-        .header { background: #1A1A1A; padding: 1rem; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; 
-            height: 70px; display: flex; align-items: center; justify-content: space-between; }
-        .menu-button { background: none; border: none; color: white; cursor: pointer; padding: 0.5rem; display: flex; flex-direction: column; 
-            gap: 4px; width: 30px; height: 30px; justify-content: center; align-items: center; }
-        .menu-line { width: 20px; height: 2px; background: white; transition: all 0.3s ease; }
-        .menu-button.active .menu-line:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
-        .menu-button.active .menu-line:nth-child(2) { opacity: 0; }
-        .menu-button.active .menu-line:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
-        .nav-user { color: #FFB366; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
-        .logout-btn { background: transparent; border: 1px solid #FFB366; color: #FFB366; padding: 0.4rem 0.8rem; 
-            border-radius: 4px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; }
-        .logout-btn:hover { background: #FFB366; color: #0A0A0A; }
+        .app {
+            min-height: 100vh;
+            background: #0A0A0A;
+            position: relative;
+        }
         
-        .side-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); 
-            z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-        .side-menu-overlay.active { opacity: 1; visibility: visible; }
-        .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #1A1A1A; 
-            border-right: 1px solid #333; z-index: 1000; transition: left 0.3s ease; overflow-y: auto; padding: 2rem 1rem; }
-        .side-menu.active { left: 0; }
-        .side-menu-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333; }
-        .side-menu-logo { width: 40px; height: 40px; background: linear-gradient(135deg, #FFB366, #FF8C42); border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-        .side-menu-title { font-size: 1.2rem; font-weight: bold; color: #FFB366; }
-        .side-menu-nav { display: flex; flex-direction: column; gap: 0.5rem; }
-        .side-menu-button { background: #333; color: white; border: none; padding: 1rem; border-radius: 8px; cursor: pointer; 
-            text-align: left; font-size: 1rem; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.75rem; }
-        .side-menu-button:hover { background: #444; transform: translateX(5px); }
-        .side-menu-button.active { background: #FFB366; color: #0A0A0A; }
-        .side-menu-button.disabled { opacity: 0.5; cursor: not-allowed; }
-        .side-menu-button.disabled:hover { background: #333; transform: none; }
+        /* Header */
+        .header {
+            background: #1A1A1A;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
         
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .page-title { font-size: 1.8rem; color: #FFB366; }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
         
-        .search-section { background: #1A1A1A; padding: 1.25rem; border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #333; }
-        .search-box { width: 100%; padding: 0.75rem; background: #333; border: 1px solid #555; border-radius: 6px; color: white; 
-            margin-bottom: 1rem; font-size: 1rem; }
-        .filters { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-        .filter-select { padding: 0.75rem; background: #333; border: 1px solid #555; border-radius: 6px; color: white; 
-            flex: 1; min-width: 140px; font-size: 0.9rem; }
+        .menu-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+        }
         
-        .recipes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
-        .recipe-card { background: #1A1A1A; border-radius: 10px; overflow: hidden; border: 1px solid #333; 
-            transition: all 0.2s ease; cursor: pointer; position: relative; }
-        .recipe-card:hover { transform: translateY(-2px); border-color: #FFB366; }
-        .recipe-image { width: 100%; height: 160px; background: #333; display: flex; align-items: center; justify-content: center; 
-            color: #666; background-size: cover; background-position: center; position: relative; }
-        .recipe-info { padding: 0.75rem; }
-        .recipe-name { font-weight: bold; margin-bottom: 0.25rem; font-size: 0.9rem; line-height: 1.2; }
-        .recipe-spirit { color: #FFB366; font-size: 0.8rem; }
-        
-        .alphabet-section { margin-bottom: 2rem; }
-        .letter-header { font-size: 1.5rem; color: #FFB366; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #FFB366; }
-        
-        .footer { text-align: center; padding: 1.5rem 1rem; margin-top: 2rem; border-top: 1px solid #333; color: #666; font-size: 0.9rem; }
-        .footer a { color: #FFB366; text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
-        
-        .form { background: #1A1A1A; padding: 1.5rem; border-radius: 10px; border: 1px solid #333; max-width: 100%; margin: 0 auto; }
-        .form-group { margin-bottom: 1.25rem; }
-        .form-label { display: block; margin-bottom: 0.5rem; color: #FFB366; font-size: 0.9rem; }
-        .form-input, .form-textarea { width: 100%; padding: 0.75rem; background: #333; border: 1px solid #555; border-radius: 6px; 
-            color: white; font-size: 16px; }
-        .form-textarea { min-height: 100px; resize: vertical; font-family: inherit; }
-        .button { background: #FFB366; color: #0A0A0A; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; 
-            cursor: pointer; font-weight: bold; transition: background 0.2s; font-size: 1rem; }
-        .button:hover { background: #FF8C42; }
-        .button-secondary { background: #333; color: white; }
-        .button-secondary:hover { background: #444; }
-        .buttons-row { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
-        .buttons-row .button { flex: 1; min-width: 120px; }
-        
-        .image-upload { border: 2px dashed #555; border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s; }
-        .image-upload:hover { border-color: #FFB366; }
-        .image-preview { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 1rem; }
-        
-        .loading { text-align: center; padding: 2rem; color: #666; }
-        
-        .recipe-view { background: #1A1A1A; border-radius: 10px; padding: 1.5rem; border: 1px solid #333; position: relative; overflow: hidden; }
-        .recipe-background { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; 
-            opacity: 0.1; z-index: 0; filter: brightness(0.3) contrast(1.2); }
-        .recipe-content { position: relative; z-index: 1; }
-        .recipe-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .recipe-title { font-size: 1.8rem; color: #FFB366; margin-bottom: 0.5rem; }
-        .recipe-meta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .meta-item { background: #333; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; }
-        .recipe-image-large { width: 100%; max-width: 300px; height: 300px; background: #333; border-radius: 10px; margin-bottom: 1.5rem; 
-            background-size: cover; background-position: center; position: relative; z-index: 1; }
-        .recipe-details { display: grid; grid-template-columns: 1fr; gap: 1.5rem; position: relative; z-index: 1; }
-        .ingredients-list { list-style: none; }
-        .ingredient-item { padding: 0.75rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
-        .ingredient-item:last-child { border-bottom: none; }
-        .instructions { white-space: pre-line; line-height: 1.6; }
-        .action-buttons { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
-        .action-button { background: #333; color: white; border: none; padding: 0.75rem; border-radius: 6px; cursor: pointer; 
-            display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; transition: background 0.2s; }
-        .action-button:hover { background: #444; }
-        .action-button.edit { background: #4CAF50; }
-        .action-button.edit:hover { background: #45a049; }
-        .action-button.delete { background: #f44336; }
-        .action-button.delete:hover { background: #d32f2f; }
-        
-        .settings-section { background: #1A1A1A; padding: 1.5rem; border-radius: 10px; border: 1px solid #333; margin-bottom: 1.5rem; }
-        .settings-title { font-size: 1.3rem; color: #FFB366; margin-bottom: 1rem; }
-        .settings-list { list-style: none; min-height: 60px; }
-        .settings-item { padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .settings-item:last-child { border-bottom: none; }
-        .settings-actions { display: flex; gap: 0.5rem; }
-        .icon-button { background: #333; color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; font-size: 1rem; }
-        .icon-button:hover { background: #444; }
-        .icon-button.delete { background: #f44336; }
-        .icon-button.delete:hover { background: #d32f2f; }
-        
-        .sync-status { 
-            position: fixed; 
-            top: 80px; 
-            right: 20px; 
-            background: #1A1A1A; 
-            padding: 0.5rem 1rem; 
-            border-radius: 6px; 
-            border: 1px solid #333;
-            font-size: 0.8rem;
-            z-index: 1000;
+        .menu-line {
+            width: 20px;
+            height: 2px;
+            background: white;
             transition: all 0.3s ease;
         }
-        .sync-status.syncing { border-color: #FFB366; color: #FFB366; }
-        .sync-status.error { border-color: #f44336; color: #f44336; }
-        .sync-status.success { border-color: #4CAF50; color: #4CAF50; }
-
-        /* Scale control styles */
-        .scale-control {
-            background: #333;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #555;
+        
+        .menu-button.active .menu-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
         }
-        .scale-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        
+        .menu-button.active .menu-line:nth-child(2) {
+            opacity: 0;
         }
-        .scale-title {
+        
+        .menu-button.active .menu-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .nav-user {
             color: #FFB366;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .scale-reset {
+        
+        .logout-btn {
             background: transparent;
             border: 1px solid #FFB366;
             color: #FFB366;
@@ -171,65 +113,646 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
+            white-space: nowrap;
         }
-        .scale-reset:hover {
+        
+        /* Side Menu */
+        .side-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .side-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background: #1A1A1A;
+            border-right: 1px solid #333;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+        
+        .side-menu.active {
+            left: 0;
+        }
+        
+        .side-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        .side-menu-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FFB366, #FF8C42);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .side-menu-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #FFB366;
+        }
+        
+        .side-menu-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .side-menu-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .side-menu-button:hover {
+            background: #444;
+            transform: translateX(5px);
+        }
+        
+        .side-menu-button.active {
             background: #FFB366;
             color: #0A0A0A;
         }
-        .scale-slider {
-            width: 100%;
-            margin: 1rem 0;
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            position: relative;
         }
-        .scale-values {
+        
+        .page-header {
             display: flex;
             justify-content: space-between;
-            margin-top: 0.5rem;
-            color: #888;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            color: #FFB366;
+        }
+        
+        /* Search and Filters */
+        .search-section {
+            background: #1A1A1A;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 16px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            flex: 1;
+            min-width: 140px;
+            font-size: 16px;
+        }
+        
+        /* Recipe Grid */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .recipe-card {
+            background: #1A1A1A;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            border-color: #FFB366;
+        }
+        
+        .recipe-image {
+            width: 100%;
+            height: 160px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .recipe-info {
+            padding: 0.75rem;
+        }
+        
+        .recipe-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
             font-size: 0.9rem;
         }
-        .scale-value {
-            text-align: center;
-            flex: 1;
-        }
-        .scale-value.active {
+        
+        .recipe-spirit {
             color: #FFB366;
+            font-size: 0.8rem;
+        }
+        
+        /* Storage Status */
+        .storage-status {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .storage-upgrade {
+            background: rgba(255, 179, 102, 0.1);
+            border: 1px solid #FFB366;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        /* Form Styles */
+        .form {
+            background: #1A1A1A;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #FFB366;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            min-height: 100px;
+            resize: vertical;
+            font-size: 16px;
+        }
+        
+        .button {
+            background: #FFB366;
+            color: #0A0A0A;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
             font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .button:hover {
+            background: #FF8C42;
+        }
+        
+        .button-secondary {
+            background: #333;
+            color: white;
+        }
+        
+        .button-secondary:hover {
+            background: #444;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Role Badges */
+        .role-badge {
+            display: inline-flex;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        .role-badge.admin {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .role-badge.user {
+            background: #666;
+            color: white;
         }
 
-        /* Data Management Styles */
-        .data-management {
+        /* Settings */
+        .settings-section {
             background: #1A1A1A;
             padding: 1.5rem;
             border-radius: 10px;
             border: 1px solid #333;
             margin-bottom: 1.5rem;
         }
-        .data-section {
-            margin-bottom: 2rem;
-        }
-        .data-section:last-child {
-            margin-bottom: 0;
-        }
-        .data-title {
-            color: #FFB366;
+        
+        .settings-title {
             font-size: 1.3rem;
+            color: #FFB366;
             margin-bottom: 1rem;
         }
-        .data-description {
-            color: #888;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+        
+        .settings-list {
+            list-style: none;
+            min-height: 60px;
         }
-        .data-actions {
+        
+        .settings-item {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            background: #1A1A1A;
+            transition: background 0.2s;
+            user-select: none;
         }
-        .data-action-btn {
+        
+        .settings-item:hover {
+            background: #222;
+        }
+        
+        .settings-item.dragging {
+            opacity: 0.5;
+            background: #333;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .icon-button {
             background: #333;
             color: white;
             border: none;
-            padding: 1rem 1.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+        }
+        
+        .icon-button:hover {
+            background: #444;
+        }
+        
+        .icon-button.delete {
+            background: #f44336;
+        }
+        
+        .icon-button.delete:hover {
+            background: #d32f2f;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed #555;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .image-upload:hover {
+            border-color: #FFB366;
+        }
+        
+        .image-upload.dragover {
+            border-color: #FFB366;
+            background: rgba(255, 179, 102, 0.1);
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Scale Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .modal {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .scale-option {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1A1A1A;
+        }
+        
+        .scale-option-title {
+            font-size: 1.1rem;
+            color: #FFB366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scale-option-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .dilution-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .dilution-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .dilution-label {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dilution-percentage {
+            font-weight: bold;
+            color: #FFB366;
+        }
+        
+        .dilution-description {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .servings-info {
+            background: #333;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .servings-count {
+            font-size: 1.2rem;
+            color: #FFB366;
+            font-weight: bold;
+        }
+
+        /* Recipe View */
+        .recipe-view {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recipe-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .recipe-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .recipe-title {
+            font-size: 1.5rem;
+            color: #FFB366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            background: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .recipe-image-large {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            background: #333;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .recipe-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .recipe-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .ingredients-list {
+            list-style: none;
+        }
+        
+        .ingredient-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        
+        .instructions {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 0.75rem;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
@@ -238,103 +761,186 @@
             font-size: 0.9rem;
             transition: background 0.2s;
         }
-        .data-action-btn:hover {
+        
+        .action-button:hover {
             background: #444;
         }
-        .data-action-btn.export {
+        
+        .action-button.scale {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .action-button.scale:hover {
+            background: #FF8C42;
+        }
+        
+        .action-button.edit {
             background: #4CAF50;
         }
-        .data-action-btn.export:hover {
+        
+        .action-button.edit:hover {
             background: #45a049;
         }
-        .data-action-btn.import {
-            background: #2196F3;
+        
+        .action-button.delete {
+            background: #f44336;
         }
-        .data-action-btn.import:hover {
-            background: #1976D2;
-        }
-        .file-input {
-            display: none;
+        
+        .action-button.delete:hover {
+            background: #d32f2f;
         }
 
-        /* User Access Styles */
-        .user-access-section {
+        /* Alphabetical Quick Search */
+        .alphabet-scroll {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
             background: #1A1A1A;
-            padding: 1.5rem;
-            border-radius: 10px;
+            border-radius: 8px;
             border: 1px solid #333;
-            margin-bottom: 1.5rem;
         }
-        .access-code {
-            font-family: monospace;
+        
+        .alphabet-letter {
+            padding: 0.5rem 0.75rem;
             background: #333;
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 1rem 0;
-            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
             text-align: center;
-            border: 2px solid #FFB366;
-            word-break: break-all;
+            flex: 1;
+            min-width: 30px;
         }
-        .qr-code {
-            text-align: center;
-            margin: 1rem 0;
+        
+        .alphabet-letter:hover {
+            background: #444;
         }
-        .qr-placeholder {
-            width: 200px;
-            height: 200px;
-            background: #333;
-            margin: 0 auto;
+        
+        .alphabet-letter.active {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        /* Mobile Optimizations */
+        .mobile-actions {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .mobile-fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #FFB366;
+            color: #0A0A0A;
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
-            border: 2px solid #555;
-            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
         }
-        .share-methods {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
+        
+        .mobile-fab:hover {
+            transform: scale(1.1);
+            background: #FF8C42;
         }
-        .share-method {
+        
+        .mobile-fab.secondary {
             background: #333;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #555;
+            color: white;
         }
-        .share-method h4 {
+        
+        .mobile-fab.secondary:hover {
+            background: #444;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            font-size: 1.1rem;
             color: #FFB366;
-            margin-bottom: 1rem;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
         }
 
         @media (max-width: 768px) {
-            .header { padding: 0.75rem; height: 60px; }
-            .container { padding: 0.75rem; }
-            .page-title { font-size: 1.5rem; }
-            .recipes-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; }
-            .recipe-image { height: 140px; }
-            .filters { flex-direction: column; }
-            .filter-select { min-width: auto; }
-            .side-menu { width: 85%; max-width: 280px; }
-            .form { padding: 1rem; }
-            .buttons-row { flex-direction: column; }
-            .buttons-row .button { width: 100%; }
-            .nav-user { font-size: 0.8rem; }
-            .logout-btn { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
-            .recipe-header { flex-direction: column; }
-            .action-buttons { width: 100%; }
-            .action-buttons button { flex: 1; }
-            .page-header { flex-direction: column; align-items: flex-start; }
-            .sync-status { top: 70px; right: 10px; left: 10px; text-align: center; }
-            .data-actions { flex-direction: column; }
-            .data-action-btn { width: 100%; justify-content: center; }
-            .share-methods { grid-template-columns: 1fr; }
+            .recipes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .buttons-row {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .alphabet-scroll {
+                gap: 0.15rem;
+                padding: 0.5rem;
+            }
+            
+            .alphabet-letter {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.8rem;
+                min-width: 24px;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .header {
+                padding: 0.75rem;
+            }
+            
+            .search-section {
+                padding: 0.75rem;
+            }
+            
+            .form {
+                padding: 1rem;
+            }
         }
-        @media (min-width: 768px) {
-            .recipe-details { grid-template-columns: 1fr 1fr; }
+
+        @media (max-width: 480px) {
+            .recipes-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .recipe-image {
+                height: 120px;
+            }
+            
+            .recipe-info {
+                padding: 0.5rem;
+            }
+            
+            .recipe-name {
+                font-size: 0.8rem;
+            }
+            
+            .recipe-spirit {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -342,271 +948,238 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React;
+        const { useState, useEffect, useRef } = React;
         
-        // Configuration
-        const ADMIN_CREDENTIALS = { username: 'suraj', password: 'cocktail123' };
+        // Authentication configuration
+        const ADMIN_CREDENTIALS = {
+            username: 'suraj',
+            password: 'cocktail123'
+        };
 
-        // Data Service - Simple localStorage with URL data sharing
-        const dataService = {
-            async loadData() {
-                try {
-                    console.log('🔄 Loading data from localStorage...');
-                    
-                    // First, check if there's data in the URL (for user access)
-                    const urlData = this.getDataFromURL();
-                    if (urlData) {
-                        console.log('📥 Loaded data from URL');
-                        return urlData;
+        // Enhanced Storage Manager with IndexedDB
+        const StorageManager = {
+            db: null,
+            dbName: 'CocktailCodexDB',
+            version: 1,
+            
+            async init() {
+                return new Promise((resolve, reject) => {
+                    if (this.db) {
+                        resolve(this.db);
+                        return;
                     }
+
+                    const request = indexedDB.open(this.dbName, this.version);
                     
-                    const savedData = localStorage.getItem('cocktailData');
-                    if (savedData) {
-                        const data = JSON.parse(savedData);
-                        console.log('📥 Loaded from localStorage:', data);
-                        return data;
-                    }
-                    
-                    // Return default data structure
-                    const defaultData = {
-                        recipes: [],
-                        settings: {
-                            spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                            glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                            venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-                        }
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve(this.db);
                     };
                     
-                    console.log('📥 Using default data');
-                    return defaultData;
-                } catch (error) {
-                    console.error('❌ Error loading data:', error);
-                    return {
-                        recipes: [],
-                        settings: {
-                            spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                            glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                            venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        if (!db.objectStoreNames.contains('recipes')) {
+                            db.createObjectStore('recipes', { keyPath: 'id' });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('syrups')) {
+                            db.createObjectStore('syrups', { keyPath: 'id' });
+                        }
+                        
+                        if (!db.objectStoreNames.contains('settings')) {
+                            db.createObjectStore('settings', { keyPath: 'id' });
                         }
                     };
-                }
+                });
             },
 
-            async saveData(data) {
-                try {
-                    console.log('💾 Saving data to localStorage...');
-                    localStorage.setItem('cocktailData', JSON.stringify(data));
-                    console.log('✅ Data saved to localStorage');
-                    return { success: true };
-                } catch (error) {
-                    console.error('❌ Error saving data:', error);
-                    return { success: false, error: error.message };
-                }
-            },
-
-            exportData() {
-                const data = localStorage.getItem('cocktailData');
-                if (!data) {
-                    alert('No data to export!');
-                    return;
-                }
-
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'cocktail-data.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            },
-
-            importData(file, onSuccess, onError) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        // Validate the data structure
-                        if (!data.recipes || !data.settings) {
-                            throw new Error('Invalid data format');
-                        }
-                        
-                        localStorage.setItem('cocktailData', JSON.stringify(data));
-                        console.log('✅ Data imported successfully');
-                        onSuccess();
-                    } catch (error) {
-                        console.error('❌ Error importing data:', error);
-                        onError('Invalid file format. Please select a valid cocktail data file.');
-                    }
+            getAvailableStorage() {
+                return {
+                    estimated: 500,
+                    type: 'IndexedDB'
                 };
-                reader.onerror = () => onError('Error reading file');
-                reader.readAsText(file);
             },
 
-            // Generate shareable URL with data embedded
-            generateShareableURL() {
-                const data = localStorage.getItem('cocktailData');
-                if (!data) {
-                    return null;
-                }
-
-                // Compress and encode data for URL
+            async getStorageUsage() {
                 try {
-                    // For larger datasets, we might need to use compression
-                    // For now, we'll use base64 encoding
-                    const compressedData = btoa(unescape(encodeURIComponent(data)));
-                    const currentUrl = window.location.origin + window.location.pathname;
-                    return `${currentUrl}?data=${compressedData}`;
+                    const recipes = await this.getAll('recipes');
+                    const syrups = await this.getAll('syrups');
+                    const settings = await this.getAll('settings');
+                    
+                    const allData = { recipes, syrups, settings };
+                    const sizeInMB = (JSON.stringify(allData).length) / 1024 / 1024;
+                    return Math.round(sizeInMB * 100) / 100;
                 } catch (error) {
-                    console.error('Error generating share URL:', error);
-                    return null;
+                    return 0;
                 }
             },
 
-            // Extract data from URL
-            getDataFromURL() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const encodedData = urlParams.get('data');
-                
-                if (encodedData) {
-                    try {
-                        const decodedData = decodeURIComponent(escape(atob(encodedData)));
-                        return JSON.parse(decodedData);
-                    } catch (error) {
-                        console.error('Error decoding URL data:', error);
-                        return null;
-                    }
-                }
-                return null;
+            async getAll(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
             },
 
-            // Generate QR code data URL (simplified)
-            generateQRCodeData() {
-                const shareUrl = this.generateShareableURL();
-                if (!shareUrl) return null;
-                
-                // In a real implementation, you would use a QR code library
-                // For now, we'll return a data URL that can be used with external QR generators
-                return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+            async get(storeName, id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.get(id);
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async put(storeName, data) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.put(data);
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async delete(storeName, id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.delete(id);
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async clear(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.clear();
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            // Image compression
+            compressImage(base64String, maxWidth = 400, quality = 0.8) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedBase64);
+                    };
+                    img.src = base64String;
+                });
             }
         };
 
-        // Data operations
-        const getRecipes = async () => {
-            const data = await dataService.loadData();
-            return data.recipes || [];
-        };
-
-        const getSettings = async () => {
-            const data = await dataService.loadData();
-            return data.settings || {
-                spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-            };
-        };
-
-        const saveRecipe = async (recipe, isEdit = false) => {
-            console.log('💾 Saving recipe:', recipe.name);
-            const data = await dataService.loadData();
-            let updatedRecipes;
+        // Data Manager
+        const DataManager = {
+            initialized: false,
             
-            if (isEdit) {
-                updatedRecipes = data.recipes.map(r => r.id === recipe.id ? recipe : r);
-            } else {
-                const newRecipe = { 
-                    ...recipe, 
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+            async init() {
+                if (!this.initialized) {
+                    await StorageManager.init();
+                    this.initialized = true;
+                }
+            },
+
+            async getAllData() {
+                await this.init();
+                const [recipes, syrups, settings] = await Promise.all([
+                    StorageManager.getAll('recipes'),
+                    StorageManager.getAll('syrups'),
+                    StorageManager.getAll('settings')
+                ]);
+                
+                const defaultSettings = {
+                    id: 'app_settings',
+                    spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
+                    glass_types: ['Martini', 'Highball', 'Old Fashioned', 'Collins', 'Coupe', 'Margarita'],
+                    venues: ['Bar', 'Restaurant', 'Event', 'Home'],
+                    syrup_types: ['Simple Syrup', 'Honey Syrup', 'Grenadine', 'Orgeat', 'Demerara Syrup']
                 };
-                updatedRecipes = [...data.recipes, newRecipe];
+                
+                const appSettings = settings.find(s => s.id === 'app_settings') || defaultSettings;
+                
+                return {
+                    recipes: recipes || [],
+                    syrups: syrups || [],
+                    settings: appSettings
+                };
+            },
+
+            async saveRecipe(recipe) {
+                await this.init();
+                return await StorageManager.put('recipes', recipe);
+            },
+
+            async saveSyrup(syrup) {
+                await this.init();
+                return await StorageManager.put('syrups', syrup);
+            },
+
+            async saveSettings(settings) {
+                await this.init();
+                const settingsWithId = { ...settings, id: 'app_settings' };
+                return await StorageManager.put('settings', settingsWithId);
+            },
+
+            async deleteRecipe(id) {
+                await this.init();
+                return await StorageManager.delete('recipes', id);
+            },
+
+            async deleteSyrup(id) {
+                await this.init();
+                return await StorageManager.delete('syrups', id);
+            },
+
+            async clearAllData() {
+                await this.init();
+                await Promise.all([
+                    StorageManager.clear('recipes'),
+                    StorageManager.clear('syrups'),
+                    StorageManager.clear('settings')
+                ]);
             }
-            
-            const updatedData = {
-                ...data,
-                recipes: updatedRecipes
-            };
-            
-            const result = await dataService.saveData(updatedData);
-            return { 
-                ...result, 
-                recipe: isEdit ? recipe : updatedRecipes[updatedRecipes.length - 1]
-            };
-        };
-
-        const deleteRecipe = async (recipeId) => {
-            console.log('🗑️ Deleting recipe:', recipeId);
-            const data = await dataService.loadData();
-            const updatedRecipes = data.recipes.filter(recipe => recipe.id !== recipeId);
-            
-            const updatedData = {
-                ...data,
-                recipes: updatedRecipes
-            };
-            
-            const result = await dataService.saveData(updatedData);
-            return result;
-        };
-
-        const saveSettings = async (newSettings) => {
-            console.log('⚙️ Saving settings...');
-            const data = await dataService.loadData();
-            
-            const updatedData = {
-                ...data,
-                settings: newSettings
-            };
-            
-            const result = await dataService.saveData(updatedData);
-            return result;
-        };
-
-        // Utility functions
-        const convertImageToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        };
-
-        // Check if user is accessing via shared data URL
-        const isUserAccess = () => {
-            return dataService.getDataFromURL() !== null;
         };
 
         // Authentication Hook
         function useAuth() {
             const [user, setUser] = useState(null);
-            const [loading, setLoading] = useState(true);
             
             useEffect(() => {
-                const checkAuth = () => {
-                    try {
-                        // If accessing via shared URL, automatically set as user
-                        if (isUserAccess()) {
-                            const guestUser = { username: 'User', isAdmin: false };
-                            setUser(guestUser);
-                            localStorage.setItem('cocktailAppUser', JSON.stringify(guestUser));
-                            setLoading(false);
-                            return;
-                        }
-
-                        const savedUser = localStorage.getItem('cocktailAppUser');
-                        if (savedUser) {
-                            const userData = JSON.parse(savedUser);
-                            setUser(userData);
-                        }
-                    } catch (error) {
-                        console.error('Error loading user:', error);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                
-                checkAuth();
+                const savedUser = localStorage.getItem('cocktailAppUser');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                }
             }, []);
             
             const login = (username, password) => {
@@ -629,128 +1202,257 @@
             const logout = () => {
                 setUser(null);
                 localStorage.removeItem('cocktailAppUser');
-                // If user was accessing via shared URL, redirect to clean URL
-                if (isUserAccess()) {
-                    window.location.href = window.location.origin + window.location.pathname;
-                }
             };
             
-            return { user, loading, login, loginAsGuest, logout };
+            return { user, login, loginAsGuest, logout };
         }
 
-        // User Access Component - For Admin to share access
-        function UserAccess({ onSyncStatus }) {
-            const [shareUrl, setShareUrl] = useState(null);
-            const [qrCodeUrl, setQrCodeUrl] = useState(null);
+        // Storage Status Component
+        function StorageStatus({ data, isAdmin }) {
+            const [storageInfo, setStorageInfo] = useState({ usage: 0, limit: '500+ MB' });
             
             useEffect(() => {
-                const url = dataService.generateShareableURL();
-                setShareUrl(url);
-                
-                if (url) {
-                    const qrUrl = dataService.generateQRCodeData();
-                    setQrCodeUrl(qrUrl);
-                }
-            }, []);
+                const loadStorageInfo = async () => {
+                    const usage = await StorageManager.getStorageUsage();
+                    setStorageInfo({ usage, limit: '500+ MB' });
+                };
+                loadStorageInfo();
+            }, [data]);
             
-            const copyToClipboard = () => {
-                if (!shareUrl) {
-                    onSyncStatus('error', 'No data to share! Please add some recipes first.');
-                    return;
-                }
-                
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    onSyncStatus('success', 'Share URL copied to clipboard!');
-                }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = shareUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    onSyncStatus('success', 'Share URL copied to clipboard!');
-                });
+            return (
+                <div>
+                    <div className="storage-upgrade">
+                        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem'}}>
+                            <span>🚀</span>
+                            <strong>Enhanced Storage Active</strong>
+                        </div>
+                        <div style={{fontSize: '0.8rem', color: '#666'}}>
+                            Using IndexedDB - Up to 500MB+ capacity
+                        </div>
+                    </div>
+                    
+                    <div className="storage-status">
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+                            <span>💾 IndexedDB</span>
+                            {isAdmin && <span className="role-badge admin">ADMIN</span>}
+                        </div>
+                        <div style={{fontSize: '0.7rem'}}>
+                            {data.recipes.length} cocktails • {data.syrups.length} syrups • 
+                            {storageInfo.usage}MB / {storageInfo.limit} used
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Alphabetical Quick Search Component
+        function AlphabetScroll({ onLetterClick, activeLetter }) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            return (
+                <div className="alphabet-scroll">
+                    {alphabet.map(letter => (
+                        <div
+                            key={letter}
+                            className={`alphabet-letter ${activeLetter === letter ? 'active' : ''}`}
+                            onClick={() => onLetterClick(letter)}
+                        >
+                            {letter}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // Draggable Settings List Component
+        function DraggableSettingsList({ items, onReorder, onRemove, placeholder, isAdmin }) {
+            const [draggedItem, setDraggedItem] = useState(null);
+            
+            const handleDragStart = (e, index) => {
+                if (!isAdmin) return;
+                setDraggedItem(index);
+                e.dataTransfer.effectAllowed = 'move';
             };
             
-            const downloadDataFile = () => {
-                dataService.exportData();
-                onSyncStatus('success', 'Data file downloaded!');
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            };
+            
+            const handleDrop = (e, index) => {
+                e.preventDefault();
+                if (!isAdmin) return;
+                if (draggedItem !== null && draggedItem !== index) {
+                    const newItems = [...items];
+                    const [removed] = newItems.splice(draggedItem, 1);
+                    newItems.splice(index, 0, removed);
+                    onReorder(newItems);
+                }
+                setDraggedItem(null);
+            };
+            
+            if (items.length === 0) {
+                return <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>{placeholder}</div>;
+            }
+            
+            return (
+                <ul className="settings-list">
+                    {items.map((item, index) => (
+                        <li 
+                            key={index} 
+                            className={`settings-item ${draggedItem === index ? 'dragging' : ''}`} 
+                            draggable={isAdmin}
+                            onDragStart={(e) => handleDragStart(e, index)} 
+                            onDragOver={handleDragOver} 
+                            onDrop={(e) => handleDrop(e, index)}
+                        >
+                            <span>{item}</span>
+                            {isAdmin && (
+                                <div className="settings-actions">
+                                    <button className="icon-button delete" onClick={() => onRemove(index)}>×</button>
+                                </div>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
+
+        // Settings Page Component
+        function SettingsPage({ onBack, isAdmin, data, onUpdateSettings }) {
+            const [settings, setSettings] = useState(data.settings);
+            const [newItems, setNewItems] = useState({ 
+                spirit_types: '', 
+                glass_types: '', 
+                venues: '',
+                syrup_types: ''
+            });
+            
+            useEffect(() => {
+                onUpdateSettings(settings);
+            }, [settings, onUpdateSettings]);
+            
+            const handleAddItem = (type) => {
+                if (!isAdmin) return;
+                const value = newItems[type].trim();
+                if (!value) {
+                    alert('Please enter a value');
+                    return;
+                }
+                setSettings(prev => ({ ...prev, [type]: [...prev[type], value] }));
+                setNewItems(prev => ({ ...prev, [type]: '' }));
+            };
+            
+            const handleKeyPress = (e, type) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddItem(type);
+                }
+            };
+            
+            const handleRemoveItem = (type, index) => {
+                if (!isAdmin) return;
+                setSettings(prev => ({ ...prev, [type]: prev[type].filter((_, i) => i !== index) }));
+            };
+            
+            const handleReorderItems = (type, newItems) => {
+                if (!isAdmin) return;
+                setSettings(prev => ({ ...prev, [type]: newItems }));
+            };
+            
+            const handleInputChange = (type, value) => {
+                setNewItems(prev => ({ ...prev, [type]: value }));
             };
             
             return (
-                <div className="user-access-section">
-                    <h2 className="page-title">Share with Users</h2>
+                <div className="container">
+                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
+                    <h1 className="page-title">
+                        Settings
+                        {isAdmin ? (
+                            <span className="role-badge admin">ADMIN</span>
+                        ) : (
+                            <span className="role-badge user">VIEWER</span>
+                        )}
+                    </h1>
                     
-                    {!shareUrl ? (
-                        <div className="data-section">
-                            <p style={{color: '#ff6b6b', textAlign: 'center'}}>
-                                No data to share! Please add some recipes first.
+                    {!isAdmin ? (
+                        <div className="settings-section">
+                            <h3 className="settings-title">View Only Mode</h3>
+                            <p style={{color: '#666', lineHeight: '1.6'}}>
+                                You are currently in <strong>Viewer Mode</strong>. To modify settings, 
+                                please log in as an administrator.
                             </p>
                         </div>
                     ) : (
                         <>
-                            <div className="share-methods">
-                                <div className="share-method">
-                                    <h4>📱 Share via URL</h4>
-                                    <p style={{fontSize: '0.9rem', marginBottom: '1rem', color: '#888'}}>
-                                        Copy this URL and share it with users. When they open it, they'll see all your recipes.
-                                    </p>
-                                    <div className="access-code">
-                                        {shareUrl}
-                                    </div>
-                                    <button className="data-action-btn export" onClick={copyToClipboard} style={{width: '100%'}}>
-                                        📋 Copy Share URL
-                                    </button>
+                            <div className="settings-section">
+                                <h3 className="settings-title">Spirit Types</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="Add new spirit type" 
+                                        value={newItems.spirit_types} 
+                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)} 
+                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')} 
+                                        style={{flex: 1}} 
+                                    />
+                                    <button className="button" onClick={() => handleAddItem('spirit_types')}>Add</button>
                                 </div>
-                                
-                                <div className="share-method">
-                                    <h4>📄 Share via File</h4>
-                                    <p style={{fontSize: '0.9rem', marginBottom: '1rem', color: '#888'}}>
-                                        Download a data file that users can import on their devices.
-                                    </p>
-                                    <button className="data-action-btn import" onClick={downloadDataFile} style={{width: '100%'}}>
-                                        📥 Download Data File
-                                    </button>
-                                </div>
+                                <DraggableSettingsList 
+                                    items={settings.spirit_types} 
+                                    onReorder={(newItems) => handleReorderItems('spirit_types', newItems)} 
+                                    onRemove={(index) => handleRemoveItem('spirit_types', index)} 
+                                    placeholder="No spirit types added yet" 
+                                    isAdmin={isAdmin} 
+                                />
                             </div>
                             
-                            <div className="data-section">
-                                <h3 className="data-title">QR Code for Mobile Access</h3>
-                                <p className="data-description">
-                                    Users can scan this QR code with their phone cameras to quickly access the cocktail menu.
-                                </p>
-                                
-                                <div className="qr-code">
-                                    {qrCodeUrl ? (
-                                        <img src={qrCodeUrl} alt="QR Code" style={{width: '200px', height: '200px', borderRadius: '8px'}} />
-                                    ) : (
-                                        <div className="qr-placeholder">
-                                            QR Code<br/>(Scan with phone camera)
-                                        </div>
-                                    )}
+                            <div className="settings-section">
+                                <h3 className="settings-title">Venues</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="Add new venue" 
+                                        value={newItems.venues} 
+                                        onChange={(e) => handleInputChange('venues', e.target.value)} 
+                                        onKeyPress={(e) => handleKeyPress(e, 'venues')} 
+                                        style={{flex: 1}} 
+                                    />
+                                    <button className="button" onClick={() => handleAddItem('venues')}>Add</button>
                                 </div>
+                                <DraggableSettingsList 
+                                    items={settings.venues} 
+                                    onReorder={(newItems) => handleReorderItems('venues', newItems)} 
+                                    onRemove={(index) => handleRemoveItem('venues', index)} 
+                                    placeholder="No venues added yet" 
+                                    isAdmin={isAdmin} 
+                                />
                             </div>
-                            
-                            <div className="data-section">
-                                <h3 className="data-title">How to Share</h3>
-                                <p className="data-description">
-                                    <strong>Option 1 - URL Sharing (Recommended):</strong><br/>
-                                    1. Copy the share URL above<br/>
-                                    2. Send it to your team via WhatsApp, Email, etc.<br/>
-                                    3. Users open the URL to instantly see all recipes<br/>
-                                    <br/>
-                                    <strong>Option 2 - File Sharing:</strong><br/>
-                                    1. Download the data file<br/>
-                                    2. Share the file with your team<br/>
-                                    3. Users import the file in the app<br/>
-                                    <br/>
-                                    <strong>User Permissions:</strong><br/>
-                                    ✅ View all cocktail recipes<br/>
-                                    ✅ Search and filter cocktails<br/>
-                                    ✅ Use scale feature to adjust quantities<br/>
-                                    ❌ Cannot modify any data
-                                </p>
+
+                            <div className="settings-section">
+                                <h3 className="settings-title">Syrup Types</h3>
+                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="Add new syrup type" 
+                                        value={newItems.syrup_types} 
+                                        onChange={(e) => handleInputChange('syrup_types', e.target.value)} 
+                                        onKeyPress={(e) => handleKeyPress(e, 'syrup_types')} 
+                                        style={{flex: 1}} 
+                                    />
+                                    <button className="button" onClick={() => handleAddItem('syrup_types')}>Add</button>
+                                </div>
+                                <DraggableSettingsList 
+                                    items={settings.syrup_types} 
+                                    onReorder={(newItems) => handleReorderItems('syrup_types', newItems)} 
+                                    onRemove={(index) => handleRemoveItem('syrup_types', index)} 
+                                    placeholder="No syrup types added yet" 
+                                    isAdmin={isAdmin} 
+                                />
                             </div>
                         </>
                     )}
@@ -758,214 +1460,7 @@
             );
         }
 
-        // Data Management Component
-        function DataManagement({ onSyncStatus }) {
-            const { refreshData } = useData();
-            const fileInputRef = useRef(null);
-            
-            const handleExport = () => {
-                dataService.exportData();
-                onSyncStatus('success', 'Data exported successfully');
-            };
-            
-            const handleImportClick = () => {
-                fileInputRef.current?.click();
-            };
-            
-            const handleImport = (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                if (file.type !== 'application/json') {
-                    onSyncStatus('error', 'Please select a JSON file');
-                    return;
-                }
-                
-                dataService.importData(
-                    file,
-                    () => {
-                        onSyncStatus('success', 'Data imported successfully');
-                        refreshData();
-                        if (fileInputRef.current) {
-                            fileInputRef.current.value = '';
-                        }
-                    },
-                    (error) => {
-                        onSyncStatus('error', error);
-                    }
-                );
-            };
-            
-            return (
-                <div className="data-management">
-                    <h2 className="page-title">Data Management</h2>
-                    
-                    <div className="data-section">
-                        <h3 className="data-title">Export Data</h3>
-                        <p className="data-description">
-                            Download all cocktail recipes and settings as a JSON file for backup.
-                        </p>
-                        <div className="data-actions">
-                            <button className="data-action-btn export" onClick={handleExport}>
-                                📥 Export Data
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div className="data-section">
-                        <h3 className="data-title">Import Data</h3>
-                        <p className="data-description">
-                            Upload a previously exported JSON file to restore your cocktail data.
-                        </p>
-                        <div className="data-actions">
-                            <button className="data-action-btn import" onClick={handleImportClick}>
-                                📤 Import Data
-                            </button>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept=".json"
-                                onChange={handleImport}
-                                className="file-input"
-                            />
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Sync Status Component
-        function SyncStatus({ status, message }) {
-            if (!status) return null;
-            
-            return (
-                <div className={`sync-status ${status}`}>
-                    {status === 'success' && '✅ ' + (message || 'Success')}
-                    {status === 'error' && '❌ ' + (message || 'Error')}
-                </div>
-            );
-        }
-
-        // Loading Component
-        function LoadingSpinner() {
-            return (
-                <div className="loading">
-                    <div>Loading...</div>
-                </div>
-            );
-        }
-
-        // Data Context for global state management
-        const DataContext = React.createContext();
-
-        function DataProvider({ children }) {
-            const [recipes, setRecipes] = useState([]);
-            const [settings, setSettings] = useState(null);
-            const [loading, setLoading] = useState(true);
-
-            const loadAllData = useCallback(async () => {
-                try {
-                    setLoading(true);
-                    const data = await dataService.loadData();
-                    
-                    const recipesData = Array.isArray(data.recipes) ? data.recipes : [];
-                    const settingsData = data.settings || {
-                        spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                        glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                        venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-                    };
-                    
-                    setRecipes(recipesData);
-                    setSettings(settingsData);
-                } catch (error) {
-                    console.error('❌ Error loading data:', error);
-                    setRecipes([]);
-                    setSettings({
-                        spirit_types: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                        glass_types: ['Coupe', 'Martini', 'Highball', 'Old Fashioned', 'Collins', 'Margarita'],
-                        venues: ['Main Bar', 'Pool Bar', 'Restaurant', 'Private Event']
-                    });
-                } finally {
-                    setLoading(false);
-                }
-            }, []);
-
-            const refreshData = useCallback(async () => {
-                await loadAllData();
-            }, [loadAllData]);
-
-            useEffect(() => {
-                loadAllData();
-            }, [loadAllData]);
-
-            const value = {
-                recipes,
-                settings,
-                loading,
-                refreshData,
-                setRecipes,
-                setSettings
-            };
-
-            return (
-                <DataContext.Provider value={value}>
-                    {children}
-                </DataContext.Provider>
-            );
-        }
-
-        function useData() {
-            const context = React.useContext(DataContext);
-            if (!context) {
-                throw new Error('useData must be used within a DataProvider');
-            }
-            return context;
-        }
-
-        // Scale Control Component
-        function ScaleControl({ ingredients, onScaleChange }) {
-            const [scale, setScale] = useState(1);
-            
-            const handleScaleChange = (newScale) => {
-                setScale(newScale);
-                onScaleChange(newScale);
-            };
-            
-            const resetScale = () => {
-                handleScaleChange(1);
-            };
-            
-            return (
-                <div className="scale-control">
-                    <div className="scale-header">
-                        <div className="scale-title">Adjust Recipe Scale</div>
-                        <button className="scale-reset" onClick={resetScale}>
-                            Reset to 1x
-                        </button>
-                    </div>
-                    
-                    <input
-                        type="range"
-                        min="0.25"
-                        max="4"
-                        step="0.25"
-                        value={scale}
-                        onChange={(e) => handleScaleChange(parseFloat(e.target.value))}
-                        className="scale-slider"
-                    />
-                    
-                    <div className="scale-values">
-                        <div className={`scale-value ${scale === 0.25 ? 'active' : ''}`}>0.25x</div>
-                        <div className={`scale-value ${scale === 0.5 ? 'active' : ''}`}>0.5x</div>
-                        <div className={`scale-value ${scale === 1 ? 'active' : ''}`}>1x</div>
-                        <div className={`scale-value ${scale === 2 ? 'active' : ''}`}>2x</div>
-                        <div className={`scale-value ${scale === 4 ? 'active' : ''}`}>4x</div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Hamburger Menu Component - Simplified for users
+        // Hamburger Menu Component
         function HamburgerMenu({ isOpen, onToggle, currentPage, onNavigate, isAdmin }) {
             const menuRef = useRef(null);
             
@@ -979,12 +1474,10 @@
                 
                 if (isOpen) {
                     document.addEventListener('mousedown', handleClickOutside);
-                    document.addEventListener('touchstart', handleClickOutside);
                 }
                 
                 return () => {
                     document.removeEventListener('mousedown', handleClickOutside);
-                    document.removeEventListener('touchstart', handleClickOutside);
                 };
             }, [isOpen, onToggle]);
             
@@ -999,7 +1492,7 @@
                     <div ref={menuRef} className={`side-menu ${isOpen ? 'active' : ''}`}>
                         <div className="side-menu-header">
                             <div className="side-menu-logo">🍸</div>
-                            <div className="side-menu-title">Cocktail Manual</div>
+                            <div className="side-menu-title">Cocktail Codex</div>
                         </div>
                         
                         <nav className="side-menu-nav">
@@ -1007,37 +1500,28 @@
                                 className={`side-menu-button ${currentPage === 'home' ? 'active' : ''}`}
                                 onClick={() => handleNavigation('home')}
                             >
-                                📖 Cocktail Menu
+                                📖 Cocktail Codex
                             </button>
                             
                             {isAdmin && (
                                 <>
                                     <button 
-                                        className={`side-menu-button ${currentPage === 'create-recipe' ? 'active' : ''}`}
-                                        onClick={() => handleNavigation('create-recipe')}
+                                        className={`side-menu-button ${currentPage === 'create' ? 'active' : ''}`}
+                                        onClick={() => handleNavigation('create')}
                                     >
                                         ➕ Add Recipe
                                     </button>
-                                    
+                                    <button 
+                                        className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
+                                        onClick={() => handleNavigation('syrups')}
+                                    >
+                                        🍯 Syrups
+                                    </button>
                                     <button 
                                         className={`side-menu-button ${currentPage === 'settings' ? 'active' : ''}`}
                                         onClick={() => handleNavigation('settings')}
                                     >
                                         ⚙️ Settings
-                                    </button>
-                                    
-                                    <button 
-                                        className={`side-menu-button ${currentPage === 'data-management' ? 'active' : ''}`}
-                                        onClick={() => handleNavigation('data-management')}
-                                    >
-                                        💾 Data Management
-                                    </button>
-                                    
-                                    <button 
-                                        className={`side-menu-button ${currentPage === 'user-access' ? 'active' : ''}`}
-                                        onClick={() => handleNavigation('user-access')}
-                                    >
-                                        👥 Share with Users
                                     </button>
                                 </>
                             )}
@@ -1050,40 +1534,297 @@
         // Recipe Card Component
         function RecipeCard({ recipe, onClick }) {
             const imageStyle = {
-                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none'
             };
             
             return (
                 <div className="recipe-card" onClick={() => onClick(recipe)}>
                     <div className="recipe-image" style={imageStyle}>
-                        {!recipe.image_url && '🍸'}
+                        {!recipe.image_url && 'No Image'}
                     </div>
                     <div className="recipe-info">
                         <div className="recipe-name">{recipe.name}</div>
                         <div className="recipe-spirit">{recipe.spirit_type}</div>
+                        {recipe.abv && <div style={{fontSize: '0.7rem', color: '#888'}}>{recipe.abv}% ABV</div>}
+                        {recipe.cost && <div style={{fontSize: '0.7rem', color: '#888'}}>${recipe.cost}</div>}
+                    </div>
+                </div>
+            );
+        }
+
+        // Syrup Card Component
+        function SyrupCard({ syrup, onClick }) {
+            const imageStyle = {
+                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'
+            };
+            
+            return (
+                <div className="recipe-card" onClick={() => onClick(syrup)}>
+                    <div className="recipe-image" style={imageStyle}>
+                        {!syrup.image_url && 'No Image'}
+                    </div>
+                    <div className="recipe-info">
+                        <div className="recipe-name">{syrup.name}</div>
+                        <div className="recipe-spirit">{syrup.type}</div>
+                        {syrup.cost && <div style={{fontSize: '0.7rem', color: '#888'}}>${syrup.cost}</div>}
+                    </div>
+                </div>
+            );
+        }
+
+        // Scale Modal Component
+        function ScaleModal({ recipe, onClose }) {
+            const [scaleMethod, setScaleMethod] = useState('servings');
+            const [quantity, setQuantity] = useState(1);
+            const [volumeUnit, setVolumeUnit] = useState('ml');
+            const [dilution, setDilution] = useState('0');
+            const [customDilution, setCustomDilution] = useState('');
+            
+            const calculateOriginalVolume = () => {
+                return recipe.ingredients.reduce((total, ingredient) => {
+                    if (ingredient.unit === 'ml') return total + parseFloat(ingredient.amount);
+                    if (ingredient.unit === 'oz') return total + (parseFloat(ingredient.amount) * 29.5735);
+                    return total;
+                }, 0);
+            };
+            
+            const convertToMl = (amount, unit) => {
+                switch(unit) {
+                    case 'oz': return amount * 29.5735;
+                    case 'l': return amount * 1000;
+                    case 'gal': return amount * 3785.41;
+                    default: return amount;
+                }
+            };
+            
+            const calculateScaledIngredients = () => {
+                const originalVolume = calculateOriginalVolume();
+                let scaleFactor, servings = 1;
+                
+                if (scaleMethod === 'servings') {
+                    scaleFactor = quantity;
+                    servings = quantity;
+                } else {
+                    const targetVolume = convertToMl(quantity, volumeUnit);
+                    scaleFactor = targetVolume / originalVolume;
+                    servings = Math.round((targetVolume / originalVolume) * 10) / 10;
+                }
+                
+                const dilutionPercentage = dilution === 'custom' ? parseFloat(customDilution) : parseFloat(dilution);
+                const totalScaledVolume = originalVolume * scaleFactor;
+                const dilutionWater = (totalScaledVolume * dilutionPercentage) / 100;
+                
+                const scaledIngredients = recipe.ingredients.map(ingredient => ({
+                    ...ingredient,
+                    scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
+                }));
+                
+                if (dilutionWater > 0) {
+                    scaledIngredients.push({
+                        name: 'Water (for dilution)',
+                        scaledAmount: Math.round(dilutionWater * 10) / 10,
+                        unit: 'ml'
+                    });
+                }
+                
+                return { ingredients: scaledIngredients, servings, totalVolume: totalScaledVolume + dilutionWater };
+            };
+            
+            const scaledResult = calculateScaledIngredients();
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>Scale: {recipe.name}</h2>
+                        
+                        <div className="scale-option">
+                            <h3 className="scale-option-title">Scale by Number of Servings</h3>
+                            <p className="scale-option-description">Choose this option if you know how many servings you need.</p>
+                            <div className="radio-group">
+                                <label className="radio-option">
+                                    <input 
+                                        type="radio" 
+                                        name="scaleMethod" 
+                                        value="servings" 
+                                        checked={scaleMethod === 'servings'} 
+                                        onChange={(e) => setScaleMethod(e.target.value)} 
+                                    />
+                                    Scale by Servings
+                                </label>
+                                {scaleMethod === 'servings' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                        <label>Enter Quantity:</label>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            value={quantity} 
+                                            onChange={(e) => setQuantity(parseInt(e.target.value))} 
+                                            className="form-input" 
+                                            style={{width: '100px'}} 
+                                        />
+                                        <span>servings</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="scale-option">
+                            <h3 className="scale-option-title">Scale by Total Volume</h3>
+                            <p className="scale-option-description">Ideal for filling a specific container or batch size.</p>
+                            <div className="radio-group">
+                                <label className="radio-option">
+                                    <input 
+                                        type="radio" 
+                                        name="scaleMethod" 
+                                        value="volume" 
+                                        checked={scaleMethod === 'volume'} 
+                                        onChange={(e) => setScaleMethod(e.target.value)} 
+                                    />
+                                    Scale by Volume
+                                </label>
+                                {scaleMethod === 'volume' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap'}}>
+                                        <label>Enter Quantity:</label>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            step="0.1" 
+                                            value={quantity} 
+                                            onChange={(e) => setQuantity(parseFloat(e.target.value))} 
+                                            className="form-input" 
+                                            style={{width: '100px'}} 
+                                        />
+                                        <select 
+                                            value={volumeUnit} 
+                                            onChange={(e) => setVolumeUnit(e.target.value)} 
+                                            className="form-input" 
+                                            style={{width: '120px'}}
+                                        >
+                                            <option value="ml">Milliliters</option>
+                                            <option value="oz">Ounces</option>
+                                            <option value="l">Liters</option>
+                                            <option value="gal">Gallons</option>
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="scale-option">
+                            <h3 className="scale-option-title">Add Dilution (Optional)</h3>
+                            <p className="scale-option-description">Choose a dilution percentage that suits your cocktail.</p>
+                            <div className="dilution-options">
+                                {['0', '18', '25', 'custom'].map(value => (
+                                    <label key={value} className="dilution-option">
+                                        <input 
+                                            type="radio" 
+                                            name="dilution" 
+                                            value={value} 
+                                            checked={dilution === value} 
+                                            onChange={(e) => setDilution(e.target.value)} 
+                                        />
+                                        <div className="dilution-label">
+                                            <span className="dilution-percentage">
+                                                {value === '0' ? '0% (No Dilution)' : value === 'custom' ? 'Custom:' : `${value}%`}
+                                            </span>
+                                            <span className="dilution-description">
+                                                {value === '0' ? 'Best if you plan to shake or stir your drinks to order.' :
+                                                 value === '18' ? 'Best for strong drinks containing mainly spirits.' :
+                                                 value === '25' ? 'Ideal for cocktails containing fruit juices, dairy, or eggs.' :
+                                                 'Enter custom dilution percentage'}
+                                            </span>
+                                        </div>
+                                    </label>
+                                ))}
+                                {dilution === 'custom' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem'}}>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            max="100" 
+                                            value={customDilution} 
+                                            onChange={(e) => setCustomDilution(e.target.value)} 
+                                            className="form-input" 
+                                            style={{width: '80px'}} 
+                                            placeholder="0" 
+                                        />
+                                        <span>%</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {scaleMethod === 'volume' && (
+                            <div className="servings-info">
+                                <div>This batch will make approximately</div>
+                                <div className="servings-count">{scaledResult.servings} servings</div>
+                            </div>
+                        )}
+                        
+                        <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Scaled Ingredients</h3>
+                        <ul className="ingredients-list">
+                            {scaledResult.ingredients.map((ingredient, index) => (
+                                <li key={index} className="ingredient-item">
+                                    <span>{ingredient.name}</span>
+                                    <span>{ingredient.scaledAmount} {ingredient.unit}</span>
+                                </li>
+                            ))}
+                        </ul>
+                        
+                        <div className="buttons-row">
+                            <button className="button" onClick={onClose}>Close</button>
+                        </div>
                     </div>
                 </div>
             );
         }
 
         // View Recipe Component
-        function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
+        function ViewRecipePage({ recipe, onBack, onScale, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const backgroundStyle = {
-                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none'
             };
             
-            const [scaledIngredients, setScaledIngredients] = useState(recipe.ingredients);
+            const handleShare = async () => {
+                const recipeText = `
+🍸 ${recipe.name}
+
+${recipe.spirit_type} • ${recipe.glass_type} Glass
+${recipe.abv}% ABV • $${recipe.cost} Cost • ${recipe.venue}
+
+INGREDIENTS:
+${recipe.ingredients.map(ing => `• ${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}
+
+INSTRUCTIONS:
+${recipe.instructions}
+
+${recipe.notes ? `NOTES:\n${recipe.notes}` : ''}
+                `.trim();
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: recipe.name,
+                            text: recipeText
+                        });
+                    } catch (error) {
+                        console.log('Share cancelled');
+                    }
+                } else {
+                    navigator.clipboard.writeText(recipeText);
+                    alert('Recipe copied to clipboard!');
+                }
+            };
             
-            const handleScaleChange = (scale) => {
-                const scaled = recipe.ingredients.map(ingredient => ({
-                    ...ingredient,
-                    scaledAmount: ingredient.amount * scale
-                }));
-                setScaledIngredients(scaled);
+            const handleDownloadImage = () => {
+                if (recipe.image_url) {
+                    const link = document.createElement('a');
+                    link.href = recipe.image_url;
+                    link.download = `${recipe.name.replace(/\s+/g, '_')}.jpg`;
+                    link.click();
+                } else {
+                    alert('No image available for download');
+                }
             };
             
             return (
@@ -1105,33 +1846,24 @@
                                         <div className="meta-item">{recipe.spirit_type}</div>
                                         <div className="meta-item">{recipe.glass_type} Glass</div>
                                         <div className="meta-item">{recipe.abv}% ABV</div>
-                                        <div className="meta-item">${recipe.pour_cost} Cost</div>
+                                        <div className="meta-item">${recipe.cost} Cost</div>
                                         <div className="meta-item">{recipe.venue}</div>
                                     </div>
                                 </div>
                             </div>
                             
-                            {/* Scale Control - Available to all users */}
-                            <ScaleControl 
-                                ingredients={recipe.ingredients} 
-                                onScaleChange={handleScaleChange}
-                            />
+                            {recipe.image_url && (
+                                <div className="recipe-image-large" style={{backgroundImage: `url(${recipe.image_url})`}}></div>
+                            )}
                             
                             <div className="recipe-details">
                                 <div>
                                     <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
                                     <ul className="ingredients-list">
-                                        {scaledIngredients.map((ingredient, index) => (
+                                        {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
                                                 <span>{ingredient.name}</span>
-                                                <span>
-                                                    {ingredient.scaledAmount || ingredient.amount} {ingredient.unit}
-                                                    {ingredient.scaledAmount && ingredient.scaledAmount !== ingredient.amount && (
-                                                        <span style={{color: '#FFB366', fontSize: '0.8rem', marginLeft: '0.5rem'}}>
-                                                            ({ingredient.amount} {ingredient.unit})
-                                                        </span>
-                                                    )}
-                                                </span>
+                                                <span>{ingredient.amount} {ingredient.unit}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -1148,23 +1880,35 @@
                                         </>
                                     )}
                                     
-                                    {/* Action buttons - Only for admin */}
-                                    {isAdmin && (
-                                        <div className="action-buttons">
-                                            <button 
-                                                className="action-button edit"
-                                                onClick={() => onEditRecipe(recipe)}
-                                            >
-                                                ✏️ Edit
+                                    <div className="action-buttons">
+                                        <button className="action-button scale" onClick={onScale}>
+                                            ⚖️ Scale Recipe
+                                        </button>
+                                        <button className="action-button" onClick={handleShare}>
+                                            📤 Share
+                                        </button>
+                                        {recipe.image_url && (
+                                            <button className="action-button" onClick={handleDownloadImage}>
+                                                📷 Download Image
                                             </button>
-                                            <button 
-                                                className="action-button delete"
-                                                onClick={() => onDeleteRecipe(recipe.id)}
-                                            >
-                                                🗑️ Delete
-                                            </button>
-                                        </div>
-                                    )}
+                                        )}
+                                        {isAdmin && (
+                                            <>
+                                                <button 
+                                                    className="action-button edit"
+                                                    onClick={() => onEditRecipe(recipe)}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                                <button 
+                                                    className="action-button delete"
+                                                    onClick={() => onDeleteRecipe(recipe.id)}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1173,65 +1917,181 @@
             );
         }
 
-        // Home Page Component - Works for both admin and users
-        function HomePage({ onRecipeClick, isAdmin, onCreateRecipe, onSyncStatus }) {
-            const { recipes, settings, loading } = useData();
+        // View Syrup Component
+        function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
+            const backgroundStyle = {
+                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'
+            };
+            
+            const handleShare = async () => {
+                const syrupText = `
+🍯 ${syrup.name}
+
+${syrup.type}
+$${syrup.cost} Cost • ${syrup.venue}
+
+INGREDIENTS:
+${syrup.ingredients.map(ing => `• ${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}
+
+INSTRUCTIONS:
+${syrup.instructions}
+
+${syrup.notes ? `NOTES:\n${syrup.notes}` : ''}
+                `.trim();
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: syrup.name,
+                            text: syrupText
+                        });
+                    } catch (error) {
+                        console.log('Share cancelled');
+                    }
+                } else {
+                    navigator.clipboard.writeText(syrupText);
+                    alert('Syrup recipe copied to clipboard!');
+                }
+            };
+            
+            const handleDownloadImage = () => {
+                if (syrup.image_url) {
+                    const link = document.createElement('a');
+                    link.href = syrup.image_url;
+                    link.download = `${syrup.name.replace(/\s+/g, '_')}.jpg`;
+                    link.click();
+                } else {
+                    alert('No image available for download');
+                }
+            };
+            
+            return (
+                <div className="container">
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Syrups
+                    </button>
+                    
+                    <div className="recipe-view">
+                        {syrup.image_url && (
+                            <div className="recipe-background" style={backgroundStyle}></div>
+                        )}
+                        
+                        <div className="recipe-content">
+                            <div className="recipe-header">
+                                <div>
+                                    <h1 className="recipe-title">{syrup.name}</h1>
+                                    <div className="recipe-meta">
+                                        <div className="meta-item">{syrup.type}</div>
+                                        <div className="meta-item">${syrup.cost} Cost</div>
+                                        <div className="meta-item">{syrup.venue}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {syrup.image_url && (
+                                <div className="recipe-image-large" style={{backgroundImage: `url(${syrup.image_url})`}}></div>
+                            )}
+                            
+                            <div className="recipe-details">
+                                <div>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
+                                    <ul className="ingredients-list">
+                                        {syrup.ingredients.map((ingredient, index) => (
+                                            <li key={index} className="ingredient-item">
+                                                <span>{ingredient.name}</span>
+                                                <span>{ingredient.amount} {ingredient.unit}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
+                                    <div className="instructions">{syrup.instructions}</div>
+                                    
+                                    {syrup.notes && (
+                                        <>
+                                            <h3 style={{color: '#FFB366', marginBottom: '1rem', marginTop: '1.5rem'}}>Notes</h3>
+                                            <div className="instructions">{syrup.notes}</div>
+                                        </>
+                                    )}
+                                    
+                                    <div className="action-buttons">
+                                        <button className="action-button" onClick={handleShare}>
+                                            📤 Share
+                                        </button>
+                                        {syrup.image_url && (
+                                            <button className="action-button" onClick={handleDownloadImage}>
+                                                📷 Download Image
+                                            </button>
+                                        )}
+                                        {isAdmin && (
+                                            <>
+                                                <button 
+                                                    className="action-button edit"
+                                                    onClick={() => onEditSyrup(syrup)}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                                <button 
+                                                    className="action-button delete"
+                                                    onClick={() => onDeleteSyrup(syrup.id)}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Home Page Component
+        function HomePage({ recipes, onRecipeClick, isAdmin, onCreateRecipe, settings }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
+            const [activeLetter, setActiveLetter] = useState('');
             
-            // Filter recipes based on search and filters
-            const filteredRecipes = recipes.filter(recipe => {
+            // Sort recipes alphabetically
+            const sortedRecipes = [...recipes].sort((a, b) => a.name.localeCompare(b.name));
+            
+            const filteredRecipes = sortedRecipes.filter(recipe => {
                 const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesSpirit = filterSpirit === 'All' || recipe.spirit_type === filterSpirit;
                 const matchesVenue = filterVenue === 'All' || recipe.venue === filterVenue;
-                
-                return matchesSearch && matchesSpirit && matchesVenue;
+                const matchesLetter = !activeLetter || recipe.name.toUpperCase().startsWith(activeLetter);
+                return matchesSearch && matchesSpirit && matchesVenue && matchesLetter;
             });
             
-            // Group recipes by first letter
-            const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
-                const firstLetter = recipe.name.charAt(0).toUpperCase();
-                if (!groups[firstLetter]) groups[firstLetter] = [];
-                groups[firstLetter].push(recipe);
-                return groups;
-            }, {});
+            const handleLetterClick = (letter) => {
+                setActiveLetter(activeLetter === letter ? '' : letter);
+                setSearchTerm(''); // Clear search when using alphabetical navigation
+            };
             
-            // Sort the groups alphabetically
-            const sortedLetters = Object.keys(groupedRecipes).sort();
-            
-            if (loading) {
-                return <LoadingSpinner />;
-            }
-
             return (
                 <div className="container">
                     <div className="page-header">
-                        <h1 className="page-title">Cocktail Menu</h1>
-                        {isAdmin && !isUserAccess() && (
+                        <h1 className="page-title">
+                            Cocktail Codex
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
+                        {isAdmin && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
                             </button>
                         )}
-                        {isUserAccess() && (
-                            <span style={{color: '#FFB366', fontSize: '0.9rem'}}>📱 Shared View</span>
-                        )}
                     </div>
                     
-                    {isUserAccess() && (
-                        <div style={{
-                            background: '#1A1A1A',
-                            padding: '1rem',
-                            borderRadius: '8px',
-                            marginBottom: '1rem',
-                            border: '1px solid #333',
-                            textAlign: 'center'
-                        }}>
-                            <p style={{color: '#FFB366', margin: 0}}>
-                                📋 <strong>Read-Only Mode</strong> - Viewing shared cocktail recipes
-                            </p>
-                        </div>
-                    )}
+                    <StorageStatus data={{ recipes, syrups: [], settings }} isAdmin={isAdmin} />
                     
                     <div className="search-section">
                         <input 
@@ -1242,6 +2102,11 @@
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         
+                        <AlphabetScroll 
+                            onLetterClick={handleLetterClick}
+                            activeLetter={activeLetter}
+                        />
+                        
                         <div className="filters">
                             <select 
                                 className="filter-select"
@@ -1249,7 +2114,7 @@
                                 onChange={(e) => setFilterSpirit(e.target.value)}
                             >
                                 <option value="All">All Spirits</option>
-                                {settings?.spirit_types?.map(spirit => (
+                                {settings.spirit_types.map(spirit => (
                                     <option key={spirit} value={spirit}>{spirit}</option>
                                 ))}
                             </select>
@@ -1260,7 +2125,7 @@
                                 onChange={(e) => setFilterVenue(e.target.value)}
                             >
                                 <option value="All">All Venues</option>
-                                {settings?.venues?.map(venue => (
+                                {settings.venues.map(venue => (
                                     <option key={venue} value={venue}>{venue}</option>
                                 ))}
                             </select>
@@ -1271,12 +2136,10 @@
                         <div className="loading">
                             {recipes.length === 0 ? (
                                 <div>
-                                    <p>No cocktails available.</p>
-                                    {isAdmin && !isUserAccess() && (
-                                        <p style={{marginTop: '1rem'}}>
-                                            <button className="button" onClick={onCreateRecipe}>
-                                                + Add Your First Recipe
-                                            </button>
+                                    <p>No cocktails found.</p>
+                                    {isAdmin && (
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add Recipe" to create your first cocktail!
                                         </p>
                                     )}
                                 </div>
@@ -1285,60 +2148,146 @@
                             )}
                         </div>
                     ) : (
-                        <>
-                            <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                Showing {filteredRecipes.length} of {recipes.length} cocktails
-                                {!isAdmin && ' (Read-Only)'}
-                            </div>
-                            {sortedLetters.map(letter => (
-                                <div key={letter} className="alphabet-section">
-                                    <h2 className="letter-header">{letter}</h2>
-                                    <div className="recipes-grid">
-                                        {groupedRecipes[letter].map(recipe => (
-                                            <RecipeCard 
-                                                key={recipe.id}
-                                                recipe={recipe}
-                                                onClick={onRecipeClick}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                        <div className="recipes-grid">
+                            {filteredRecipes.map(recipe => (
+                                <RecipeCard 
+                                    key={recipe.id} 
+                                    recipe={recipe} 
+                                    onClick={onRecipeClick}
+                                />
                             ))}
-                        </>
+                        </div>
                     )}
                 </div>
             );
         }
 
-        // Create/Edit Recipe Component - Admin only
-        function CreateEditRecipePage({ recipe, onBack, isEdit = false, onSyncStatus }) {
-            const { refreshData } = useData();
-            const [formData, setFormData] = useState(
-                recipe || {
-                    name: '',
-                    spirit_type: '',
-                    venue: '',
-                    glass_type: '',
-                    abv: '',
-                    pour_cost: '',
-                    image_url: '',
-                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
-                    instructions: '',
-                    notes: ''
-                }
-            );
+        // Syrups Page Component
+        function SyrupsPage({ syrups, onSyrupClick, isAdmin, onCreateSyrup, settings }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterType, setFilterType] = useState('All');
+            const [filterVenue, setFilterVenue] = useState('All');
+            const [activeLetter, setActiveLetter] = useState('');
             
-            const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
-            const [settings, setSettings] = useState(null);
-            const [loading, setLoading] = useState(false);
+            // Sort syrups alphabetically
+            const sortedSyrups = [...syrups].sort((a, b) => a.name.localeCompare(b.name));
+            
+            const filteredSyrups = sortedSyrups.filter(syrup => {
+                const matchesSearch = syrup.name.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesType = filterType === 'All' || syrup.type === filterType;
+                const matchesVenue = filterVenue === 'All' || syrup.venue === filterVenue;
+                const matchesLetter = !activeLetter || syrup.name.toUpperCase().startsWith(activeLetter);
+                return matchesSearch && matchesType && matchesVenue && matchesLetter;
+            });
+            
+            const handleLetterClick = (letter) => {
+                setActiveLetter(activeLetter === letter ? '' : letter);
+                setSearchTerm(''); // Clear search when using alphabetical navigation
+            };
+            
+            return (
+                <div className="container">
+                    <div className="page-header">
+                        <h1 className="page-title">
+                            Syrups
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
+                        {isAdmin && (
+                            <button className="button" onClick={onCreateSyrup}>
+                                + Add Syrup
+                            </button>
+                        )}
+                    </div>
+                    
+                    <div className="search-section">
+                        <input 
+                            type="text"
+                            className="search-box"
+                            placeholder="Search syrups..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        
+                        <AlphabetScroll 
+                            onLetterClick={handleLetterClick}
+                            activeLetter={activeLetter}
+                        />
+                        
+                        <div className="filters">
+                            <select 
+                                className="filter-select"
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                            >
+                                <option value="All">All Types</option>
+                                {settings.syrup_types.map(type => (
+                                    <option key={type} value={type}>{type}</option>
+                                ))}
+                            </select>
+                            
+                            <select 
+                                className="filter-select"
+                                value={filterVenue}
+                                onChange={(e) => setFilterVenue(e.target.value)}
+                            >
+                                <option value="All">All Venues</option>
+                                {settings.venues.map(venue => (
+                                    <option key={venue} value={venue}>{venue}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    {filteredSyrups.length === 0 ? (
+                        <div className="loading">
+                            {syrups.length === 0 ? (
+                                <div>
+                                    <p>No syrups found.</p>
+                                    {isAdmin && (
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add Syrup" to create your first syrup!
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                'No syrups found matching your criteria.'
+                            )}
+                        </div>
+                    ) : (
+                        <div className="recipes-grid">
+                            {filteredSyrups.map(syrup => (
+                                <SyrupCard 
+                                    key={syrup.id} 
+                                    syrup={syrup} 
+                                    onClick={onSyrupClick}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Create Recipe Component with Image Drag & Drop
+        function CreateRecipePage({ onBack, onSave, isAdmin, settings, editingRecipe, isSyrup = false }) {
+            const [formData, setFormData] = useState({
+                name: '', spirit_type: '', venue: '', glass_type: '', abv: '', cost: '', 
+                image_url: '', ingredients: [{ name: '', amount: '', unit: 'ml' }], instructions: '', notes: ''
+            });
+            
+            const [imagePreview, setImagePreview] = useState('');
+            const [isDragging, setIsDragging] = useState(false);
             
             useEffect(() => {
-                const loadSettings = async () => {
-                    const settingsData = await getSettings();
-                    setSettings(settingsData);
-                };
-                loadSettings();
-            }, []);
+                if (editingRecipe) {
+                    setFormData(editingRecipe);
+                    setImagePreview(editingRecipe.image_url || '');
+                }
+            }, [editingRecipe]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -1366,104 +2315,139 @@
                 }
             };
             
-            const handleImageUpload = async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    try {
-                        const base64 = await convertImageToBase64(file);
-                        setFormData(prev => ({ ...prev, image_url: base64 }));
-                        setImagePreview(base64);
-                    } catch (error) {
-                        console.error('Error uploading image:', error);
-                        alert('Error uploading image. Please try again.');
-                    }
-                }
-            };
-            
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                
-                if (!formData.name) {
-                    alert('Please at least enter a cocktail name');
+            const handleImageUpload = async (file) => {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
                     return;
                 }
                 
-                setLoading(true);
-                onSyncStatus('syncing', 'Saving recipe...');
-                
                 try {
-                    const recipeData = {
-                        ...formData,
-                        abv: parseFloat(formData.abv) || 0,
-                        pour_cost: parseFloat(formData.pour_cost) || 0
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        let base64 = e.target.result;
+                        // Compress image if needed
+                        if (file.size > 500000) { // 500KB
+                            base64 = await StorageManager.compressImage(base64);
+                        }
+                        setFormData(prev => ({ ...prev, image_url: base64 }));
+                        setImagePreview(base64);
                     };
-                    
-                    const result = await saveRecipe(recipeData, isEdit);
-                    
-                    await refreshData();
-                    
-                    if (result.success) {
-                        onSyncStatus('success', 'Recipe saved successfully');
-                        setTimeout(() => onBack(), 1000);
-                    } else {
-                        onSyncStatus('error', 'Failed to save recipe');
-                        alert('Error saving recipe. Please try again.');
-                    }
+                    reader.readAsDataURL(file);
                 } catch (error) {
-                    console.error('Error saving recipe:', error);
-                    onSyncStatus('error', 'Failed to save recipe');
-                    alert('Error saving recipe. Please try again.');
-                } finally {
-                    setLoading(false);
+                    alert('Error uploading image. Please try again.');
                 }
             };
             
-            if (!settings) return <LoadingSpinner />;
+            const handleFileInput = (e) => {
+                const file = e.target.files[0];
+                if (file) handleImageUpload(file);
+            };
+            
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            };
+            
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            };
+            
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files[0];
+                if (file) handleImageUpload(file);
+            };
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formData.name) {
+                    alert('Please enter a name');
+                    return;
+                }
+                const itemData = {
+                    ...formData,
+                    id: editingRecipe ? editingRecipe.id : Date.now().toString(),
+                    abv: parseFloat(formData.abv) || 0,
+                    cost: parseFloat(formData.cost) || 0
+                };
+                onSave(itemData);
+            };
+            
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>← Back</button>
+                        <div className="loading">
+                            <h2>Admin Access Required</h2>
+                            <p>Only administrators can create {isSyrup ? 'syrups' : 'recipes'}.</p>
+                        </div>
+                    </div>
+                );
+            }
             
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
+                        ← Back to {isSyrup ? 'Syrups' : 'Cocktails'}
                     </button>
-                    
-                    <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
+                    <h1 className="page-title">
+                        {editingRecipe ? `Edit ${isSyrup ? 'Syrup' : 'Cocktail'}` : `Add New ${isSyrup ? 'Syrup' : 'Cocktail'}`}
+                    </h1>
                     
                     <form className="form" onSubmit={handleSubmit}>
-                        {/* Form content remains the same as before */}
                         <div className="form-group">
-                            <label className="form-label">Cocktail Name *</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                required
+                            <label className="form-label">{isSyrup ? 'Syrup' : 'Cocktail'} Name *</label>
+                            <input 
+                                type="text" 
+                                className="form-input" 
+                                name="name" 
+                                value={formData.name} 
+                                onChange={handleInputChange} 
+                                required 
                             />
                         </div>
                         
                         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                            <div className="form-group">
-                                <label className="form-label">Spirit Type</label>
-                                <select
-                                    className="form-input"
-                                    name="spirit_type"
-                                    value={formData.spirit_type}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="">Select Spirit</option>
-                                    {settings.spirit_types.map(spirit => (
-                                        <option key={spirit} value={spirit}>{spirit}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            {!isSyrup ? (
+                                <div className="form-group">
+                                    <label className="form-label">Spirit Type</label>
+                                    <select 
+                                        className="form-input" 
+                                        name="spirit_type" 
+                                        value={formData.spirit_type} 
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="">Select Spirit</option>
+                                        {settings.spirit_types.map(spirit => (
+                                            <option key={spirit} value={spirit}>{spirit}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div className="form-group">
+                                    <label className="form-label">Syrup Type</label>
+                                    <select 
+                                        className="form-input" 
+                                        name="type" 
+                                        value={formData.type} 
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="">Select Type</option>
+                                        {settings.syrup_types.map(type => (
+                                            <option key={type} value={type}>{type}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                             
                             <div className="form-group">
                                 <label className="form-label">Venue</label>
-                                <select
-                                    className="form-input"
-                                    name="venue"
-                                    value={formData.venue}
+                                <select 
+                                    className="form-input" 
+                                    name="venue" 
+                                    value={formData.venue} 
                                     onChange={handleInputChange}
                                 >
                                     <option value="">Select Venue</option>
@@ -1474,65 +2458,67 @@
                             </div>
                         </div>
                         
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                            <div className="form-group">
-                                <label className="form-label">Glass Type</label>
-                                <select
-                                    className="form-input"
-                                    name="glass_type"
-                                    value={formData.glass_type}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="">Select Glass</option>
-                                    {settings.glass_types.map(glass => (
-                                        <option key={glass} value={glass}>{glass}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            
+                        {!isSyrup && (
                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                                 <div className="form-group">
                                     <label className="form-label">ABV (%)</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="form-input"
-                                        name="abv"
-                                        value={formData.abv}
-                                        onChange={handleInputChange}
+                                    <input 
+                                        type="number" 
+                                        step="0.1" 
+                                        className="form-input" 
+                                        name="abv" 
+                                        value={formData.abv} 
+                                        onChange={handleInputChange} 
                                     />
                                 </div>
                                 
                                 <div className="form-group">
-                                    <label className="form-label">Pour Cost ($)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        className="form-input"
-                                        name="pour_cost"
-                                        value={formData.pour_cost}
-                                        onChange={handleInputChange}
+                                    <label className="form-label">Cost ($)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        className="form-input" 
+                                        name="cost" 
+                                        value={formData.cost} 
+                                        onChange={handleInputChange} 
                                     />
                                 </div>
                             </div>
-                        </div>
+                        )}
+                        
+                        {isSyrup && (
+                            <div className="form-group">
+                                <label className="form-label">Cost ($)</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01" 
+                                    className="form-input" 
+                                    name="cost" 
+                                    value={formData.cost} 
+                                    onChange={handleInputChange} 
+                                />
+                            </div>
+                        )}
                         
                         <div className="form-group">
-                            <label className="form-label">Cocktail Image</label>
-                            <div className="image-upload">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    style={{display: 'none'}}
-                                    id="image-upload"
+                            <label className="form-label">{isSyrup ? 'Syrup' : 'Cocktail'} Image</label>
+                            <div 
+                                className={`image-upload ${isDragging ? 'dragover' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                            >
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={handleFileInput} 
+                                    style={{display: 'none'}} 
+                                    id="image-upload" 
                                 />
                                 <label htmlFor="image-upload" style={{cursor: 'pointer'}}>
-                                    {imagePreview ? 'Change Image' : 'Upload Image'}
+                                    {imagePreview ? 'Change Image' : 'Click to upload or drag & drop'}
                                 </label>
-                                {imagePreview && (
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                                )}
+                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
                             </div>
                         </div>
                         
@@ -1540,40 +2526,42 @@
                             <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
                                 <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Ingredient name"
-                                        value={ingredient.name}
-                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                        style={{flex: 2}}
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="Ingredient name" 
+                                        value={ingredient.name} 
+                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} 
+                                        style={{flex: 2}} 
                                     />
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        className="form-input"
-                                        placeholder="Amount"
-                                        value={ingredient.amount}
-                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                                        style={{flex: 1}}
+                                    <input 
+                                        type="number" 
+                                        step="0.1" 
+                                        className="form-input" 
+                                        placeholder="Amount" 
+                                        value={ingredient.amount} 
+                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} 
+                                        style={{flex: 1}} 
                                     />
-                                    <select
-                                        className="form-input"
-                                        value={ingredient.unit}
-                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                        style={{flex: 1}}
+                                    <select 
+                                        className="form-input" 
+                                        value={ingredient.unit} 
+                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} 
+                                        style={{flex: 1}} 
                                     >
                                         <option value="ml">ml</option>
                                         <option value="oz">oz</option>
                                         <option value="dash">dash</option>
                                         <option value="piece">piece</option>
                                         <option value="slice">slice</option>
-                                        <option value="sprig">sprig</option>
+                                        <option value="cup">cup</option>
+                                        <option value="tsp">tsp</option>
+                                        <option value="tbsp">tbsp</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="icon-button delete"
+                                        <button 
+                                            type="button" 
+                                            className="icon-button delete" 
                                             onClick={() => removeIngredient(index)}
                                         >
                                             ×
@@ -1588,261 +2576,31 @@
                         
                         <div className="form-group">
                             <label className="form-label">Instructions</label>
-                            <textarea
-                                className="form-textarea"
-                                name="instructions"
-                                value={formData.instructions}
-                                onChange={handleInputChange}
+                            <textarea 
+                                className="form-textarea" 
+                                name="instructions" 
+                                value={formData.instructions} 
+                                onChange={handleInputChange} 
                             />
                         </div>
                         
                         <div className="form-group">
                             <label className="form-label">Notes</label>
-                            <textarea
-                                className="form-textarea"
-                                name="notes"
-                                value={formData.notes}
-                                onChange={handleInputChange}
+                            <textarea 
+                                className="form-textarea" 
+                                name="notes" 
+                                value={formData.notes} 
+                                onChange={handleInputChange} 
                             />
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button" disabled={loading}>
-                                {loading ? 'Saving...' : (isEdit ? 'Update Cocktail' : 'Save Cocktail')}
+                            <button type="submit" className="button">
+                                {editingRecipe ? `Update ${isSyrup ? 'Syrup' : 'Cocktail'}` : `Save ${isSyrup ? 'Syrup' : 'Cocktail'}`}
                             </button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>
-                                Cancel
-                            </button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
                         </div>
                     </form>
-                </div>
-            );
-        }
-
-        // Settings Page Component - Admin only
-        function SettingsPage({ onBack, isAdmin, onSyncStatus }) {
-            const { settings, refreshData } = useData();
-            const [newItems, setNewItems] = useState({
-                spirit_types: '',
-                glass_types: '',
-                venues: ''
-            });
-            const [loading, setLoading] = useState(false);
-            
-            const handleKeyPress = (e, type) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddItem(type);
-                }
-            };
-            
-            const handleAddItem = async (type) => {
-                const value = newItems[type].trim();
-                if (!value) {
-                    alert('Please enter a value');
-                    return;
-                }
-                
-                if (settings[type].includes(value)) {
-                    alert('This item already exists');
-                    return;
-                }
-                
-                const updatedSettings = {
-                    ...settings,
-                    [type]: [...settings[type], value]
-                };
-                
-                setLoading(true);
-                onSyncStatus('syncing', 'Saving settings...');
-                try {
-                    const result = await saveSettings(updatedSettings);
-                    setNewItems(prev => ({
-                        ...prev,
-                        [type]: ''
-                    }));
-                    
-                    await refreshData();
-                    
-                    if (result.success) {
-                        onSyncStatus('success', 'Settings saved successfully');
-                    } else {
-                        onSyncStatus('error', 'Failed to save settings');
-                    }
-                } catch (error) {
-                    console.error('Error saving settings:', error);
-                    onSyncStatus('error', 'Failed to save settings');
-                    alert('Error saving settings. Please try again.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            
-            const handleRemoveItem = async (type, index) => {
-                const updatedSettings = {
-                    ...settings,
-                    [type]: settings[type].filter((_, i) => i !== index)
-                };
-                
-                setLoading(true);
-                onSyncStatus('syncing', 'Saving settings...');
-                try {
-                    const result = await saveSettings(updatedSettings);
-                    
-                    await refreshData();
-                    
-                    if (result.success) {
-                        onSyncStatus('success', 'Settings saved successfully');
-                    } else {
-                        onSyncStatus('error', 'Failed to save settings');
-                    }
-                } catch (error) {
-                    console.error('Error saving settings:', error);
-                    onSyncStatus('error', 'Failed to save settings');
-                    alert('Error saving settings. Please try again.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            
-            const handleInputChange = (type, value) => {
-                setNewItems(prev => ({
-                    ...prev,
-                    [type]: value
-                }));
-            };
-            
-            if (!settings) return <LoadingSpinner />;
-            
-            return (
-                <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
-                    </button>
-                    
-                    <h1 className="page-title">Settings</h1>
-                    
-                    {!isAdmin ? (
-                        <div className="settings-section">
-                            <p>Admin access required to modify settings.</p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="settings-section">
-                                <h3 className="settings-title">Spirit Types</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new spirit type"
-                                        value={newItems.spirit_types}
-                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('spirit_types')}
-                                        disabled={loading}
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.spirit_types.map((item, index) => (
-                                        <li key={index} className="settings-item">
-                                            <span>{item}</span>
-                                            <div className="settings-actions">
-                                                <button 
-                                                    className="icon-button delete"
-                                                    onClick={() => handleRemoveItem('spirit_types', index)}
-                                                    disabled={loading}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            
-                            <div className="settings-section">
-                                <h3 className="settings-title">Glass Types</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new glass type"
-                                        value={newItems.glass_types}
-                                        onChange={(e) => handleInputChange('glass_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'glass_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('glass_types')}
-                                        disabled={loading}
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.glass_types.map((item, index) => (
-                                        <li key={index} className="settings-item">
-                                            <span>{item}</span>
-                                            <div className="settings-actions">
-                                                <button 
-                                                    className="icon-button delete"
-                                                    onClick={() => handleRemoveItem('glass_types', index)}
-                                                    disabled={loading}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            
-                            <div className="settings-section">
-                                <h3 className="settings-title">Venues</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new venue"
-                                        value={newItems.venues}
-                                        onChange={(e) => handleInputChange('venues', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'venues')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('venues')}
-                                        disabled={loading}
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.venues.map((item, index) => (
-                                        <li key={index} className="settings-item">
-                                            <span>{item}</span>
-                                            <div className="settings-actions">
-                                                <button 
-                                                    className="icon-button delete"
-                                                    onClick={() => handleRemoveItem('venues', index)}
-                                                    disabled={loading}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </>
-                    )}
                 </div>
             );
         }
@@ -1852,13 +2610,6 @@
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
             const [error, setError] = useState('');
-            
-            // If accessing via shared URL, automatically redirect to user access
-            useEffect(() => {
-                if (isUserAccess()) {
-                    onGuestLogin();
-                }
-            }, [onGuestLogin]);
             
             const handleSubmit = (e) => {
                 e.preventDefault();
@@ -1872,46 +2623,35 @@
             return (
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
-                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Manual</h1>
-                        
+                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
+                        <p style={{textAlign: 'center', color: '#666', marginBottom: '2rem'}}>
+                            Login as admin to manage recipes, or continue as guest to view.
+                        </p>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
                                 <label className="form-label">Username</label>
                                 <input 
-                                    type="text"
-                                    className="form-input"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
+                                    type="text" 
+                                    className="form-input" 
+                                    value={username} 
+                                    onChange={(e) => setUsername(e.target.value)} 
+                                    required 
                                 />
                             </div>
-                            
                             <div className="form-group">
                                 <label className="form-label">Password</label>
                                 <input 
-                                    type="password"
-                                    className="form-input"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
+                                    type="password" 
+                                    className="form-input" 
+                                    value={password} 
+                                    onChange={(e) => setPassword(e.target.value)} 
+                                    required 
                                 />
                             </div>
-                            
-                            {error && (
-                                <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>
-                                    {error}
-                                </div>
-                            )}
-                            
+                            {error && <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>{error}</div>}
                             <div className="buttons-row">
-                                <button type="submit" className="button">
-                                    Admin Login
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="button button-secondary"
-                                    onClick={onGuestLogin}
-                                >
+                                <button type="submit" className="button">Login as Admin</button>
+                                <button type="button" className="button button-secondary" onClick={onGuestLogin}>
                                     Continue as Guest
                                 </button>
                             </div>
@@ -1921,129 +2661,192 @@
             );
         }
 
+        // Mobile Floating Action Button Component
+        function MobileFAB({ isAdmin, currentPage, onNavigate }) {
+            const [isOpen, setIsOpen] = useState(false);
+            
+            const getFABConfig = () => {
+                switch(currentPage) {
+                    case 'home':
+                        return isAdmin ? [
+                            { icon: '➕', label: 'Add Recipe', action: () => onNavigate('create') },
+                            { icon: '🍯', label: 'Syrups', action: () => onNavigate('syrups') },
+                            { icon: '⚙️', label: 'Settings', action: () => onNavigate('settings') }
+                        ] : [
+                            { icon: '🍯', label: 'Syrups', action: () => onNavigate('syrups') }
+                        ];
+                    case 'syrups':
+                        return isAdmin ? [
+                            { icon: '➕', label: 'Add Syrup', action: () => onNavigate('create-syrup') },
+                            { icon: '📖', label: 'Cocktails', action: () => onNavigate('home') },
+                            { icon: '⚙️', label: 'Settings', action: () => onNavigate('settings') }
+                        ] : [
+                            { icon: '📖', label: 'Cocktails', action: () => onNavigate('home') }
+                        ];
+                    default:
+                        return [
+                            { icon: '📖', label: 'Cocktails', action: () => onNavigate('home') },
+                            { icon: '🍯', label: 'Syrups', action: () => onNavigate('syrups') }
+                        ];
+                }
+            };
+            
+            const fabConfig = getFABConfig();
+            
+            return (
+                <div className="mobile-actions">
+                    {isOpen && fabConfig.map((fab, index) => (
+                        <button
+                            key={index}
+                            className="mobile-fab secondary"
+                            onClick={() => {
+                                fab.action();
+                                setIsOpen(false);
+                            }}
+                            style={{
+                                transform: `translateY(-${(index + 1) * 60}px)`,
+                                transition: 'transform 0.3s ease'
+                            }}
+                        >
+                            {fab.icon}
+                        </button>
+                    ))}
+                    <button 
+                        className="mobile-fab"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        {isOpen ? '✕' : '⚡'}
+                    </button>
+                </div>
+            );
+        }
+
         // Main App Component
         function App() {
-            const { user, loading: authLoading, login, loginAsGuest, logout } = useAuth();
+            const { user, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
-            const [selectedRecipe, setSelectedRecipe] = useState(null);
+            const [appData, setAppData] = useState({ recipes: [], syrups: [], settings: {} });
+            const [loading, setLoading] = useState(true);
             const [menuOpen, setMenuOpen] = useState(false);
-            const [editingItem, setEditingItem] = useState(null);
-            const [isEditing, setIsEditing] = useState(false);
-            const [syncStatus, setSyncStatus] = useState({ status: null, message: '' });
+            const [selectedRecipe, setSelectedRecipe] = useState(null);
+            const [selectedSyrup, setSelectedSyrup] = useState(null);
+            const [showScaleModal, setShowScaleModal] = useState(false);
+            const [editingRecipe, setEditingRecipe] = useState(null);
+            const [editingSyrup, setEditingSyrup] = useState(null);
+            const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
             
-            // Clear sync status after 3 seconds
+            // Detect mobile screen size
             useEffect(() => {
-                if (syncStatus.status) {
-                    const timer = setTimeout(() => {
-                        setSyncStatus({ status: null, message: '' });
-                    }, 3000);
-                    return () => clearTimeout(timer);
-                }
-            }, [syncStatus]);
+                const handleResize = () => {
+                    setIsMobile(window.innerWidth <= 768);
+                };
+                
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
             
-            const navigateTo = (page, item = null) => {
-                // Users can only access home and view-recipe pages
-                if (!user?.isAdmin && (page === 'create-recipe' || page === 'settings' || page === 'data-management' || page === 'user-access')) {
-                    return;
-                }
+            // Load data from IndexedDB
+            useEffect(() => {
+                const loadData = async () => {
+                    try {
+                        const data = await DataManager.getAllData();
+                        setAppData(data);
+                    } catch (error) {
+                        console.error('Error loading data:', error);
+                        setAppData({
+                            recipes: [],
+                            syrups: [],
+                            settings: {
+                                id: 'app_settings',
+                                spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey'],
+                                glass_types: ['Martini', 'Highball', 'Old Fashioned'],
+                                venues: ['Bar', 'Restaurant', 'Home'],
+                                syrup_types: ['Simple Syrup', 'Honey Syrup', 'Grenadine', 'Orgeat', 'Demerara Syrup']
+                            }
+                        });
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                loadData();
+            }, []);
+            
+            const refreshData = async () => {
+                const data = await DataManager.getAllData();
+                setAppData(data);
+            };
+            
+            const navigateTo = (page) => {
                 setCurrentPage(page);
-                if (page === 'view-recipe') setSelectedRecipe(item);
                 setMenuOpen(false);
             };
             
+            const handleSaveRecipe = async (recipeData) => {
+                await DataManager.saveRecipe(recipeData);
+                await refreshData();
+                setCurrentPage('home');
+                setEditingRecipe(null);
+            };
+            
+            const handleSaveSyrup = async (syrupData) => {
+                await DataManager.saveSyrup(syrupData);
+                await refreshData();
+                setCurrentPage('syrups');
+                setEditingSyrup(null);
+            };
+            
+            const handleUpdateSettings = async (newSettings) => {
+                await DataManager.saveSettings(newSettings);
+                await refreshData();
+            };
+            
             const handleDeleteRecipe = async (recipeId) => {
-                if (!user || !user.isAdmin) return;
-                
                 if (confirm('Are you sure you want to delete this cocktail?')) {
-                    setSyncStatus({ status: 'syncing', message: 'Deleting recipe...' });
-                    try {
-                        const result = await deleteRecipe(recipeId);
-                        
-                        if (result.success) {
-                            setSyncStatus({ status: 'success', message: 'Recipe deleted successfully' });
-                        } else {
-                            setSyncStatus({ status: 'error', message: 'Failed to delete recipe' });
-                        }
-                        
-                        if (currentPage === 'view-recipe' && selectedRecipe?.id === recipeId) {
-                            navigateTo('home');
-                        }
-                    } catch (error) {
-                        console.error('Error deleting recipe:', error);
-                        setSyncStatus({ status: 'error', message: 'Failed to delete recipe' });
-                        alert('Error deleting recipe. Please try again.');
+                    await DataManager.deleteRecipe(recipeId);
+                    await refreshData();
+                    if (currentPage === 'view-recipe') {
+                        setCurrentPage('home');
+                    }
+                }
+            };
+            
+            const handleDeleteSyrup = async (syrupId) => {
+                if (confirm('Are you sure you want to delete this syrup?')) {
+                    await DataManager.deleteSyrup(syrupId);
+                    await refreshData();
+                    if (currentPage === 'view-syrup') {
+                        setCurrentPage('syrups');
                     }
                 }
             };
             
             const handleEditRecipe = (recipe) => {
-                setEditingItem(recipe);
-                setIsEditing(true);
-                setCurrentPage('create-recipe');
+                setEditingRecipe(recipe);
+                setCurrentPage('create');
             };
             
-            const handleSyncStatus = (status, message = '') => {
-                setSyncStatus({ status, message });
+            const handleEditSyrup = (syrup) => {
+                setEditingSyrup(syrup);
+                setCurrentPage('create-syrup');
             };
             
-            const renderPage = () => {
-                if (authLoading) {
-                    return <LoadingSpinner />;
-                }
-                
-                if (!user) {
-                    return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
-                }
-                
-                switch(currentPage) {
-                    case 'home':
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => {
-                                setIsEditing(false);
-                                setEditingItem(null);
-                                navigateTo('create-recipe');
-                            }}
-                            onSyncStatus={handleSyncStatus}
-                        />;
-                    case 'view-recipe':
-                        return <ViewRecipePage 
-                            recipe={selectedRecipe} 
-                            onBack={() => navigateTo('home')}
-                            isAdmin={user.isAdmin}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            onEditRecipe={handleEditRecipe}
-                        />;
-                    case 'create-recipe':
-                        return <CreateEditRecipePage 
-                            recipe={editingItem}
-                            onBack={() => navigateTo('home')} 
-                            isEdit={isEditing}
-                            onSyncStatus={handleSyncStatus}
-                        />;
-                    case 'settings':
-                        return <SettingsPage 
-                            onBack={() => navigateTo('home')} 
-                            isAdmin={user.isAdmin}
-                            onSyncStatus={handleSyncStatus}
-                        />;
-                    case 'data-management':
-                        return <DataManagement onSyncStatus={handleSyncStatus} />;
-                    case 'user-access':
-                        return <UserAccess onSyncStatus={handleSyncStatus} />;
-                    default:
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => navigateTo('create-recipe')}
-                            onSyncStatus={handleSyncStatus}
-                        />;
-                }
-            };
-            
-            if (authLoading) {
-                return <LoadingSpinner />;
+            if (loading) {
+                return (
+                    <div className="app">
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            height: '100vh',
+                            flexDirection: 'column',
+                            gap: '1rem'
+                        }}>
+                            <div style={{ fontSize: '2rem' }}>🍸</div>
+                            <div>Loading Cocktail Codex...</div>
+                        </div>
+                    </div>
+                );
             }
             
             if (!user) {
@@ -2051,58 +2854,144 @@
             }
             
             return (
-                <DataProvider>
-                    <div className="app">
-                        <header className="header">
-                            <div className="header-left">
-                                <button 
-                                    className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                    onClick={() => setMenuOpen(!menuOpen)}
-                                    aria-label="Toggle menu"
-                                >
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
-                                    <span className="menu-line"></span>
-                                </button>
-                            </div>
-                            
-                            <div className="nav-user">
-                                👤 {user.username}
-                                {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                                {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (User)</span>}
-                                <button className="logout-btn" onClick={logout}>
-                                    Logout
-                                </button>
-                            </div>
-                        </header>
+                <div className="app">
+                    <header className="header">
+                        <div className="header-left">
+                            <button 
+                                className={`menu-button ${menuOpen ? 'active' : ''}`} 
+                                onClick={() => setMenuOpen(!menuOpen)}
+                            >
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                            </button>
+                        </div>
+                        <div className="nav-user">
+                            👤 {user.username}
+                            {user.isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                            <button className="logout-btn" onClick={logout}>Logout</button>
+                        </div>
+                    </header>
+                    
+                    <HamburgerMenu 
+                        isOpen={menuOpen} 
+                        onToggle={setMenuOpen} 
+                        currentPage={currentPage} 
+                        onNavigate={navigateTo} 
+                        isAdmin={user.isAdmin} 
+                    />
+                    
+                    <main>
+                        {currentPage === 'home' && (
+                            <HomePage 
+                                recipes={appData.recipes}
+                                onRecipeClick={(recipe) => {
+                                    setSelectedRecipe(recipe);
+                                    setCurrentPage('view-recipe');
+                                }}
+                                isAdmin={user.isAdmin}
+                                onCreateRecipe={() => {
+                                    setEditingRecipe(null);
+                                    setCurrentPage('create');
+                                }}
+                                settings={appData.settings}
+                            />
+                        )}
                         
-                        <SyncStatus 
-                            status={syncStatus.status} 
-                            message={syncStatus.message} 
-                        />
+                        {currentPage === 'view-recipe' && selectedRecipe && (
+                            <ViewRecipePage 
+                                recipe={selectedRecipe}
+                                onBack={() => setCurrentPage('home')}
+                                onScale={() => setShowScaleModal(true)}
+                                isAdmin={user.isAdmin}
+                                onDeleteRecipe={handleDeleteRecipe}
+                                onEditRecipe={handleEditRecipe}
+                            />
+                        )}
                         
-                        <HamburgerMenu 
-                            isOpen={menuOpen}
-                            onToggle={setMenuOpen}
+                        {currentPage === 'syrups' && (
+                            <SyrupsPage 
+                                syrups={appData.syrups}
+                                onSyrupClick={(syrup) => {
+                                    setSelectedSyrup(syrup);
+                                    setCurrentPage('view-syrup');
+                                }}
+                                isAdmin={user.isAdmin}
+                                onCreateSyrup={() => {
+                                    setEditingSyrup(null);
+                                    setCurrentPage('create-syrup');
+                                }}
+                                settings={appData.settings}
+                            />
+                        )}
+                        
+                        {currentPage === 'view-syrup' && selectedSyrup && (
+                            <ViewSyrupPage 
+                                syrup={selectedSyrup}
+                                onBack={() => setCurrentPage('syrups')}
+                                isAdmin={user.isAdmin}
+                                onDeleteSyrup={handleDeleteSyrup}
+                                onEditSyrup={handleEditSyrup}
+                            />
+                        )}
+                        
+                        {currentPage === 'create' && (
+                            <CreateRecipePage 
+                                onBack={() => {
+                                    setCurrentPage('home');
+                                    setEditingRecipe(null);
+                                }}
+                                onSave={handleSaveRecipe}
+                                isAdmin={user.isAdmin}
+                                settings={appData.settings}
+                                editingRecipe={editingRecipe}
+                            />
+                        )}
+                        
+                        {currentPage === 'create-syrup' && (
+                            <CreateRecipePage 
+                                onBack={() => {
+                                    setCurrentPage('syrups');
+                                    setEditingSyrup(null);
+                                }}
+                                onSave={handleSaveSyrup}
+                                isAdmin={user.isAdmin}
+                                settings={appData.settings}
+                                editingRecipe={editingSyrup}
+                                isSyrup={true}
+                            />
+                        )}
+                        
+                        {currentPage === 'settings' && (
+                            <SettingsPage 
+                                onBack={() => setCurrentPage('home')}
+                                isAdmin={user.isAdmin}
+                                data={appData}
+                                onUpdateSettings={handleUpdateSettings}
+                            />
+                        )}
+                        
+                        {showScaleModal && selectedRecipe && (
+                            <ScaleModal 
+                                recipe={selectedRecipe}
+                                onClose={() => setShowScaleModal(false)}
+                            />
+                        )}
+                    </main>
+                    
+                    {/* Mobile Floating Action Button */}
+                    {isMobile && (
+                        <MobileFAB 
+                            isAdmin={user.isAdmin}
                             currentPage={currentPage}
                             onNavigate={navigateTo}
-                            isAdmin={user.isAdmin}
                         />
-                        
-                        <main>
-                            {renderPage()}
-                        </main>
-
-                        <footer className="footer">
-                            <p>
-                                Cocktail Manual © {new Date().getFullYear()} | Created by{' '}
-                                <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
-                                    @suraj.gg87
-                                </a>
-                            </p>
-                        </footer>
-                    </div>
-                </DataProvider>
+                    )}
+                </div>
             );
         }
 
