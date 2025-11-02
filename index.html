@@ -274,6 +274,7 @@
             font-size: 1.2rem;
             text-align: center;
             border: 2px solid #FFB366;
+            word-break: break-all;
         }
         .qr-code {
             text-align: center;
@@ -290,6 +291,23 @@
             border-radius: 8px;
             border: 2px solid #555;
             color: #888;
+        }
+        .share-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .share-method {
+            background: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #555;
+        }
+        .share-method h4 {
+            color: #FFB366;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -313,6 +331,7 @@
             .sync-status { top: 70px; right: 10px; left: 10px; text-align: center; }
             .data-actions { flex-direction: column; }
             .data-action-btn { width: 100%; justify-content: center; }
+            .share-methods { grid-template-columns: 1fr; }
         }
         @media (min-width: 768px) {
             .recipe-details { grid-template-columns: 1fr 1fr; }
@@ -328,11 +347,18 @@
         // Configuration
         const ADMIN_CREDENTIALS = { username: 'suraj', password: 'cocktail123' };
 
-        // Data Service - Simple localStorage
+        // Data Service - Simple localStorage with URL data sharing
         const dataService = {
             async loadData() {
                 try {
                     console.log('🔄 Loading data from localStorage...');
+                    
+                    // First, check if there's data in the URL (for user access)
+                    const urlData = this.getDataFromURL();
+                    if (urlData) {
+                        console.log('📥 Loaded data from URL');
+                        return urlData;
+                    }
                     
                     const savedData = localStorage.getItem('cocktailData');
                     if (savedData) {
@@ -419,10 +445,51 @@
                 reader.readAsText(file);
             },
 
-            // Generate access URL for users
-            generateAccessURL() {
-                const currentUrl = window.location.href.split('?')[0];
-                return currentUrl + '?access=user';
+            // Generate shareable URL with data embedded
+            generateShareableURL() {
+                const data = localStorage.getItem('cocktailData');
+                if (!data) {
+                    return null;
+                }
+
+                // Compress and encode data for URL
+                try {
+                    // For larger datasets, we might need to use compression
+                    // For now, we'll use base64 encoding
+                    const compressedData = btoa(unescape(encodeURIComponent(data)));
+                    const currentUrl = window.location.origin + window.location.pathname;
+                    return `${currentUrl}?data=${compressedData}`;
+                } catch (error) {
+                    console.error('Error generating share URL:', error);
+                    return null;
+                }
+            },
+
+            // Extract data from URL
+            getDataFromURL() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const encodedData = urlParams.get('data');
+                
+                if (encodedData) {
+                    try {
+                        const decodedData = decodeURIComponent(escape(atob(encodedData)));
+                        return JSON.parse(decodedData);
+                    } catch (error) {
+                        console.error('Error decoding URL data:', error);
+                        return null;
+                    }
+                }
+                return null;
+            },
+
+            // Generate QR code data URL (simplified)
+            generateQRCodeData() {
+                const shareUrl = this.generateShareableURL();
+                if (!shareUrl) return null;
+                
+                // In a real implementation, you would use a QR code library
+                // For now, we'll return a data URL that can be used with external QR generators
+                return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
             }
         };
 
@@ -505,10 +572,9 @@
             });
         };
 
-        // Check if user is accessing via user access URL
+        // Check if user is accessing via shared data URL
         const isUserAccess = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('access') === 'user';
+            return dataService.getDataFromURL() !== null;
         };
 
         // Authentication Hook
@@ -519,7 +585,7 @@
             useEffect(() => {
                 const checkAuth = () => {
                     try {
-                        // If accessing via user URL, automatically set as guest
+                        // If accessing via shared URL, automatically set as user
                         if (isUserAccess()) {
                             const guestUser = { username: 'User', isAdmin: false };
                             setUser(guestUser);
@@ -563,9 +629,9 @@
             const logout = () => {
                 setUser(null);
                 localStorage.removeItem('cocktailAppUser');
-                // If user was accessing via user URL, redirect to admin page
+                // If user was accessing via shared URL, redirect to clean URL
                 if (isUserAccess()) {
-                    window.location.href = window.location.href.split('?')[0];
+                    window.location.href = window.location.origin + window.location.pathname;
                 }
             };
             
@@ -574,72 +640,120 @@
 
         // User Access Component - For Admin to share access
         function UserAccess({ onSyncStatus }) {
-            const accessUrl = dataService.generateAccessURL();
+            const [shareUrl, setShareUrl] = useState(null);
+            const [qrCodeUrl, setQrCodeUrl] = useState(null);
+            
+            useEffect(() => {
+                const url = dataService.generateShareableURL();
+                setShareUrl(url);
+                
+                if (url) {
+                    const qrUrl = dataService.generateQRCodeData();
+                    setQrCodeUrl(qrUrl);
+                }
+            }, []);
             
             const copyToClipboard = () => {
-                navigator.clipboard.writeText(accessUrl).then(() => {
-                    onSyncStatus('success', 'URL copied to clipboard!');
+                if (!shareUrl) {
+                    onSyncStatus('error', 'No data to share! Please add some recipes first.');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    onSyncStatus('success', 'Share URL copied to clipboard!');
                 }).catch(() => {
                     // Fallback for older browsers
                     const textArea = document.createElement('textarea');
-                    textArea.value = accessUrl;
+                    textArea.value = shareUrl;
                     document.body.appendChild(textArea);
                     textArea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
-                    onSyncStatus('success', 'URL copied to clipboard!');
+                    onSyncStatus('success', 'Share URL copied to clipboard!');
                 });
+            };
+            
+            const downloadDataFile = () => {
+                dataService.exportData();
+                onSyncStatus('success', 'Data file downloaded!');
             };
             
             return (
                 <div className="user-access-section">
-                    <h2 className="page-title">User Access</h2>
+                    <h2 className="page-title">Share with Users</h2>
                     
-                    <div className="data-section">
-                        <h3 className="data-title">Share with Users</h3>
-                        <p className="data-description">
-                            Share this URL with your team members. When they open this link, 
-                            they will automatically get read-only access to all cocktail recipes.
-                        </p>
-                        
-                        <div className="access-code">
-                            {accessUrl}
+                    {!shareUrl ? (
+                        <div className="data-section">
+                            <p style={{color: '#ff6b6b', textAlign: 'center'}}>
+                                No data to share! Please add some recipes first.
+                            </p>
                         </div>
-                        
-                        <div className="data-actions">
-                            <button className="data-action-btn export" onClick={copyToClipboard}>
-                                📋 Copy User Access URL
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div className="data-section">
-                        <h3 className="data-title">QR Code for Mobile Access</h3>
-                        <p className="data-description">
-                            Users can scan this QR code with their phone cameras to quickly access the cocktail menu.
-                        </p>
-                        
-                        <div className="qr-code">
-                            <div className="qr-placeholder">
-                                QR Code<br/>(Scan with phone camera)
+                    ) : (
+                        <>
+                            <div className="share-methods">
+                                <div className="share-method">
+                                    <h4>📱 Share via URL</h4>
+                                    <p style={{fontSize: '0.9rem', marginBottom: '1rem', color: '#888'}}>
+                                        Copy this URL and share it with users. When they open it, they'll see all your recipes.
+                                    </p>
+                                    <div className="access-code">
+                                        {shareUrl}
+                                    </div>
+                                    <button className="data-action-btn export" onClick={copyToClipboard} style={{width: '100%'}}>
+                                        📋 Copy Share URL
+                                    </button>
+                                </div>
+                                
+                                <div className="share-method">
+                                    <h4>📄 Share via File</h4>
+                                    <p style={{fontSize: '0.9rem', marginBottom: '1rem', color: '#888'}}>
+                                        Download a data file that users can import on their devices.
+                                    </p>
+                                    <button className="data-action-btn import" onClick={downloadDataFile} style={{width: '100%'}}>
+                                        📥 Download Data File
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div className="data-section">
-                        <h3 className="data-title">User Permissions</h3>
-                        <p className="data-description">
-                            <strong>What users can do:</strong><br/>
-                            ✅ View all cocktail recipes<br/>
-                            ✅ Search and filter cocktails<br/>
-                            ✅ Use scale feature to adjust quantities<br/>
-                            <br/>
-                            <strong>What users cannot do:</strong><br/>
-                            ❌ Add, edit, or delete recipes<br/>
-                            ❌ Modify settings<br/>
-                            ❌ Export/import data
-                        </p>
-                    </div>
+                            
+                            <div className="data-section">
+                                <h3 className="data-title">QR Code for Mobile Access</h3>
+                                <p className="data-description">
+                                    Users can scan this QR code with their phone cameras to quickly access the cocktail menu.
+                                </p>
+                                
+                                <div className="qr-code">
+                                    {qrCodeUrl ? (
+                                        <img src={qrCodeUrl} alt="QR Code" style={{width: '200px', height: '200px', borderRadius: '8px'}} />
+                                    ) : (
+                                        <div className="qr-placeholder">
+                                            QR Code<br/>(Scan with phone camera)
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="data-section">
+                                <h3 className="data-title">How to Share</h3>
+                                <p className="data-description">
+                                    <strong>Option 1 - URL Sharing (Recommended):</strong><br/>
+                                    1. Copy the share URL above<br/>
+                                    2. Send it to your team via WhatsApp, Email, etc.<br/>
+                                    3. Users open the URL to instantly see all recipes<br/>
+                                    <br/>
+                                    <strong>Option 2 - File Sharing:</strong><br/>
+                                    1. Download the data file<br/>
+                                    2. Share the file with your team<br/>
+                                    3. Users import the file in the app<br/>
+                                    <br/>
+                                    <strong>User Permissions:</strong><br/>
+                                    ✅ View all cocktail recipes<br/>
+                                    ✅ Search and filter cocktails<br/>
+                                    ✅ Use scale feature to adjust quantities<br/>
+                                    ❌ Cannot modify any data
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
             );
         }
@@ -923,7 +1037,7 @@
                                         className={`side-menu-button ${currentPage === 'user-access' ? 'active' : ''}`}
                                         onClick={() => handleNavigation('user-access')}
                                     >
-                                        👥 User Access
+                                        👥 Share with Users
                                     </button>
                                 </>
                             )}
@@ -1094,12 +1208,30 @@
                 <div className="container">
                     <div className="page-header">
                         <h1 className="page-title">Cocktail Menu</h1>
-                        {isAdmin && (
+                        {isAdmin && !isUserAccess() && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
                             </button>
                         )}
+                        {isUserAccess() && (
+                            <span style={{color: '#FFB366', fontSize: '0.9rem'}}>📱 Shared View</span>
+                        )}
                     </div>
+                    
+                    {isUserAccess() && (
+                        <div style={{
+                            background: '#1A1A1A',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            marginBottom: '1rem',
+                            border: '1px solid #333',
+                            textAlign: 'center'
+                        }}>
+                            <p style={{color: '#FFB366', margin: 0}}>
+                                📋 <strong>Read-Only Mode</strong> - Viewing shared cocktail recipes
+                            </p>
+                        </div>
+                    )}
                     
                     <div className="search-section">
                         <input 
@@ -1140,7 +1272,7 @@
                             {recipes.length === 0 ? (
                                 <div>
                                     <p>No cocktails available.</p>
-                                    {isAdmin && (
+                                    {isAdmin && !isUserAccess() && (
                                         <p style={{marginTop: '1rem'}}>
                                             <button className="button" onClick={onCreateRecipe}>
                                                 + Add Your First Recipe
@@ -1275,7 +1407,7 @@
                         setTimeout(() => onBack(), 1000);
                     } else {
                         onSyncStatus('error', 'Failed to save recipe');
-                    alert('Error saving recipe. Please try again.');
+                        alert('Error saving recipe. Please try again.');
                     }
                 } catch (error) {
                     console.error('Error saving recipe:', error);
@@ -1297,6 +1429,7 @@
                     <h1 className="page-title">{isEdit ? 'Edit Cocktail' : 'Add New Cocktail'}</h1>
                     
                     <form className="form" onSubmit={handleSubmit}>
+                        {/* Form content remains the same as before */}
                         <div className="form-group">
                             <label className="form-label">Cocktail Name *</label>
                             <input
@@ -1720,7 +1853,7 @@
             const [password, setPassword] = useState('');
             const [error, setError] = useState('');
             
-            // If accessing via user URL, automatically redirect to guest access
+            // If accessing via shared URL, automatically redirect to user access
             useEffect(() => {
                 if (isUserAccess()) {
                     onGuestLogin();
