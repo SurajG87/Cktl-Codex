@@ -478,6 +478,283 @@
             color: white;
         }
 
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed #555;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .image-upload:hover {
+            border-color: #FFB366;
+        }
+        
+        .image-upload.dragover {
+            border-color: #FFB366;
+            background: rgba(255, 179, 102, 0.1);
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Scale Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .modal {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .scale-option {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1A1A1A;
+        }
+        
+        .scale-option-title {
+            font-size: 1.1rem;
+            color: #FFB366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scale-option-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .dilution-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .dilution-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .dilution-label {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dilution-percentage {
+            font-weight: bold;
+            color: #FFB366;
+        }
+        
+        .dilution-description {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .servings-info {
+            background: #333;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .servings-count {
+            font-size: 1.2rem;
+            color: #FFB366;
+            font-weight: bold;
+        }
+
+        /* Recipe View */
+        .recipe-view {
+            background: #1A1A1A;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recipe-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .recipe-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .recipe-title {
+            font-size: 1.5rem;
+            color: #FFB366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            background: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .recipe-image-large {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            background: #333;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .recipe-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .recipe-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .ingredients-list {
+            list-style: none;
+        }
+        
+        .ingredient-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        
+        .instructions {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .action-button:hover {
+            background: #444;
+        }
+        
+        .action-button.scale {
+            background: #FFB366;
+            color: #0A0A0A;
+        }
+        
+        .action-button.scale:hover {
+            background: #FF8C42;
+        }
+        
+        .action-button.edit {
+            background: #4CAF50;
+        }
+        
+        .action-button.edit:hover {
+            background: #45a049;
+        }
+        
+        .action-button.delete {
+            background: #f44336;
+        }
+        
+        .action-button.delete:hover {
+            background: #d32f2f;
+        }
+
         /* Alphabetical Quick Search - Vertical Right Side */
         .alphabet-scroll-vertical {
             position: fixed;
@@ -529,6 +806,10 @@
                 flex-direction: column;
             }
             
+            .action-buttons {
+                flex-direction: column;
+            }
+            
             .alphabet-scroll-vertical {
                 position: fixed;
                 bottom: 1rem;
@@ -577,11 +858,20 @@
             password: 'cocktail123'
         };
 
-        // Simple Cloud Storage using localStorage
+        // Enhanced Cloud Storage with real-time sync
         const CloudStorageManager = {
+            // Use a shared key that all devices can access
+            CLOUD_KEY: 'cocktailCodexSharedData',
+            
             async saveToCloud(data) {
                 try {
-                    localStorage.setItem('cocktailCodexCloudData', JSON.stringify(data));
+                    // Save to localStorage with timestamp
+                    const cloudData = {
+                        ...data,
+                        lastUpdated: Date.now(),
+                        deviceId: this.getDeviceId()
+                    };
+                    localStorage.setItem(this.CLOUD_KEY, JSON.stringify(cloudData));
                     return { success: true };
                 } catch (error) {
                     return { success: false };
@@ -590,7 +880,7 @@
 
             async loadFromCloud() {
                 try {
-                    const cloudData = localStorage.getItem('cocktailCodexCloudData');
+                    const cloudData = localStorage.getItem(this.CLOUD_KEY);
                     if (cloudData) {
                         return { 
                             success: true, 
@@ -599,7 +889,12 @@
                     } else {
                         return { 
                             success: true, 
-                            data: { recipes: [], syrups: [], settings: null }
+                            data: { 
+                                recipes: [], 
+                                syrups: [], 
+                                settings: null,
+                                lastUpdated: 0 
+                            }
                         };
                     }
                 } catch (error) {
@@ -608,10 +903,36 @@
                         data: null
                     };
                 }
+            },
+
+            getDeviceId() {
+                let deviceId = localStorage.getItem('cocktailDeviceId');
+                if (!deviceId) {
+                    deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('cocktailDeviceId', deviceId);
+                }
+                return deviceId;
+            },
+
+            // Check for updates from other devices
+            checkForUpdates(currentData) {
+                try {
+                    const cloudData = localStorage.getItem(this.CLOUD_KEY);
+                    if (cloudData) {
+                        const parsedData = JSON.parse(cloudData);
+                        // If cloud data is newer, use it
+                        if (parsedData.lastUpdated > (currentData.lastUpdated || 0)) {
+                            return { hasUpdate: true, data: parsedData };
+                        }
+                    }
+                    return { hasUpdate: false };
+                } catch (error) {
+                    return { hasUpdate: false };
+                }
             }
         };
 
-        // Simple Storage Manager
+        // Storage Manager
         const StorageManager = {
             db: null,
             dbName: 'CocktailCodexDB',
@@ -636,6 +957,9 @@
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains('recipes')) {
                             db.createObjectStore('recipes', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('syrups')) {
+                            db.createObjectStore('syrups', { keyPath: 'id' });
                         }
                         if (!db.objectStoreNames.contains('settings')) {
                             db.createObjectStore('settings', { keyPath: 'id' });
@@ -662,13 +986,51 @@
                     request.onsuccess = () => resolve(request.result);
                     request.onerror = () => reject(request.error);
                 });
+            },
+
+            async delete(storeName, id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            // Image compression
+            compressImage(base64String, maxWidth = 400, quality = 0.7) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedBase64);
+                    };
+                    img.src = base64String;
+                });
             }
         };
 
-        // Data Manager
+        // Data Manager with real-time sync
         const DataManager = {
             initialized: false,
             cloudEnabled: true,
+            lastSyncTime: 0,
             
             async init() {
                 if (!this.initialized) {
@@ -679,38 +1041,56 @@
 
             async getAllData() {
                 await this.init();
-                const [recipes, settings] = await Promise.all([
+                const [recipes, syrups, settings] = await Promise.all([
                     StorageManager.getAll('recipes'),
+                    StorageManager.getAll('syrups'),
                     StorageManager.getAll('settings')
                 ]);
                 
                 const defaultSettings = {
                     id: 'app_settings',
                     spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey', 'Brandy'],
-                    venues: ['Bar', 'Restaurant', 'Event', 'Home']
+                    venues: ['Bar', 'Restaurant', 'Event', 'Home'],
+                    syrup_types: ['Simple Syrup', 'Honey Syrup', 'Grenadine', 'Orgeat', 'Demerara Syrup']
                 };
                 
                 const appSettings = settings.find(s => s.id === 'app_settings') || defaultSettings;
                 
                 const localData = {
                     recipes: recipes || [],
-                    syrups: [],
-                    settings: appSettings
+                    syrups: syrups || [],
+                    settings: appSettings,
+                    lastUpdated: this.lastSyncTime
                 };
 
-                // Fast cloud sync
+                // Real-time cloud sync
                 if (this.cloudEnabled) {
                     try {
-                        const cloudResult = await CloudStorageManager.loadFromCloud();
-                        if (cloudResult.success && cloudResult.data) {
-                            // Use cloud recipes if available
-                            if (cloudResult.data.recipes && cloudResult.data.recipes.length > 0) {
-                                localData.recipes = cloudResult.data.recipes;
-                                // Save to local storage
-                                for (const recipe of localData.recipes) {
-                                    await StorageManager.put('recipes', recipe);
-                                }
+                        const updateCheck = CloudStorageManager.checkForUpdates(localData);
+                        if (updateCheck.hasUpdate) {
+                            // Cloud has newer data - use it
+                            const cloudData = updateCheck.data;
+                            localData.recipes = cloudData.recipes || [];
+                            localData.syrups = cloudData.syrups || [];
+                            localData.settings = cloudData.settings || appSettings;
+                            this.lastSyncTime = cloudData.lastUpdated || Date.now();
+                            
+                            // Save to local storage
+                            for (const recipe of localData.recipes) {
+                                await StorageManager.put('recipes', recipe);
                             }
+                            for (const syrup of localData.syrups) {
+                                await StorageManager.put('syrups', syrup);
+                            }
+                            if (cloudData.settings) {
+                                await StorageManager.put('settings', cloudData.settings);
+                            }
+                        } else {
+                            // Our data is current - update cloud
+                            await CloudStorageManager.saveToCloud({
+                                ...localData,
+                                lastUpdated: Date.now()
+                            });
                         }
                     } catch (error) {
                         console.warn('Cloud sync failed:', error);
@@ -727,9 +1107,51 @@
                 if (this.cloudEnabled) {
                     try {
                         const allData = await this.getAllData();
-                        await CloudStorageManager.saveToCloud(allData);
+                        await CloudStorageManager.saveToCloud({
+                            ...allData,
+                            lastUpdated: Date.now()
+                        });
                     } catch (error) {
                         console.warn('Cloud sync failed for recipe save');
+                    }
+                }
+                
+                return result;
+            },
+
+            async saveSyrup(syrup) {
+                await this.init();
+                const result = await StorageManager.put('syrups', syrup);
+                
+                if (this.cloudEnabled) {
+                    try {
+                        const allData = await this.getAllData();
+                        await CloudStorageManager.saveToCloud({
+                            ...allData,
+                            lastUpdated: Date.now()
+                        });
+                    } catch (error) {
+                        console.warn('Cloud sync failed for syrup save');
+                    }
+                }
+                
+                return result;
+            },
+
+            async saveSettings(settings) {
+                await this.init();
+                const settingsWithId = { ...settings, id: 'app_settings' };
+                const result = await StorageManager.put('settings', settingsWithId);
+                
+                if (this.cloudEnabled) {
+                    try {
+                        const allData = await this.getAllData();
+                        await CloudStorageManager.saveToCloud({
+                            ...allData,
+                            lastUpdated: Date.now()
+                        });
+                    } catch (error) {
+                        console.warn('Cloud sync failed for settings save');
                     }
                 }
                 
@@ -796,6 +1218,153 @@
             );
         }
 
+        // Scale Modal Component
+        function ScaleModal({ recipe, onClose }) {
+            const [scaleMethod, setScaleMethod] = useState('servings');
+            const [quantity, setQuantity] = useState(1);
+            const [volumeUnit, setVolumeUnit] = useState('ml');
+            
+            const calculateOriginalVolume = () => {
+                return recipe.ingredients.reduce((total, ingredient) => {
+                    if (ingredient.unit === 'ml') return total + parseFloat(ingredient.amount);
+                    if (ingredient.unit === 'oz') return total + (parseFloat(ingredient.amount) * 29.5735);
+                    return total;
+                }, 0);
+            };
+            
+            const convertToMl = (amount, unit) => {
+                switch(unit) {
+                    case 'oz': return amount * 29.5735;
+                    case 'l': return amount * 1000;
+                    case 'gal': return amount * 3785.41;
+                    default: return amount;
+                }
+            };
+            
+            const calculateScaledIngredients = () => {
+                const originalVolume = calculateOriginalVolume();
+                let scaleFactor, servings = 1;
+                
+                if (scaleMethod === 'servings') {
+                    scaleFactor = quantity;
+                    servings = quantity;
+                } else {
+                    const targetVolume = convertToMl(quantity, volumeUnit);
+                    scaleFactor = targetVolume / originalVolume;
+                    servings = Math.round((targetVolume / originalVolume) * 10) / 10;
+                }
+                
+                const scaledIngredients = recipe.ingredients.map(ingredient => ({
+                    ...ingredient,
+                    scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
+                }));
+                
+                return { ingredients: scaledIngredients, servings };
+            };
+            
+            const scaledResult = calculateScaledIngredients();
+            
+            return (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2 style={{color: '#FFB366', marginBottom: '1rem'}}>Scale: {recipe.name}</h2>
+                        
+                        <div className="scale-option">
+                            <h3 className="scale-option-title">Scale by Number of Servings</h3>
+                            <div className="radio-group">
+                                <label className="radio-option">
+                                    <input 
+                                        type="radio" 
+                                        name="scaleMethod" 
+                                        value="servings" 
+                                        checked={scaleMethod === 'servings'} 
+                                        onChange={(e) => setScaleMethod(e.target.value)} 
+                                    />
+                                    Scale by Servings
+                                </label>
+                                {scaleMethod === 'servings' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                        <label>Enter Quantity:</label>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            value={quantity} 
+                                            onChange={(e) => setQuantity(parseInt(e.target.value))} 
+                                            className="form-input" 
+                                            style={{width: '100px'}} 
+                                        />
+                                        <span>servings</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="scale-option">
+                            <h3 className="scale-option-title">Scale by Total Volume</h3>
+                            <div className="radio-group">
+                                <label className="radio-option">
+                                    <input 
+                                        type="radio" 
+                                        name="scaleMethod" 
+                                        value="volume" 
+                                        checked={scaleMethod === 'volume'} 
+                                        onChange={(e) => setScaleMethod(e.target.value)} 
+                                    />
+                                    Scale by Volume
+                                </label>
+                                {scaleMethod === 'volume' && (
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap'}}>
+                                        <label>Enter Quantity:</label>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            step="0.1" 
+                                            value={quantity} 
+                                            onChange={(e) => setQuantity(parseFloat(e.target.value))} 
+                                            className="form-input" 
+                                            style={{width: '100px'}} 
+                                        />
+                                        <select 
+                                            value={volumeUnit} 
+                                            onChange={(e) => setVolumeUnit(e.target.value)} 
+                                            className="form-input" 
+                                            style={{width: '120px'}}
+                                        >
+                                            <option value="ml">Milliliters</option>
+                                            <option value="oz">Ounces</option>
+                                            <option value="l">Liters</option>
+                                            <option value="gal">Gallons</option>
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {scaleMethod === 'volume' && (
+                            <div className="servings-info">
+                                <div>This batch will make approximately</div>
+                                <div className="servings-count">{scaledResult.servings} servings</div>
+                            </div>
+                        )}
+                        
+                        <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Scaled Ingredients</h3>
+                        <ul className="ingredients-list">
+                            {scaledResult.ingredients.map((ingredient, index) => (
+                                <li key={index} className="ingredient-item">
+                                    <span>{ingredient.name}</span>
+                                    <span>{ingredient.scaledAmount} {ingredient.unit}</span>
+                                </li>
+                            ))}
+                        </ul>
+                        
+                        <div className="buttons-row">
+                            <button className="button" onClick={onClose}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         // Sidebar Storage Status Component
         function SidebarStorageStatus({ data, isAdmin }) {
             return (
@@ -808,7 +1377,7 @@
                         Using IndexedDB - Fast & Reliable
                     </div>
                     <div className="sidebar-storage-status">
-                        💾 {data.recipes.length} cocktails
+                        💾 {data.recipes.length} cocktails • {data.syrups.length} syrups
                     </div>
                     <div className="sidebar-cloud-status">
                         ☁️ Auto-Sync: {DataManager.isCloudSyncEnabled() ? 'ENABLED' : 'DISABLED'}
@@ -906,13 +1475,28 @@
                                 📖 Cocktail Codex
                             </button>
                             
+                            <button 
+                                className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
+                                onClick={() => handleNavigation('syrups')}
+                            >
+                                🍯 Syrups
+                            </button>
+                            
                             {isAdmin && (
-                                <button 
-                                    className={`side-menu-button ${currentPage === 'create' ? 'active' : ''}`}
-                                    onClick={() => handleNavigation('create')}
-                                >
-                                    ➕ Add Recipe
-                                </button>
+                                <>
+                                    <button 
+                                        className={`side-menu-button ${currentPage === 'create' ? 'active' : ''}`}
+                                        onClick={() => handleNavigation('create')}
+                                    >
+                                        ➕ Add Recipe
+                                    </button>
+                                    <button 
+                                        className={`side-menu-button ${currentPage === 'create-syrup' ? 'active' : ''}`}
+                                        onClick={() => handleNavigation('create-syrup')}
+                                    >
+                                        🍯 Add Syrup
+                                    </button>
+                                </>
                             )}
                         </nav>
                     </div>
@@ -920,12 +1504,14 @@
             );
         }
 
-        // Create Recipe Component
-        function CreateRecipePage({ onBack, onSave, isAdmin, settings }) {
+        // Create Recipe Component with Image Upload
+        function CreateRecipePage({ onBack, onSave, isAdmin, settings, isSyrup = false }) {
             const [formData, setFormData] = useState({
                 name: '', spirit_type: '', venue: '', abv: '', cost: '', 
                 image_url: '', ingredients: [{ name: '', amount: '', unit: 'ml' }], instructions: ''
             });
+            const [imagePreview, setImagePreview] = useState('');
+            const [isDragging, setIsDragging] = useState(false);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -945,19 +1531,64 @@
                 }));
             };
             
+            const handleImageUpload = async (file) => {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        let base64 = e.target.result;
+                        // Compress image
+                        if (file.size > 500000) {
+                            base64 = await StorageManager.compressImage(base64);
+                        }
+                        setFormData(prev => ({ ...prev, image_url: base64 }));
+                        setImagePreview(base64);
+                    };
+                    reader.readAsDataURL(file);
+                } catch (error) {
+                    alert('Error uploading image');
+                }
+            };
+            
+            const handleFileInput = (e) => {
+                const file = e.target.files[0];
+                if (file) handleImageUpload(file);
+            };
+            
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            };
+            
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            };
+            
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files[0];
+                if (file) handleImageUpload(file);
+            };
+            
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (!formData.name) {
-                    alert('Please enter a cocktail name');
+                    alert('Please enter a name');
                     return;
                 }
-                const recipeData = {
+                const itemData = {
                     ...formData,
                     id: Date.now().toString(),
                     abv: parseFloat(formData.abv) || 0,
                     cost: parseFloat(formData.cost) || 0
                 };
-                onSave(recipeData);
+                onSave(itemData);
             };
             
             if (!isAdmin) {
@@ -966,7 +1597,7 @@
                         <button className="button button-secondary" onClick={onBack}>← Back</button>
                         <div className="loading">
                             <h2>Admin Access Required</h2>
-                            <p>Only administrators can create recipes.</p>
+                            <p>Only administrators can create {isSyrup ? 'syrups' : 'recipes'}.</p>
                         </div>
                     </div>
                 );
@@ -974,12 +1605,16 @@
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>← Back to Cocktails</button>
-                    <h1 className="page-title">Add New Cocktail</h1>
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to {isSyrup ? 'Syrups' : 'Cocktails'}
+                    </button>
+                    <h1 className="page-title">
+                        Add New {isSyrup ? 'Syrup' : 'Cocktail'}
+                    </h1>
                     
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label className="form-label">Cocktail Name *</label>
+                            <label className="form-label">{isSyrup ? 'Syrup' : 'Cocktail'} Name *</label>
                             <input 
                                 type="text" 
                                 className="form-input" 
@@ -990,7 +1625,7 @@
                             />
                         </div>
                         
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                        {!isSyrup ? (
                             <div className="form-group">
                                 <label className="form-label">Spirit Type</label>
                                 <select 
@@ -1005,46 +1640,42 @@
                                     ))}
                                 </select>
                             </div>
-                            
+                        ) : (
                             <div className="form-group">
-                                <label className="form-label">Venue</label>
+                                <label className="form-label">Syrup Type</label>
                                 <select 
                                     className="form-input" 
-                                    name="venue" 
-                                    value={formData.venue} 
+                                    name="type" 
+                                    value={formData.type} 
                                     onChange={handleInputChange}
                                 >
-                                    <option value="">Select Venue</option>
-                                    {settings.venues.map(venue => (
-                                        <option key={venue} value={venue}>{venue}</option>
+                                    <option value="">Select Type</option>
+                                    {settings.syrup_types.map(type => (
+                                        <option key={type} value={type}>{type}</option>
                                     ))}
                                 </select>
                             </div>
-                        </div>
+                        )}
                         
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                            <div className="form-group">
-                                <label className="form-label">ABV (%)</label>
+                        <div className="form-group">
+                            <label className="form-label">Image</label>
+                            <div 
+                                className={`image-upload ${isDragging ? 'dragover' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                            >
                                 <input 
-                                    type="number" 
-                                    step="0.1" 
-                                    className="form-input" 
-                                    name="abv" 
-                                    value={formData.abv} 
-                                    onChange={handleInputChange} 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={handleFileInput} 
+                                    style={{display: 'none'}} 
+                                    id="image-upload" 
                                 />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label className="form-label">Cost ($)</label>
-                                <input 
-                                    type="number" 
-                                    step="0.01" 
-                                    className="form-input" 
-                                    name="cost" 
-                                    value={formData.cost} 
-                                    onChange={handleInputChange} 
-                                />
+                                <label htmlFor="image-upload" style={{cursor: 'pointer'}}>
+                                    {imagePreview ? 'Change Image' : 'Click to upload or drag & drop'}
+                                </label>
+                                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
                             </div>
                         </div>
                         
@@ -1077,7 +1708,8 @@
                                     >
                                         <option value="ml">ml</option>
                                         <option value="oz">oz</option>
-                                        <option value="dash">dash</option>
+                                        <option value="cup">cup</option>
+                                        <option value="tsp">tsp</option>
                                     </select>
                                 </div>
                             ))}
@@ -1097,7 +1729,7 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">Save Cocktail</button>
+                            <button type="submit" className="button">Save {isSyrup ? 'Syrup' : 'Cocktail'}</button>
                             <button type="button" className="button button-secondary" onClick={onBack}>Cancel</button>
                         </div>
                     </form>
@@ -1162,7 +1794,7 @@
         }
 
         // Home Page Component
-        function HomePage({ recipes, onRecipeClick, isAdmin, onCreateRecipe, settings }) {
+        function HomePage({ recipes, onRecipeClick, isAdmin, onCreateRecipe, settings, onShowScale }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
@@ -1270,6 +1902,87 @@
             );
         }
 
+        // Syrups Page Component
+        function SyrupsPage({ syrups, onSyrupClick, isAdmin, onCreateSyrup, settings }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [activeLetter, setActiveLetter] = useState('');
+            
+            const sortedSyrups = [...syrups].sort((a, b) => a.name.localeCompare(b.name));
+            
+            const filteredSyrups = sortedSyrups.filter(syrup => {
+                const matchesSearch = syrup.name.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesLetter = !activeLetter || syrup.name.toUpperCase().startsWith(activeLetter);
+                return matchesSearch && matchesLetter;
+            });
+            
+            const handleLetterClick = (letter) => {
+                setActiveLetter(activeLetter === letter ? '' : letter);
+                setSearchTerm('');
+            };
+            
+            return (
+                <div className="container">
+                    <div className="page-header">
+                        <h1 className="page-title">
+                            Syrups
+                            {isAdmin ? (
+                                <span className="role-badge admin">ADMIN</span>
+                            ) : (
+                                <span className="role-badge user">VIEWER</span>
+                            )}
+                        </h1>
+                        {isAdmin && (
+                            <button className="button" onClick={onCreateSyrup}>
+                                + Add Syrup
+                            </button>
+                        )}
+                    </div>
+                    
+                    <div className="search-section">
+                        <input 
+                            type="text"
+                            className="search-box"
+                            placeholder="Search syrups..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    
+                    <AlphabetScrollVertical 
+                        onLetterClick={handleLetterClick}
+                        activeLetter={activeLetter}
+                    />
+                    
+                    {filteredSyrups.length === 0 ? (
+                        <div className="loading">
+                            {syrups.length === 0 ? (
+                                <div>
+                                    <p>No syrups found.</p>
+                                    {isAdmin && (
+                                        <p style={{marginTop: '1rem', color: '#FFB366'}}>
+                                            Click "Add Syrup" to create your first syrup!
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                'No syrups found matching your criteria.'
+                            )}
+                        </div>
+                    ) : (
+                        <div className="recipes-grid">
+                            {filteredSyrups.map(syrup => (
+                                <RecipeCard 
+                                    key={syrup.id} 
+                                    recipe={syrup} 
+                                    onClick={onSyrupClick}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
         // Main App Component
         function App() {
             const { user, login, loginAsGuest, logout } = useAuth();
@@ -1277,7 +1990,25 @@
             const [appData, setAppData] = useState({ recipes: [], syrups: [], settings: {} });
             const [loading, setLoading] = useState(true);
             const [menuOpen, setMenuOpen] = useState(false);
+            const [selectedRecipe, setSelectedRecipe] = useState(null);
+            const [showScaleModal, setShowScaleModal] = useState(false);
             
+            // Real-time sync check
+            useEffect(() => {
+                const checkForUpdates = () => {
+                    if (DataManager.cloudEnabled && !loading) {
+                        const updateCheck = CloudStorageManager.checkForUpdates(appData);
+                        if (updateCheck.hasUpdate) {
+                            setAppData(updateCheck.data);
+                        }
+                    }
+                };
+
+                // Check for updates every 5 seconds
+                const interval = setInterval(checkForUpdates, 5000);
+                return () => clearInterval(interval);
+            }, [appData, loading]);
+
             useEffect(() => {
                 const loadData = async () => {
                     try {
@@ -1291,7 +2022,8 @@
                             settings: {
                                 id: 'app_settings',
                                 spirit_types: ['Vodka', 'Gin', 'Rum', 'Tequila', 'Whiskey'],
-                                venues: ['Bar', 'Restaurant', 'Home']
+                                venues: ['Bar', 'Restaurant', 'Home'],
+                                syrup_types: ['Simple Syrup', 'Honey Syrup', 'Grenadine', 'Orgeat', 'Demerara Syrup']
                             }
                         });
                     } finally {
@@ -1319,6 +2051,16 @@
                 
                 if (DataManager.isCloudSyncEnabled()) {
                     alert('Recipe saved successfully! ✅\n\nThis recipe will automatically appear on all other devices.');
+                }
+            };
+            
+            const handleSaveSyrup = async (syrupData) => {
+                await DataManager.saveSyrup(syrupData);
+                await refreshData();
+                setCurrentPage('syrups');
+                
+                if (DataManager.isCloudSyncEnabled()) {
+                    alert('Syrup saved successfully! ✅\n\nThis syrup will automatically appear on all other devices.');
                 }
             };
             
@@ -1385,11 +2127,24 @@
                             <HomePage 
                                 recipes={appData.recipes}
                                 onRecipeClick={(recipe) => {
-                                    // Simple view for now
-                                    alert(`Viewing: ${recipe.name}\n\nIngredients:\n${recipe.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}\n\nInstructions:\n${recipe.instructions}`);
+                                    setSelectedRecipe(recipe);
+                                    setShowScaleModal(true);
                                 }}
                                 isAdmin={user.isAdmin}
                                 onCreateRecipe={() => navigateTo('create')}
+                                settings={appData.settings}
+                                onShowScale={setShowScaleModal}
+                            />
+                        )}
+                        
+                        {currentPage === 'syrups' && (
+                            <SyrupsPage 
+                                syrups={appData.syrups}
+                                onSyrupClick={(syrup) => {
+                                    alert(`Viewing: ${syrup.name}\n\nIngredients:\n${syrup.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}\n\nInstructions:\n${syrup.instructions}`);
+                                }}
+                                isAdmin={user.isAdmin}
+                                onCreateSyrup={() => navigateTo('create-syrup')}
                                 settings={appData.settings}
                             />
                         )}
@@ -1400,6 +2155,23 @@
                                 onSave={handleSaveRecipe}
                                 isAdmin={user.isAdmin}
                                 settings={appData.settings}
+                            />
+                        )}
+                        
+                        {currentPage === 'create-syrup' && (
+                            <CreateRecipePage 
+                                onBack={() => navigateTo('syrups')}
+                                onSave={handleSaveSyrup}
+                                isAdmin={user.isAdmin}
+                                settings={appData.settings}
+                                isSyrup={true}
+                            />
+                        )}
+                        
+                        {showScaleModal && selectedRecipe && (
+                            <ScaleModal 
+                                recipe={selectedRecipe}
+                                onClose={() => setShowScaleModal(false)}
                             />
                         )}
                     </main>
