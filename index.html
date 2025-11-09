@@ -9,12 +9,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cocktail Manual</title>
+    <title>Cocktail Codex</title>
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cocktail Manual">
+    <meta name="apple-mobile-web-app-title" content="Cocktail Codex">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -123,6 +123,34 @@
         .logout-btn:hover {
             background: #FFB366;
             color: #0A0A0A;
+        }
+
+        .sync-btn {
+            background: transparent;
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .sync-btn:hover {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .sync-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sync-btn.syncing {
+            animation: pulse 1.5s infinite;
         }
         
         /* Side Menu */
@@ -1071,7 +1099,7 @@
                 font-size: 0.8rem;
             }
             
-            .logout-btn {
+            .logout-btn, .sync-btn {
                 padding: 0.3rem 0.6rem;
                 font-size: 0.7rem;
             }
@@ -1440,7 +1468,7 @@
         };
 
         // Share functionality
-        const shareContent = async (content, title = 'Cocktail Manual') => {
+        const shareContent = async (content, title = 'Cocktail Codex') => {
             const text = `${title}\n\n${content}`;
             
             if (navigator.share) {
@@ -1488,7 +1516,7 @@
                 text += `\nNOTES:\n${recipe.notes}\n`;
             }
             
-            text += `\n---\nShared from Cocktail Manual`;
+            text += `\n---\nShared from Cocktail Codex`;
             return text;
         };
 
@@ -1515,7 +1543,7 @@
                 text += `Storage: ${syrup.storage}\n`;
             }
             
-            text += `\n---\nShared from Cocktail Manual`;
+            text += `\n---\nShared from Cocktail Codex`;
             return text;
         };
 
@@ -1634,7 +1662,7 @@
                     scalingInfo += ` with ${dilution}% dilution`;
                 }
                 
-                shareText = shareText.replace('Shared from Cocktail Manual', `${scalingInfo} | Shared from Cocktail Manual`);
+                shareText = shareText.replace('Shared from Cocktail Codex', `${scalingInfo} | Shared from Cocktail Codex`);
                 
                 shareContent(shareText, `Scaled ${recipe.name} Recipe`);
             };
@@ -1900,7 +1928,7 @@
                     <div ref={menuRef} className={`side-menu ${isOpen ? 'active' : ''}`}>
                         <div className="side-menu-header">
                             <div className="side-menu-logo">🍸</div>
-                            <div className="side-menu-title">Cocktail Manual</div>
+                            <div className="side-menu-title">Cocktail Codex</div>
                         </div>
                         
                         <nav className="side-menu-nav">
@@ -1908,7 +1936,7 @@
                                 className={`side-menu-button ${currentPage === 'home' ? 'active' : ''}`}
                                 onClick={() => handleNavigation('home')}
                             >
-                                📖 Cocktail Menu
+                                📖 Cocktail Codex
                             </button>
                             
                             <button 
@@ -1990,7 +2018,7 @@
         }
 
         // Home Page Component with Alphabet Navigation
-        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, recipes, syncStatus }) {
+        function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, recipes, syncStatus, onManualSync }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
             const [filterVenue, setFilterVenue] = useState('All');
@@ -2029,7 +2057,7 @@
             return (
                 <div className="container">
                     <div className="page-header">
-                        <h1 className="page-title">Cocktail Menu</h1>
+                        <h1 className="page-title">Cocktail Codex</h1>
                         {isAdmin && (
                             <button className="button" onClick={onCreateRecipe}>
                                 + Add Recipe
@@ -2081,6 +2109,14 @@
                                  syncStatus === 'syncing' ? 'Syncing...' : 
                                  syncStatus === 'error' ? 'Sync error' : 'Offline'}
                             </span>
+                            <button 
+                                className="sync-btn" 
+                                onClick={onManualSync}
+                                disabled={syncStatus === 'syncing'}
+                                title="Refresh and sync data"
+                            >
+                                🔄 Sync
+                            </button>
                         </div>
                     </div>
                     
@@ -3069,7 +3105,7 @@
             return (
                 <div className="container">
                     <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
-                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Manual</h1>
+                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
                         
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
@@ -3130,6 +3166,7 @@
             const [syrups, setSyrups] = useState(getSyrups());
             const [settings, setSettings] = useState(getSettings());
             const [syncStatus, setSyncStatus] = useState('offline');
+            const [isManualSyncing, setIsManualSyncing] = useState(false);
             
             // Set up Firebase real-time listeners when user logs in
             useEffect(() => {
@@ -3185,6 +3222,61 @@
                     return cleanup;
                 }
             }, [firebaseUser]);
+            
+            // Manual sync function
+            const handleManualSync = async () => {
+                if (!user) return;
+                
+                setIsManualSyncing(true);
+                setSyncStatus('syncing');
+                
+                try {
+                    // Load fresh data from Firebase
+                    const [firebaseRecipes, firebaseSyrups, firebaseSettings] = await Promise.all([
+                        loadRecipesFromFirebase(),
+                        loadSyrupsFromFirebase(),
+                        loadSettingsFromFirebase()
+                    ]);
+                    
+                    let hasChanges = false;
+                    
+                    // Update recipes if new data is available
+                    if (firebaseRecipes && firebaseRecipes.length > 0) {
+                        setRecipes(firebaseRecipes);
+                        saveRecipes(firebaseRecipes);
+                        hasChanges = true;
+                    }
+                    
+                    // Update syrups if new data is available
+                    if (firebaseSyrups && firebaseSyrups.length >= 0) {
+                        setSyrups(firebaseSyrups);
+                        saveSyrups(firebaseSyrups);
+                        hasChanges = true;
+                    }
+                    
+                    // Update settings if new data is available
+                    if (firebaseSettings) {
+                        setSettings(firebaseSettings);
+                        saveSettings(firebaseSettings);
+                        hasChanges = true;
+                    }
+                    
+                    setSyncStatus('synced');
+                    
+                    if (hasChanges) {
+                        alert('Data successfully synced from cloud!');
+                    } else {
+                        alert('Already up to date with cloud data.');
+                    }
+                    
+                } catch (error) {
+                    console.error('Manual sync error:', error);
+                    setSyncStatus('error');
+                    alert('Sync failed. Please check your connection.');
+                } finally {
+                    setIsManualSyncing(false);
+                }
+            };
             
             const navigateTo = (page, item = null) => {
                 if ((page === 'create-recipe' || page === 'settings' || page === 'syrups') && (!user || !user.isAdmin)) {
@@ -3324,6 +3416,7 @@
                             }}
                             recipes={recipes}
                             syncStatus={syncStatus}
+                            onManualSync={handleManualSync}
                         />;
                     case 'view-recipe':
                         return <ViewRecipePage 
@@ -3363,6 +3456,7 @@
                             onCreateRecipe={() => navigateTo('create-recipe')}
                             recipes={recipes}
                             syncStatus={syncStatus}
+                            onManualSync={handleManualSync}
                         />;
                 }
             };
@@ -3390,6 +3484,14 @@
                             👤 {user.username}
                             {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
                             {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
+                            <button 
+                                className={`sync-btn ${isManualSyncing ? 'syncing' : ''}`}
+                                onClick={handleManualSync}
+                                disabled={isManualSyncing}
+                                title="Refresh and sync data"
+                            >
+                                🔄 {isManualSyncing ? 'Syncing...' : 'Sync'}
+                            </button>
                             <button className="logout-btn" onClick={logout}>
                                 Logout
                             </button>
@@ -3410,7 +3512,7 @@
 
                     <footer className="footer">
                         <p>
-                            Cocktail Manual © {new Date().getFullYear()}by{' '}
+                            Cocktail Codex © {new Date().getFullYear()} | Created by{' '}
                             <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
                                 @suraj.gg87
                             </a>
