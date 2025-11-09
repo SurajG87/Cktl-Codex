@@ -92,28 +92,38 @@
         /* Updated recipes grid to fit 3 cocktails per row */
         .recipes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-bottom: 2rem;
         }
         
-        @media (min-width: 768px) {
+        @media (max-width: 1024px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
+        @media (max-width: 640px) {
+            .recipes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* UPDATED: Compact recipe card with name outside and transparent background */
         .recipe-card {
-            background: #2a2a2a;
+            background: rgba(42, 42, 42, 0.7); /* More transparent background */
             border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s;
             position: relative;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 179, 102, 0.2);
         }
         
         .recipe-card:hover {
             transform: translateY(-4px);
+            background: rgba(42, 42, 42, 0.9);
         }
         
         .recipe-image {
@@ -122,15 +132,18 @@
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            background: #333;
             position: relative;
             overflow: hidden;
         }
         
-        .recipe-image.silhouette {
-            background-size: cover;
-            background-position: center;
-            filter: brightness(0.3) contrast(0.8);
+        .recipe-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 100%);
         }
         
         .recipe-image.normal {
@@ -138,35 +151,37 @@
             background-position: center;
         }
         
-        .recipe-image.silhouette::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        
         .recipe-info {
-            padding: 1rem;
+            padding: 0.75rem;
             position: relative;
             z-index: 1;
         }
         
+        /* UPDATED: Name appears outside the card */
         .recipe-name {
             font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #FFB366;
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+        
+        /* UPDATED: Compact information layout */
+        .recipe-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
         }
         
         .recipe-spirit {
             color: #FFB366;
-            font-size: 0.9rem;
+            font-weight: 500;
         }
         
         .recipe-abv {
             color: #888;
-            font-size: 0.8rem;
         }
         
         /* Modal Styles */
@@ -377,7 +392,7 @@
             font-size: 0.9rem;
         }
         
-        .recipe-details {
+        .recipe-details-page {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 2rem;
@@ -760,10 +775,34 @@
             animation: pulse 1s infinite;
         }
         
+        /* UPDATED: Nav user with Add Recipe button */
         .nav-user {
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .add-recipe-btn {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .add-recipe-btn:hover {
+            background: #45a049;
         }
         
         .logout-btn {
@@ -783,19 +822,20 @@
         /* Alphabet Navigation - RIGHT SIDE */
         .alphabet-nav {
             position: fixed;
-            right: 0;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
             padding: 1rem 0.5rem;
-            background: rgba(42, 42, 42, 0.9);
-            border-radius: 12px 0 0 12px;
+            background: rgba(42, 42, 42, 0.95);
+            border-radius: 12px;
             backdrop-filter: blur(10px);
             z-index: 100;
             max-height: 80vh;
             overflow-y: auto;
+            border: 1px solid rgba(255, 179, 102, 0.3);
         }
         
         .alphabet-letter {
@@ -808,14 +848,15 @@
             border-radius: 4px;
             transition: background 0.2s;
             font-size: 0.9rem;
+            cursor: pointer;
         }
         
         .alphabet-letter:hover {
-            background: #333;
+            background: rgba(255, 179, 102, 0.2);
         }
         
         .alphabet-section {
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
         
         .letter-header {
@@ -866,7 +907,7 @@
         
         /* Responsive Design */
         @media (max-width: 768px) {
-            .recipe-details {
+            .recipe-details-page {
                 grid-template-columns: 1fr;
             }
             
@@ -907,8 +948,13 @@
                 flex-direction: column;
             }
             
-            .recipes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            .nav-user {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .nav-buttons {
+                gap: 0.5rem;
             }
         }
         
@@ -925,7 +971,7 @@
             }
             
             .recipe-card {
-                min-height: 180px;
+                min-height: 150px;
             }
         }
     </style>
@@ -1683,16 +1729,6 @@
                             </button>
                             
                             <button 
-                                className={`side-menu-button ${currentPage === 'create-recipe' ? 'active' : ''} ${
-                                    !isAdmin ? 'disabled' : ''
-                                }`}
-                                onClick={() => isAdmin && handleNavigation('create-recipe')}
-                                title={!isAdmin ? 'Admin access required' : ''}
-                            >
-                                ➕ Add Recipe
-                            </button>
-                            
-                            <button 
                                 className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
                                 onClick={() => handleNavigation('syrups')}
                             >
@@ -1714,7 +1750,7 @@
             );
         }
 
-        // Recipe Card Component with normal display (no silhouette in grid)
+        // UPDATED: Recipe Card Component with name outside and transparent background
         function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -1727,10 +1763,14 @@
                     <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🍸'}
                     </div>
+                    {/* UPDATED: Name appears outside the card */}
+                    <div className="recipe-name">{recipe.name}</div>
                     <div className="recipe-info">
-                        <div className="recipe-name">{recipe.name}</div>
-                        <div className="recipe-spirit">{recipe.spirit_type}</div>
-                        <div className="recipe-abv">{recipe.abv}% ABV</div>
+                        {/* UPDATED: Compact information layout */}
+                        <div className="recipe-details">
+                            <div className="recipe-spirit">{recipe.spirit_type}</div>
+                            <div className="recipe-abv">{recipe.abv}%</div>
+                        </div>
                     </div>
                 </div>
             );
@@ -1749,12 +1789,14 @@
                     <div className={`recipe-image ${syrup.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!syrup.image_url && '🧪'}
                     </div>
+                    <div className="recipe-name">{syrup.name}</div>
                     <div className="recipe-info">
-                        <div className="recipe-name">{syrup.name}</div>
-                        <div className="recipe-spirit">{syrup.type}</div>
-                        {syrup.shelf_life && (
-                            <div className="recipe-abv">Shelf: {syrup.shelf_life}</div>
-                        )}
+                        <div className="recipe-details">
+                            <div className="recipe-spirit">{syrup.type}</div>
+                            {syrup.shelf_life && (
+                                <div className="recipe-abv">Shelf: {syrup.shelf_life}</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             );
@@ -1765,17 +1807,13 @@
             return (
                 <div className="alphabet-nav">
                     {letters.map(letter => (
-                        <a
+                        <div
                             key={letter}
                             className="alphabet-letter"
-                            href={`#letter-${letter}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onLetterClick(letter);
-                            }}
+                            onClick={() => onLetterClick(letter)}
                         >
                             {letter}
-                        </a>
+                        </div>
                     ))}
                 </div>
             );
@@ -1820,8 +1858,6 @@
             
             return (
                 <div className="container">
-                    {/* REMOVED: "Cocktail Codex" title from main page */}
-                    
                     <div className="search-section">
                         <input 
                             type="text"
@@ -1890,7 +1926,7 @@
                             )}
                         </div>
                         
-                        {/* Right-side Alphabet Navigation */}
+                        {/* UPDATED: Right-side Alphabet Navigation - Always visible when there are letters */}
                         {sortedLetters.length > 0 && (
                             <AlphabetNav letters={sortedLetters} onLetterClick={scrollToLetter} />
                         )}
@@ -1939,7 +1975,7 @@
                                 </div>
                             </div>
                             
-                            <div className="recipe-details">
+                            <div className="recipe-details-page">
                                 <div>
                                     <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
                                     <ul className="ingredients-list">
@@ -2048,7 +2084,7 @@
                                 </div>
                             </div>
                             
-                            <div className="recipe-details">
+                            <div className="recipe-details-page">
                                 <div>
                                     <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
                                     {syrup.ingredients && syrup.ingredients.length > 0 ? (
@@ -3561,10 +3597,21 @@
                                 </button>
                             </div>
                             
-                            <span style={{color: '#FFB366'}}>{user.username}</span>
-                            <button className="logout-btn" onClick={logout}>
-                                Logout
-                            </button>
+                            <div className="nav-buttons">
+                                {/* UPDATED: Add Recipe button moved next to Logout */}
+                                {user.isAdmin && (
+                                    <button 
+                                        className="add-recipe-btn"
+                                        onClick={() => setCurrentPage('create-recipe')}
+                                    >
+                                        ➕ Add Recipe
+                                    </button>
+                                )}
+                                <span style={{color: '#FFB366'}}>{user.username}</span>
+                                <button className="logout-btn" onClick={logout}>
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </header>
                     
@@ -3579,8 +3626,8 @@
                     {renderCurrentPage()}
                     
                     <footer className="footer">
-                        <p>Cocktail Codex © 2025 </p>
-                         <a href="https://www.instagram.com/suraj.gg87/" target="_blank">@suraj.gg87</a>
+                        <p>Cocktail Codex © 2024 | For professional bartenders and cocktail enthusiasts</p>
+                        <p>Data {syncStatus === 'synced' ? 'synced' : syncStatus === 'syncing' ? 'syncing...' : 'offline'}</p>
                     </footer>
                 </div>
             );
