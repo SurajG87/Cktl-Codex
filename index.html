@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <!-- Apple Touch Icon (the main one for home screen) -->
-<link rel="apple-touch-icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
 
-<!-- Optional: Prevents zooming when launching from home screen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!-- Optional: Prevents zooming when launching from home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cocktail Codex</title>
@@ -89,11 +89,18 @@
             margin-bottom: 1rem;
         }
         
+        /* Updated recipes grid to fit 3 cocktails per row */
         .recipes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
         
         .recipe-card {
@@ -102,6 +109,7 @@
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s;
+            position: relative;
         }
         
         .recipe-card:hover {
@@ -115,10 +123,35 @@
             justify-content: center;
             font-size: 2rem;
             background: #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recipe-image.silhouette {
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.3) contrast(0.8);
+        }
+        
+        .recipe-image.normal {
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .recipe-image.silhouette::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
         }
         
         .recipe-info {
             padding: 1rem;
+            position: relative;
+            z-index: 1;
         }
         
         .recipe-name {
@@ -403,22 +436,23 @@
             background: #f44336;
         }
         
-        /* Scale Recipe Styles */
+        /* Scale Recipe Styles - Compact */
         .scale-step {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid #444;
         }
         
         .step-title {
             color: #FFB366;
             margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
         
         .step-description {
             color: #888;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.85rem;
         }
         
         .scale-options {
@@ -429,7 +463,7 @@
         
         .option-card {
             background: #333;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
@@ -447,12 +481,13 @@
         
         .option-title {
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
         }
         
         .option-description {
             color: #888;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
         .scale-controls {
@@ -477,13 +512,13 @@
         .dilution-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
         }
         
         .dilution-option {
             background: #333;
-            padding: 1rem;
+            padding: 0.8rem;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
@@ -502,18 +537,20 @@
         
         .dilution-percentage {
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
         }
         
         .dilution-description {
             color: #888;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         
         .custom-dilution {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.9rem;
         }
         
         .custom-dilution-input {
@@ -527,7 +564,7 @@
         
         .scaled-ingredients {
             background: #333;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-radius: 8px;
             margin-top: 1rem;
         }
@@ -535,13 +572,14 @@
         .scaled-ingredient {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.4rem 0;
             border-bottom: 1px solid #444;
+            font-size: 0.9rem;
         }
         
         .ingredient-change {
             color: #888;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-left: 0.5rem;
         }
         
@@ -622,6 +660,32 @@
             max-width: 200px;
             max-height: 200px;
             border-radius: 8px;
+        }
+        
+        /* Drop Zone Styles */
+        .drop-zone {
+            border: 2px dashed #FFB366;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 1rem;
+        }
+        
+        .drop-zone:hover, .drop-zone.dragover {
+            background: rgba(255, 179, 102, 0.1);
+        }
+        
+        .drop-zone-text {
+            color: #FFB366;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .drop-zone-subtext {
+            color: #888;
+            font-size: 0.9rem;
         }
         
         /* Search and Filter Styles */
@@ -842,6 +906,27 @@
             .main-content {
                 flex-direction: column;
             }
+            
+            .recipes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        /* Mobile-specific styles for 14" and 16" screens */
+        @media (max-width: 1440px) and (min-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 0.75rem;
+            }
+            
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .recipe-card {
+                min-height: 180px;
+            }
         }
     </style>
 </head>
@@ -923,12 +1008,9 @@
             }
         };
         
-        // Data management functions - CLEAR ALL RECIPES
+        // Data management functions
         const getRecipes = () => {
-            // Clear all existing recipes and return empty array
-            const emptyRecipes = [];
-            saveToStorage('cocktailRecipes', emptyRecipes);
-            return emptyRecipes;
+            return loadFromStorage('cocktailRecipes', []);
         };
         
         const saveRecipes = (recipes) => {
@@ -1218,16 +1300,18 @@
             }, 0);
         };
 
+        // FIXED: Correct dilution formula - water dilution should be divided by total volume
         const scaleIngredients = (ingredients, scaleFactor, dilutionPercentage = 0) => {
             const scaledIngredients = ingredients.map(ingredient => ({
                 ...ingredient,
                 scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
             }));
 
-            // Add dilution if specified
+            // Add dilution if specified - FIXED FORMULA
             if (dilutionPercentage > 0) {
                 const totalVolume = calculateTotalVolume(scaledIngredients);
-                const dilutionAmount = (totalVolume * dilutionPercentage) / (100 - dilutionPercentage);
+                // Correct formula: dilutionAmount = (totalVolume * dilutionPercentage) / 100
+                const dilutionAmount = (totalVolume * dilutionPercentage) / 100;
                 
                 if (dilutionAmount > 0) {
                     scaledIngredients.push({
@@ -1243,7 +1327,7 @@
             return scaledIngredients;
         };
 
-        // Scale Recipe Modal Component
+        // Scale Recipe Modal Component - Compact version
         function ScaleRecipeModal({ recipe, onClose }) {
             const [scaleType, setScaleType] = useState('servings'); // 'servings' or 'volume'
             const [servings, setServings] = useState(1);
@@ -1334,23 +1418,20 @@
             return (
                 <div className="modal-overlay">
                     <div className="modal">
-                        <h2 className="modal-title">Scale Recipe: {recipe.name}</h2>
+                        <h2 className="modal-title">Scale: {recipe.name}</h2>
                         
                         {/* Step 1: Scale Type Selection */}
                         <div className="scale-step">
-                            <h3 className="step-title">Select Scaling Method</h3>
-                            <p className="step-description">
-                                Choose whether you'd like to scale by the number of servings or by total volume.
-                            </p>
+                            <h3 className="step-title">Scaling Method</h3>
                             <div className="scale-options">
                                 <div className="scale-option">
                                     <div 
                                         className={`option-card ${scaleType === 'servings' ? 'selected' : ''}`}
                                         onClick={() => setScaleType('servings')}
                                     >
-                                        <div className="option-title">Scale by Servings</div>
+                                        <div className="option-title">By Servings</div>
                                         <div className="option-description">
-                                            Choose this option if you know how many servings you need.
+                                            Choose number of servings needed.
                                         </div>
                                     </div>
                                 </div>
@@ -1359,9 +1440,9 @@
                                         className={`option-card ${scaleType === 'volume' ? 'selected' : ''}`}
                                         onClick={() => setScaleType('volume')}
                                     >
-                                        <div className="option-title">Scale by Volume</div>
+                                        <div className="option-title">By Volume</div>
                                         <div className="option-description">
-                                            Ideal for filling a specific container or batch size.
+                                            For specific container or batch size.
                                         </div>
                                     </div>
                                 </div>
@@ -1370,11 +1451,11 @@
 
                         {/* Step 2: Quantity Input */}
                         <div className="scale-step">
-                            <h3 className="step-title">Enter Quantity</h3>
+                            <h3 className="step-title">Quantity</h3>
                             {scaleType === 'servings' ? (
                                 <div className="scale-controls">
                                     <div className="scale-input-group">
-                                        <label className="form-label">Number of Servings (with decimal points)</label>
+                                        <label className="form-label">Servings</label>
                                         <input
                                             type="number"
                                             className="scale-input"
@@ -1417,10 +1498,7 @@
 
                         {/* Step 3: Dilution Options */}
                         <div className="scale-step">
-                            <h3 className="step-title">Add Dilution (Optional)</h3>
-                            <p className="step-description">
-                                Choose a dilution percentage that suits your cocktail. If none of the presets fit, you can enter a custom dilution percentage.
-                            </p>
+                            <h3 className="step-title">Dilution (Optional)</h3>
                             
                             <div className="dilution-options">
                                 <div 
@@ -1442,7 +1520,7 @@
                                     onClick={() => handleDilutionSelect(25)}
                                 >
                                     <div className="dilution-percentage">25%</div>
-                                    <div className="dilution-description">Shaken Cocktails</div>
+                                    <div className="dilution-description">Shaken</div>
                                 </div>
                             </div>
                             
@@ -1486,7 +1564,7 @@
                         
                         <div className="action-buttons" style={{marginTop: '1.5rem'}}>
                             <button className="action-button share" onClick={shareScaledRecipe}>
-                                📤 Share Scaled Recipe
+                                📤 Share Scaled
                             </button>
                             <button className="action-button" onClick={onClose}>
                                 Close
@@ -1615,11 +1693,8 @@
                             </button>
                             
                             <button 
-                                className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''} ${
-                                    !isAdmin ? 'disabled' : ''
-                                }`}
-                                onClick={() => isAdmin && handleNavigation('syrups')}
-                                title={!isAdmin ? 'Admin access required' : ''}
+                                className={`side-menu-button ${currentPage === 'syrups' ? 'active' : ''}`}
+                                onClick={() => handleNavigation('syrups')}
                             >
                                 🧪 Syrups & Infusions
                             </button>
@@ -1639,7 +1714,7 @@
             );
         }
 
-        // Recipe Card Component
+        // Recipe Card Component with normal display (no silhouette in grid)
         function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -1649,13 +1724,37 @@
             
             return (
                 <div className="recipe-card" onClick={() => onClick(recipe)}>
-                    <div className="recipe-image" style={imageStyle}>
+                    <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🍸'}
                     </div>
                     <div className="recipe-info">
                         <div className="recipe-name">{recipe.name}</div>
                         <div className="recipe-spirit">{recipe.spirit_type}</div>
                         <div className="recipe-abv">{recipe.abv}% ABV</div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Syrup Card Component with pictures
+        function SyrupCard({ syrup, onClick, isAdmin }) {
+            const imageStyle = {
+                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            };
+            
+            return (
+                <div className="recipe-card" onClick={() => onClick(syrup)}>
+                    <div className={`recipe-image ${syrup.image_url ? 'normal' : ''}`} style={imageStyle}>
+                        {!syrup.image_url && '🧪'}
+                    </div>
+                    <div className="recipe-info">
+                        <div className="recipe-name">{syrup.name}</div>
+                        <div className="recipe-spirit">{syrup.type}</div>
+                        {syrup.shelf_life && (
+                            <div className="recipe-abv">Shelf: {syrup.shelf_life}</div>
+                        )}
                     </div>
                 </div>
             );
@@ -1721,14 +1820,7 @@
             
             return (
                 <div className="container">
-                    <div className="page-header">
-                        <h1 className="page-title">Cocktail Codex</h1>
-                        {isAdmin && (
-                            <button className="button" onClick={onCreateRecipe}>
-                                + Add Recipe
-                            </button>
-                        )}
-                    </div>
+                    {/* REMOVED: "Cocktail Codex" title from main page */}
                     
                     <div className="search-section">
                         <input 
@@ -1762,8 +1854,6 @@
                                 ))}
                             </select>
                         </div>
-                        
-                        {/* REMOVED the second sync button from here */}
                     </div>
                     
                     <div className="main-content">
@@ -1809,7 +1899,7 @@
             );
         }
 
-        // View Recipe Component with Scale and Share
+        // View Recipe Component with Scale and Share (with silhouette background)
         function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const [showScaleModal, setShowScaleModal] = useState(false);
             const backgroundStyle = {
@@ -1875,10 +1965,10 @@
                                     
                                     <div className="action-buttons">
                                         <button className="action-button scale" onClick={() => setShowScaleModal(true)}>
-                                            ⚖️ Scale Recipe
+                                            ⚖️ Scale
                                         </button>
                                         <button className="action-button share" onClick={handleShareRecipe}>
-                                            📤 Share Recipe
+                                            📤 Share
                                         </button>
                                         {isAdmin && (
                                             <>
@@ -1916,7 +2006,113 @@
             );
         }
 
-        // Create/Edit Recipe Component
+        // View Syrup Component with Scale and Share (with silhouette background)
+        function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
+            const [showScaleModal, setShowScaleModal] = useState(false);
+            const backgroundStyle = {
+                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'brightness(0.3) blur(2px)'
+            };
+            
+            const handleShareSyrup = () => {
+                const shareText = generateSyrupShareText(syrup);
+                shareContent(shareText, `${syrup.name} ${syrup.type}`);
+            };
+            
+            return (
+                <div className="container">
+                    <button className="button button-secondary" onClick={onBack}>
+                        ← Back to Syrups
+                    </button>
+                    
+                    <div className="recipe-view">
+                        {syrup.image_url && (
+                            <div className="recipe-background" style={backgroundStyle}></div>
+                        )}
+                        
+                        <div className="recipe-content">
+                            <div className="recipe-header">
+                                <div>
+                                    <h1 className="recipe-title">{syrup.name}</h1>
+                                    <div className="recipe-meta">
+                                        <div className="meta-item">{syrup.type}</div>
+                                        {syrup.shelf_life && (
+                                            <div className="meta-item">Shelf: {syrup.shelf_life}</div>
+                                        )}
+                                        {syrup.storage && (
+                                            <div className="meta-item">Store: {syrup.storage}</div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="recipe-details">
+                                <div>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
+                                    {syrup.ingredients && syrup.ingredients.length > 0 ? (
+                                        <ul className="ingredients-list">
+                                            {syrup.ingredients.map((ingredient, index) => (
+                                                <li key={index} className="ingredient-item">
+                                                    <span>{ingredient.name}</span>
+                                                    <span>{ingredient.amount} {ingredient.unit}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p style={{color: '#888', fontStyle: 'italic'}}>No ingredients specified</p>
+                                    )}
+                                </div>
+                                
+                                <div>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
+                                    <div className="instructions">{syrup.instructions || 'No instructions provided'}</div>
+                                    
+                                    <div className="action-buttons">
+                                        <button className="action-button scale" onClick={() => setShowScaleModal(true)}>
+                                            ⚖️ Scale
+                                        </button>
+                                        <button className="action-button share" onClick={handleShareSyrup}>
+                                            📤 Share
+                                        </button>
+                                        {isAdmin && (
+                                            <>
+                                                <button 
+                                                    className="action-button edit"
+                                                    onClick={() => {
+                                                        if (onEditSyrup) {
+                                                            onEditSyrup(syrup);
+                                                        }
+                                                    }}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                                <button 
+                                                    className="action-button delete"
+                                                    onClick={() => onDeleteSyrup(syrup.id)}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {showScaleModal && (
+                        <ScaleRecipeModal 
+                            recipe={syrup} 
+                            onClose={() => setShowScaleModal(false)} 
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // Create/Edit Recipe Component with drag and drop
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -1934,6 +2130,7 @@
             );
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
+            const [isDragging, setIsDragging] = useState(false);
             const settings = getSettings();
             
             const handleInputChange = (e) => {
@@ -1971,8 +2168,7 @@
                 }
             };
             
-            const handleImageUpload = async (e) => {
-                const file = e.target.files[0];
+            const handleImageUpload = async (file) => {
                 if (file) {
                     try {
                         const base64 = await convertImageToBase64(file);
@@ -1985,6 +2181,34 @@
                         console.error('Error uploading image:', error);
                         alert('Error uploading image. Please try again.');
                     }
+                }
+            };
+            
+            const handleFileInputChange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await handleImageUpload(file);
+                }
+            };
+            
+            // Drag and drop handlers
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            };
+            
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            };
+            
+            const handleDrop = async (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    await handleImageUpload(files[0]);
                 }
             };
             
@@ -2106,35 +2330,57 @@
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Cocktail Image</label>
-                            <div className="image-upload">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    style={{display: 'none'}}
-                                    id="image-upload"
-                                />
-                                <label htmlFor="image-upload" className="button button-secondary" style={{display: 'inline-block', marginBottom: '1rem'}}>
+                            <label className="form-label">Image</label>
+                            <div 
+                                className={`drop-zone ${isDragging ? 'dragover' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                onClick={() => document.getElementById('image-upload').click()}
+                            >
+                                <div className="drop-zone-text">
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
-                                </label>
-                                {imagePreview && (
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                                )}
+                                </div>
+                                <div className="drop-zone-subtext">
+                                    Drag & drop or click to upload
+                                </div>
                             </div>
+                            
+                            <input
+                                type="file"
+                                id="image-upload"
+                                accept="image/*"
+                                onChange={handleFileInputChange}
+                                style={{display: 'none'}}
+                            />
+                            
+                            {imagePreview && (
+                                <div className="image-upload">
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                    <button 
+                                        type="button" 
+                                        className="button button-secondary"
+                                        onClick={() => {
+                                            setImagePreview('');
+                                            setFormData(prev => ({ ...prev, image_url: '' }));
+                                        }}
+                                    >
+                                        Remove Image
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         
                         <div className="form-group">
                             <label className="form-label">Ingredients</label>
                             {formData.ingredients.map((ingredient, index) => (
-                                <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
+                                <div key={index} style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem'}}>
                                     <input
                                         type="text"
                                         className="form-input"
                                         placeholder="Ingredient name"
                                         value={ingredient.name}
                                         onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                        style={{flex: 2}}
                                     />
                                     <input
                                         type="number"
@@ -2143,27 +2389,28 @@
                                         placeholder="Amount"
                                         value={ingredient.amount}
                                         onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                                        style={{flex: 1}}
                                     />
                                     <select
                                         className="form-input"
                                         value={ingredient.unit}
                                         onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                        style={{flex: 1}}
                                     >
                                         <option value="ml">ml</option>
                                         <option value="oz">oz</option>
                                         <option value="dash">dash</option>
-                                        <option value="drops">drops</option>
-                                        <option value="pcs">pcs</option>
+                                        <option value="drop">drop</option>
+                                        <option value="piece">piece</option>
+                                        <option value="slice">slice</option>
+                                        <option value="sprig">sprig</option>
                                     </select>
                                     {formData.ingredients.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="icon-button delete"
+                                        <button 
+                                            type="button" 
+                                            className="button button-secondary"
                                             onClick={() => removeIngredient(index)}
+                                            style={{padding: '0.5rem'}}
                                         >
-                                            ×
+                                            ✕
                                         </button>
                                     )}
                                 </div>
@@ -2180,22 +2427,24 @@
                                 name="instructions"
                                 value={formData.instructions}
                                 onChange={handleInputChange}
+                                placeholder="Step-by-step instructions..."
                             />
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Notes</label>
+                            <label className="form-label">Notes (Optional)</label>
                             <textarea
                                 className="form-textarea"
                                 name="notes"
                                 value={formData.notes}
                                 onChange={handleInputChange}
+                                placeholder="Additional notes, variations, or tips..."
                             />
                         </div>
                         
                         <div className="buttons-row">
                             <button type="submit" className="button">
-                                {isEdit ? 'Update Cocktail' : 'Save Cocktail'}
+                                {isEdit ? 'Update Cocktail' : 'Add Cocktail'}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
@@ -2206,18 +2455,22 @@
             );
         }
 
-        // Syrups Page Component with Enhanced Ingredients
-        function SyrupsPage({ onBack, isAdmin, syrups, onSaveSyrup, onDeleteSyrup }) {
-            const [editingSyrup, setEditingSyrup] = useState(null);
-            const [isEditing, setIsEditing] = useState(false);
-            const [formData, setFormData] = useState({
-                name: '',
-                type: 'syrup',
-                ingredients: [{ name: '', amount: '', unit: 'ml' }],
-                instructions: '',
-                shelf_life: '',
-                storage: ''
-            });
+        // Create/Edit Syrup Component
+        function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
+            const [formData, setFormData] = useState(
+                syrup || {
+                    name: '',
+                    type: 'Syrup',
+                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
+                    instructions: '',
+                    shelf_life: '',
+                    storage: '',
+                    image_url: ''
+                }
+            );
+            
+            const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
+            const [isDragging, setIsDragging] = useState(false);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -2254,930 +2507,1061 @@
                 }
             };
             
+            const handleImageUpload = async (file) => {
+                if (file) {
+                    try {
+                        const base64 = await convertImageToBase64(file);
+                        setFormData(prev => ({
+                            ...prev,
+                            image_url: base64
+                        }));
+                        setImagePreview(base64);
+                    } catch (error) {
+                        console.error('Error uploading image:', error);
+                        alert('Error uploading image. Please try again.');
+                    }
+                }
+            };
+            
+            const handleFileInputChange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await handleImageUpload(file);
+                }
+            };
+            
+            // Drag and drop handlers
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            };
+            
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            };
+            
+            const handleDrop = async (e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    await handleImageUpload(files[0]);
+                }
+            };
+            
             const handleSubmit = (e) => {
                 e.preventDefault();
                 
                 if (!formData.name) {
-                    alert('Please enter a name');
+                    alert('Please at least enter a syrup/infusion name');
                     return;
                 }
                 
                 const syrupData = {
                     ...formData,
-                    id: isEditing ? editingSyrup.id : Date.now().toString(),
-                    createdAt: isEditing ? editingSyrup.createdAt : new Date().toISOString(),
+                    id: isEdit ? formData.id : Date.now().toString(),
+                    createdBy: isEdit ? formData.createdBy : 'user',
+                    createdAt: isEdit ? formData.createdAt : new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
                 
-                onSaveSyrup(syrupData);
-                setFormData({
-                    name: '',
-                    type: 'syrup',
-                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
-                    instructions: '',
-                    shelf_life: '',
-                    storage: ''
-                });
-                setIsEditing(false);
-                setEditingSyrup(null);
-            };
-            
-            const handleEdit = (syrup) => {
-                setEditingSyrup(syrup);
-                setIsEditing(true);
-                setFormData({
-                    name: syrup.name,
-                    type: syrup.type,
-                    ingredients: syrup.ingredients || [{ name: '', amount: '', unit: 'ml' }],
-                    instructions: syrup.instructions,
-                    shelf_life: syrup.shelf_life,
-                    storage: syrup.storage
-                });
-            };
-            
-            const handleCancel = () => {
-                setFormData({
-                    name: '',
-                    type: 'syrup',
-                    ingredients: [{ name: '', amount: '', unit: 'ml' }],
-                    instructions: '',
-                    shelf_life: '',
-                    storage: ''
-                });
-                setIsEditing(false);
-                setEditingSyrup(null);
-            };
-            
-            const handleShareSyrup = (syrup) => {
-                const shareText = generateSyrupShareText(syrup);
-                shareContent(shareText, `${syrup.name} ${syrup.type}`);
+                onSave(syrupData);
             };
             
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
+                        ← Back to Syrups
                     </button>
                     
-                    <h1 className="page-title">Syrups & Infusions</h1>
+                    <h1 className="page-title">{isEdit ? 'Edit Syrup/Infusion' : 'Add New Syrup/Infusion'}</h1>
                     
-                    {!isAdmin ? (
-                        <div className="settings-section">
-                            <p>Admin access required to manage syrups.</p>
+                    <form className="form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">Name *</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                            />
                         </div>
-                    ) : (
-                        <>
-                            <div className="form">
-                                <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>
-                                    {isEditing ? 'Edit Syrup/Infusion' : 'Add New Syrup/Infusion'}
-                                </h3>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label className="form-label">Name *</label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div className="form-group">
-                                        <label className="form-label">Type</label>
-                                        <select
-                                            className="form-input"
-                                            name="type"
-                                            value={formData.type}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="syrup">Syrup</option>
-                                            <option value="infusion">Infusion</option>
-                                            <option value="tincture">Tincture</option>
-                                            <option value="bitters">Bitters</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div className="form-group">
-                                        <label className="form-label">Ingredients</label>
-                                        {formData.ingredients.map((ingredient, index) => (
-                                            <div key={index} style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center'}}>
-                                                <input
-                                                    type="text"
-                                                    className="form-input"
-                                                    placeholder="Ingredient name"
-                                                    value={ingredient.name}
-                                                    onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                                    style={{flex: 2}}
-                                                />
-                                                <input
-                                                    type="number"
-                                                    step="0.1"
-                                                    className="form-input"
-                                                    placeholder="Amount"
-                                                    value={ingredient.amount}
-                                                    onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                                                    style={{flex: 1}}
-                                                />
-                                                <select
-                                                    className="form-input"
-                                                    value={ingredient.unit}
-                                                    onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                                    style={{flex: 1}}
-                                                >
-                                                    <option value="ml">ml</option>
-                                                    <option value="oz">oz</option>
-                                                    <option value="dash">dash</option>
-                                                    <option value="drops">drops</option>
-                                                    <option value="pcs">pcs</option>
-                                                </select>
-                                                {formData.ingredients.length > 1 && (
-                                                    <button
-                                                        type="button"
-                                                        className="icon-button delete"
-                                                        onClick={() => removeIngredient(index)}
-                                                    >
-                                                        ×
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                        <button type="button" className="button button-secondary" onClick={addIngredient}>
-                                            + Add Ingredient
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="form-group">
-                                        <label className="form-label">Instructions</label>
-                                        <textarea
-                                            className="form-textarea"
-                                            name="instructions"
-                                            value={formData.instructions}
-                                            onChange={handleInputChange}
-                                            placeholder="Step-by-step preparation instructions"
-                                        />
-                                    </div>
-                                    
-                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                                        <div className="form-group">
-                                            <label className="form-label">Shelf Life</label>
-                                            <input
-                                                type="text"
-                                                className="form-input"
-                                                name="shelf_life"
-                                                value={formData.shelf_life}
-                                                onChange={handleInputChange}
-                                                placeholder="e.g., 2 weeks refrigerated"
-                                            />
-                                        </div>
-                                        
-                                        <div className="form-group">
-                                            <label className="form-label">Storage</label>
-                                            <input
-                                                type="text"
-                                                className="form-input"
-                                                name="storage"
-                                                value={formData.storage}
-                                                onChange={handleInputChange}
-                                                placeholder="e.g., Refrigerate in airtight container"
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="buttons-row">
-                                        <button type="submit" className="button">
-                                            {isEditing ? 'Update' : 'Save'}
-                                        </button>
-                                        {isEditing && (
-                                            <button type="button" className="button button-secondary" onClick={handleCancel}>
-                                                Cancel
-                                            </button>
-                                        )}
-                                    </div>
-                                </form>
+                        
+                        <div className="form-group">
+                            <label className="form-label">Type</label>
+                            <select
+                                className="form-input"
+                                name="type"
+                                value={formData.type}
+                                onChange={handleInputChange}
+                            >
+                                <option value="Syrup">Syrup</option>
+                                <option value="Infusion">Infusion</option>
+                                <option value="Tincture">Tincture</option>
+                                <option value="Bitters">Bitters</option>
+                                <option value="Cordial">Cordial</option>
+                            </select>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label className="form-label">Image</label>
+                            <div 
+                                className={`drop-zone ${isDragging ? 'dragover' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                onClick={() => document.getElementById('image-upload').click()}
+                            >
+                                <div className="drop-zone-text">
+                                    {imagePreview ? 'Change Image' : 'Upload Image'}
+                                </div>
+                                <div className="drop-zone-subtext">
+                                    Drag & drop or click to upload
+                                </div>
                             </div>
                             
-                            <div className="settings-section">
-                                <h3 className="settings-title">Existing Syrups & Infusions</h3>
-                                {syrups.length === 0 ? (
-                                    <p style={{color: '#888', textAlign: 'center', padding: '2rem'}}>
-                                        No syrups or infusions added yet.
-                                    </p>
-                                ) : (
-                                    <ul className="settings-list">
-                                        {syrups.map((syrup, index) => (
-                                            <li key={syrup.id} className="settings-item">
-                                                <div style={{flex: 1}}>
-                                                    <div style={{fontWeight: 'bold', marginBottom: '0.25rem'}}>
-                                                        {syrup.name} 
-                                                        <span style={{color: '#FFB366', fontSize: '0.8rem', marginLeft: '0.5rem'}}>
-                                                            ({syrup.type})
-                                                        </span>
-                                                    </div>
-                                                    {syrup.shelf_life && (
-                                                        <div style={{color: '#888', fontSize: '0.8rem'}}>
-                                                            Shelf life: {syrup.shelf_life}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="settings-actions">
-                                                    <button 
-                                                        className="icon-button"
-                                                        onClick={() => handleShareSyrup(syrup)}
-                                                        title="Share"
-                                                    >
-                                                        📤
-                                                    </button>
-                                                    <button 
-                                                        className="icon-button"
-                                                        onClick={() => handleEdit(syrup)}
-                                                    >
-                                                        ✏️
-                                                    </button>
-                                                    <button 
-                                                        className="icon-button delete"
-                                                        onClick={() => onDeleteSyrup(syrup.id)}
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                            <input
+                                type="file"
+                                id="image-upload"
+                                accept="image/*"
+                                onChange={handleFileInputChange}
+                                style={{display: 'none'}}
+                            />
+                            
+                            {imagePreview && (
+                                <div className="image-upload">
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                    <button 
+                                        type="button" 
+                                        className="button button-secondary"
+                                        onClick={() => {
+                                            setImagePreview('');
+                                            setFormData(prev => ({ ...prev, image_url: '' }));
+                                        }}
+                                    >
+                                        Remove Image
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="form-group">
+                            <label className="form-label">Ingredients</label>
+                            {formData.ingredients.map((ingredient, index) => (
+                                <div key={index} style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem'}}>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Ingredient name"
+                                        value={ingredient.name}
+                                        onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        className="form-input"
+                                        placeholder="Amount"
+                                        value={ingredient.amount}
+                                        onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+                                    />
+                                    <select
+                                        className="form-input"
+                                        value={ingredient.unit}
+                                        onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                                    >
+                                        <option value="ml">ml</option>
+                                        <option value="oz">oz</option>
+                                        <option value="cup">cup</option>
+                                        <option value="tsp">tsp</option>
+                                        <option value="tbsp">tbsp</option>
+                                        <option value="gram">gram</option>
+                                        <option value="piece">piece</option>
+                                    </select>
+                                    {formData.ingredients.length > 1 && (
+                                        <button 
+                                            type="button" 
+                                            className="button button-secondary"
+                                            onClick={() => removeIngredient(index)}
+                                            style={{padding: '0.5rem'}}
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <button type="button" className="button button-secondary" onClick={addIngredient}>
+                                + Add Ingredient
+                            </button>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label className="form-label">Instructions</label>
+                            <textarea
+                                className="form-textarea"
+                                name="instructions"
+                                value={formData.instructions}
+                                onChange={handleInputChange}
+                                placeholder="Step-by-step preparation instructions..."
+                            />
+                        </div>
+                        
+                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                            <div className="form-group">
+                                <label className="form-label">Shelf Life</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    name="shelf_life"
+                                    value={formData.shelf_life}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., 2 weeks refrigerated"
+                                />
                             </div>
-                        </>
-                    )}
+                            
+                            <div className="form-group">
+                                <label className="form-label">Storage</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    name="storage"
+                                    value={formData.storage}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., Refrigerate in airtight container"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="buttons-row">
+                            <button type="submit" className="button">
+                                {isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion'}
+                            </button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
             );
         }
 
-        // Draggable Settings Item Component
-        function DraggableSettingsItem({ item, index, onRemove, onDragStart, onDragOver, onDrop, isDragging }) {
+        // Syrups Page Component
+        function SyrupsPage({ onSyrupClick, onDeleteSyrup, isAdmin, onCreateSyrup, syrups, onBack }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterType, setFilterType] = useState('All');
+            
+            // Filter syrups based on search and filters
+            const filteredSyrups = syrups.filter(syrup => {
+                const matchesSearch = syrup.name.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesType = filterType === 'All' || syrup.type === filterType;
+                
+                return matchesSearch && matchesType;
+            });
+            
+            // Group syrups by first letter
+            const groupedSyrups = filteredSyrups.reduce((groups, syrup) => {
+                const firstLetter = syrup.name.charAt(0).toUpperCase();
+                if (!groups[firstLetter]) {
+                    groups[firstLetter] = [];
+                }
+                groups[firstLetter].push(syrup);
+                return groups;
+            }, {});
+            
+            // Sort the groups alphabetically
+            const sortedLetters = Object.keys(groupedSyrups).sort();
+            
+            // Scroll to letter function
+            const scrollToLetter = (letter) => {
+                const element = document.getElementById(`letter-${letter}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            };
+            
             return (
-                <li 
-                    className={`settings-item ${isDragging ? 'dragging' : ''}`}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, index)}
-                    onDragOver={(e) => onDragOver(e, index)}
-                    onDrop={(e) => onDrop(e, index)}
-                >
-                    <span className="drag-handle">⋮⋮</span>
-                    <span style={{flex: 1}}>{item}</span>
-                    <div className="settings-actions">
-                        <button 
-                            className="icon-button delete"
-                            onClick={() => onRemove(index)}
-                        >
-                            ×
-                        </button>
+                <div className="container">
+                    <div className="page-header">
+                        <div>
+                            <button className="button button-secondary" onClick={onBack} style={{marginBottom: '1rem'}}>
+                                ← Back to Cocktails
+                            </button>
+                            <h1 className="page-title">Syrups & Infusions</h1>
+                        </div>
+                        {isAdmin && (
+                            <button className="button" onClick={onCreateSyrup}>
+                                ➕ Add Syrup/Infusion
+                            </button>
+                        )}
                     </div>
-                </li>
+                    
+                    <div className="search-section">
+                        <input 
+                            type="text"
+                            className="search-box"
+                            placeholder="Search syrups and infusions..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        
+                        <div className="filters">
+                            <select 
+                                className="filter-select"
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                            >
+                                <option value="All">All Types</option>
+                                <option value="Syrup">Syrup</option>
+                                <option value="Infusion">Infusion</option>
+                                <option value="Tincture">Tincture</option>
+                                <option value="Bitters">Bitters</option>
+                                <option value="Cordial">Cordial</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div className="main-content">
+                        <div className="recipes-container">
+                            {filteredSyrups.length === 0 ? (
+                                <div className="loading">
+                                    {syrups.length === 0 ? (
+                                        'No syrups or infusions available. Login as admin to add some.'
+                                    ) : (
+                                        'No syrups or infusions found matching your criteria.'
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
+                                        Showing {filteredSyrups.length} of {syrups.length} syrups & infusions
+                                    </div>
+                                    {sortedLetters.map(letter => (
+                                        <div key={letter} id={`letter-${letter}`} className="alphabet-section">
+                                            <h2 className="letter-header">{letter}</h2>
+                                            <div className="recipes-grid">
+                                                {groupedSyrups[letter].map(syrup => (
+                                                    <SyrupCard 
+                                                        key={syrup.id}
+                                                        syrup={syrup}
+                                                        onClick={onSyrupClick}
+                                                        isAdmin={isAdmin}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                        
+                        {/* Right-side Alphabet Navigation */}
+                        {sortedLetters.length > 0 && (
+                            <AlphabetNav letters={sortedLetters} onLetterClick={scrollToLetter} />
+                        )}
+                    </div>
+                </div>
             );
         }
 
-        // Settings Page Component with Drag & Drop
-        function SettingsPage({ onBack, isAdmin, settings, onUpdateSettings }) {
-            const [newItems, setNewItems] = useState({
-                spirit_types: '',
-                glass_types: '',
-                venues: ''
-            });
-            
+        // Settings Page Component
+        function SettingsPage({ onBack, settings, onSaveSettings, isAdmin }) {
+            const [formData, setFormData] = useState(settings);
             const [dragIndex, setDragIndex] = useState(null);
             
-            const handleKeyPress = (e, type) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddItem(type);
-                }
-            };
-            
-            const handleAddItem = (type) => {
-                const value = newItems[type].trim();
-                if (!value) {
-                    alert('Please enter a value');
-                    return;
-                }
-                
-                const updatedSettings = {
-                    ...settings,
-                    [type]: [...settings[type], value]
-                };
-                
-                onUpdateSettings(updatedSettings);
-                setNewItems(prev => ({
+            const handleInputChange = (section, field, value) => {
+                setFormData(prev => ({
                     ...prev,
-                    [type]: ''
+                    [section]: prev[section].map(item => 
+                        item === field ? value : item
+                    )
                 }));
             };
             
-            const handleRemoveItem = (type, index) => {
-                const updatedSettings = {
-                    ...settings,
-                    [type]: settings[type].filter((_, i) => i !== index)
-                };
-                onUpdateSettings(updatedSettings);
+            const addItem = (section) => {
+                const newItem = prompt(`Enter new ${section.replace('_', ' ')}:`);
+                if (newItem && newItem.trim()) {
+                    setFormData(prev => ({
+                        ...prev,
+                        [section]: [...prev[section], newItem.trim()]
+                    }));
+                }
             };
             
-            const handleInputChange = (type, value) => {
-                setNewItems(prev => ({
-                    ...prev,
-                    [type]: value
-                }));
+            const removeItem = (section, index) => {
+                if (confirm('Are you sure you want to remove this item?')) {
+                    setFormData(prev => ({
+                        ...prev,
+                        [section]: prev[section].filter((_, i) => i !== index)
+                    }));
+                }
             };
             
-            // Drag and Drop handlers
-            const handleDragStart = (e, index) => {
+            const handleDragStart = (index) => {
                 setDragIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
             };
             
             const handleDragOver = (e, index) => {
                 e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
             };
             
-            const handleDrop = (e, dropIndex, type) => {
-                e.preventDefault();
+            const handleDrop = (section, dropIndex) => {
                 if (dragIndex === null || dragIndex === dropIndex) return;
                 
-                const reorderedItems = reorder(settings[type], dragIndex, dropIndex);
-                const updatedSettings = {
-                    ...settings,
-                    [type]: reorderedItems
-                };
-                
-                onUpdateSettings(updatedSettings);
+                const reorderedItems = reorder(formData[section], dragIndex, dropIndex);
+                setFormData(prev => ({
+                    ...prev,
+                    [section]: reorderedItems
+                }));
                 setDragIndex(null);
             };
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSaveSettings(formData);
+                onBack();
+            };
+            
+            if (!isAdmin) {
+                return (
+                    <div className="container">
+                        <button className="button button-secondary" onClick={onBack}>
+                            ← Back
+                        </button>
+                        <div className="loading">
+                            Admin access required to modify settings.
+                        </div>
+                    </div>
+                );
+            }
             
             return (
                 <div className="container">
                     <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
+                        ← Back
                     </button>
                     
                     <h1 className="page-title">Settings</h1>
                     
-                    {!isAdmin ? (
+                    <form className="form" onSubmit={handleSubmit}>
                         <div className="settings-section">
-                            <p>Admin access required to modify settings.</p>
+                            <h2 className="settings-title">Spirit Types</h2>
+                            <ul className="settings-list">
+                                {formData.spirit_types.map((spirit, index) => (
+                                    <li 
+                                        key={index}
+                                        className={`settings-item ${dragIndex === index ? 'dragging' : ''}`}
+                                        draggable
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDrop={() => handleDrop('spirit_types', index)}
+                                    >
+                                        <span className="drag-handle">⋮⋮</span>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={spirit}
+                                            onChange={(e) => handleInputChange('spirit_types', spirit, e.target.value)}
+                                            style={{flex: 1, marginRight: '1rem'}}
+                                        />
+                                        <div className="settings-actions">
+                                            <button 
+                                                type="button" 
+                                                className="icon-button delete"
+                                                onClick={() => removeItem('spirit_types', index)}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <button 
+                                type="button" 
+                                className="button button-secondary"
+                                onClick={() => addItem('spirit_types')}
+                            >
+                                + Add Spirit Type
+                            </button>
                         </div>
-                    ) : (
-                        <>
-                            <div className="settings-section">
-                                <h3 className="settings-title">Spirit Types</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new spirit type"
-                                        value={newItems.spirit_types}
-                                        onChange={(e) => handleInputChange('spirit_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'spirit_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('spirit_types')}
+                        
+                        <div className="settings-section">
+                            <h2 className="settings-title">Glass Types</h2>
+                            <ul className="settings-list">
+                                {formData.glass_types.map((glass, index) => (
+                                    <li 
+                                        key={index}
+                                        className={`settings-item ${dragIndex === index ? 'dragging' : ''}`}
+                                        draggable
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDrop={() => handleDrop('glass_types', index)}
                                     >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.spirit_types.map((item, index) => (
-                                        <DraggableSettingsItem
-                                            key={index}
-                                            item={item}
-                                            index={index}
-                                            onRemove={(idx) => handleRemoveItem('spirit_types', idx)}
-                                            onDragStart={handleDragStart}
-                                            onDragOver={handleDragOver}
-                                            onDrop={(e, idx) => handleDrop(e, idx, 'spirit_types')}
-                                            isDragging={dragIndex === index}
+                                        <span className="drag-handle">⋮⋮</span>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={glass}
+                                            onChange={(e) => handleInputChange('glass_types', glass, e.target.value)}
+                                            style={{flex: 1, marginRight: '1rem'}}
                                         />
-                                    ))}
-                                </ul>
-                            </div>
-                            
-                            <div className="settings-section">
-                                <h3 className="settings-title">Glass Types</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new glass type"
-                                        value={newItems.glass_types}
-                                        onChange={(e) => handleInputChange('glass_types', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'glass_types')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('glass_types')}
+                                        <div className="settings-actions">
+                                            <button 
+                                                type="button" 
+                                                className="icon-button delete"
+                                                onClick={() => removeItem('glass_types', index)}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <button 
+                                type="button" 
+                                className="button button-secondary"
+                                onClick={() => addItem('glass_types')}
+                            >
+                                + Add Glass Type
+                            </button>
+                        </div>
+                        
+                        <div className="settings-section">
+                            <h2 className="settings-title">Venues</h2>
+                            <ul className="settings-list">
+                                {formData.venues.map((venue, index) => (
+                                    <li 
+                                        key={index}
+                                        className={`settings-item ${dragIndex === index ? 'dragging' : ''}`}
+                                        draggable
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDrop={() => handleDrop('venues', index)}
                                     >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.glass_types.map((item, index) => (
-                                        <DraggableSettingsItem
-                                            key={index}
-                                            item={item}
-                                            index={index}
-                                            onRemove={(idx) => handleRemoveItem('glass_types', idx)}
-                                            onDragStart={handleDragStart}
-                                            onDragOver={handleDragOver}
-                                            onDrop={(e, idx) => handleDrop(e, idx, 'glass_types')}
-                                            isDragging={dragIndex === index}
+                                        <span className="drag-handle">⋮⋮</span>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={venue}
+                                            onChange={(e) => handleInputChange('venues', venue, e.target.value)}
+                                            style={{flex: 1, marginRight: '1rem'}}
                                         />
-                                    ))}
-                                </ul>
-                            </div>
-                            
-                            <div className="settings-section">
-                                <h3 className="settings-title">Venues</h3>
-                                <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Add new venue"
-                                        value={newItems.venues}
-                                        onChange={(e) => handleInputChange('venues', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'venues')}
-                                        style={{flex: 1}}
-                                    />
-                                    <button 
-                                        className="button" 
-                                        onClick={() => handleAddItem('venues')}
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                                <ul className="settings-list">
-                                    {settings.venues.map((item, index) => (
-                                        <DraggableSettingsItem
-                                            key={index}
-                                            item={item}
-                                            index={index}
-                                            onRemove={(idx) => handleRemoveItem('venues', idx)}
-                                            onDragStart={handleDragStart}
-                                            onDragOver={handleDragOver}
-                                            onDrop={(e, idx) => handleDrop(e, idx, 'venues')}
-                                            isDragging={dragIndex === index}
-                                        />
-                                    ))}
-                                </ul>
-                            </div>
-                        </>
-                    )}
+                                        <div className="settings-actions">
+                                            <button 
+                                                type="button" 
+                                                className="icon-button delete"
+                                                onClick={() => removeItem('venues', index)}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <button 
+                                type="button" 
+                                className="button button-secondary"
+                                onClick={() => addItem('venues')}
+                            >
+                                + Add Venue
+                            </button>
+                        </div>
+                        
+                        <div className="buttons-row">
+                            <button type="submit" className="button">
+                                Save Settings
+                            </button>
+                            <button type="button" className="button button-secondary" onClick={onBack}>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
             );
         }
 
-        // Login Page Component
-        function LoginPage({ onLogin, onGuestLogin }) {
+        // Login Component
+        function LoginPage({ onLogin, onLoginAsGuest }) {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
             const [error, setError] = useState('');
             
-            const handleSubmit = (e) => {
+            const handleSubmit = async (e) => {
                 e.preventDefault();
-                if (onLogin(username, password)) {
-                    setError('');
-                } else {
+                setError('');
+                
+                const success = await onLogin(username, password);
+                if (!success) {
                     setError('Invalid credentials');
                 }
             };
             
             return (
-                <div className="container">
-                    <div className="form" style={{maxWidth: '400px', marginTop: '4rem'}}>
-                        <h1 className="page-title" style={{textAlign: 'center'}}>Cocktail Codex</h1>
+                <div className="container" style={{maxWidth: '400px', textAlign: 'center', paddingTop: '4rem'}}>
+                    <div style={{fontSize: '4rem', marginBottom: '1rem'}}>🍸</div>
+                    <h1 style={{color: '#FFB366', marginBottom: '2rem'}}>Cocktail Codex</h1>
+                    
+                    <form className="form" onSubmit={handleSubmit}>
+                        {error && (
+                            <div style={{color: '#f44336', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(244, 67, 54, 0.1)', borderRadius: '4px'}}>
+                                {error}
+                            </div>
+                        )}
                         
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">Username</label>
-                                <input 
-                                    type="text"
-                                    className="form-input"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label className="form-label">Password</label>
-                                <input 
-                                    type="password"
-                                    className="form-input"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            
-                            {error && (
-                                <div style={{color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center'}}>
-                                    {error}
-                                </div>
-                            )}
-                            
-                            <div className="buttons-row">
-                                <button type="submit" className="button">
-                                    Login
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="button button-secondary"
-                                    onClick={onGuestLogin}
-                                >
-                                    Continue as Guest
-                                </button>
-                            </div>
-                        </form>
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <input
+                                type="password"
+                                className="form-input"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        
+                        <button type="submit" className="button" style={{width: '100%', marginBottom: '1rem'}}>
+                            Login as Admin
+                        </button>
+                    </form>
+                    
+                    <div style={{margin: '2rem 0', color: '#888'}}>or</div>
+                    
+                    <button 
+                        className="button button-secondary" 
+                        onClick={onLoginAsGuest}
+                        style={{width: '100%'}}
+                    >
+                        Continue as Guest
+                    </button>
+                    
+                    <div style={{marginTop: '3rem', color: '#888', fontSize: '0.9rem'}}>
+                        <p>Admin access allows you to:</p>
+                        <ul style={{textAlign: 'left', marginTop: '0.5rem'}}>
+                            <li>Add/edit/delete cocktails</li>
+                            <li>Manage syrups & infusions</li>
+                            <li>Modify app settings</li>
+                        </ul>
                     </div>
                 </div>
             );
         }
 
-        // Main App Component with Improved Sync
+        // Main App Component
         function App() {
             const { user, firebaseUser, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
             const [selectedRecipe, setSelectedRecipe] = useState(null);
-            const [menuOpen, setMenuOpen] = useState(false);
-            const [editingItem, setEditingItem] = useState(null);
-            const [isEditing, setIsEditing] = useState(false);
-            const [recipes, setRecipes] = useState(getRecipes());
-            const [syrups, setSyrups] = useState(getSyrups());
+            const [selectedSyrup, setSelectedSyrup] = useState(null);
+            const [editingRecipe, setEditingRecipe] = useState(null);
+            const [editingSyrup, setEditingSyrup] = useState(null);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [recipes, setRecipes] = useState([]);
+            const [syrups, setSyrups] = useState([]);
             const [settings, setSettings] = useState(getSettings());
-            const [syncStatus, setSyncStatus] = useState('offline');
-            const [isManualSyncing, setIsManualSyncing] = useState(false);
-            const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+            const [syncStatus, setSyncStatus] = useState('synced'); // 'synced', 'syncing', 'error'
             
-            // Initialize Firebase and set up listeners
+            // Load initial data
             useEffect(() => {
-                const initializeFirebase = async () => {
+                const loadInitialData = async () => {
+                    console.log('Loading initial data...');
+                    
+                    // Load from localStorage first for immediate display
+                    const localRecipes = getRecipes();
+                    const localSyrups = getSyrups();
+                    const localSettings = getSettings();
+                    
+                    setRecipes(localRecipes);
+                    setSyrups(localSyrups);
+                    setSettings(localSettings);
+                    
+                    console.log('Local data loaded:', {
+                        recipes: localRecipes.length,
+                        syrups: localSyrups.length
+                    });
+                    
+                    // Then try to load from Firebase
                     try {
-                        // Test Firebase connection
-                        await db.collection('sharedData').doc('test').get();
-                        setFirebaseInitialized(true);
+                        setSyncStatus('syncing');
+                        
+                        const [firebaseRecipes, firebaseSyrups, firebaseSettings] = await Promise.all([
+                            loadRecipesFromFirebase(),
+                            loadSyrupsFromFirebase(),
+                            loadSettingsFromFirebase()
+                        ]);
+                        
+                        // Use Firebase data if available and newer
+                        if (firebaseRecipes !== null) {
+                            setRecipes(firebaseRecipes);
+                            saveRecipes(firebaseRecipes);
+                        }
+                        
+                        if (firebaseSyrups !== null) {
+                            setSyrups(firebaseSyrups);
+                            saveSyrups(firebaseSyrups);
+                        }
+                        
+                        if (firebaseSettings !== null) {
+                            setSettings(firebaseSettings);
+                            saveSettings(firebaseSettings);
+                        }
+                        
                         setSyncStatus('synced');
-                        console.log('Firebase connection successful');
+                        console.log('Firebase data loaded successfully');
                     } catch (error) {
-                        console.error('Firebase connection failed:', error);
-                        setFirebaseInitialized(false);
+                        console.error('Error loading from Firebase:', error);
                         setSyncStatus('error');
                     }
                 };
-
-                initializeFirebase();
+                
+                loadInitialData();
             }, []);
-
-            // Set up Firebase real-time listeners when user logs in and Firebase is initialized
+            
+            // Set up Firebase real-time listeners
             useEffect(() => {
-                if (firebaseUser && firebaseInitialized) {
-                    console.log('Setting up Firebase listeners for auto sync');
-                    
-                    // Load initial data from Firebase
-                    const loadInitialData = async () => {
-                        try {
-                            const [firebaseRecipes, firebaseSyrups, firebaseSettings] = await Promise.all([
-                                loadRecipesFromFirebase(),
-                                loadSyrupsFromFirebase(),
-                                loadSettingsFromFirebase()
-                            ]);
-                            
-                            if (firebaseRecipes !== null) {
-                                setRecipes(firebaseRecipes);
-                                saveRecipes(firebaseRecipes);
-                            }
-                            
-                            if (firebaseSyrups !== null) {
-                                setSyrups(firebaseSyrups);
-                                saveSyrups(firebaseSyrups);
-                            }
-                            
-                            if (firebaseSettings !== null) {
-                                setSettings(firebaseSettings);
-                                saveSettings(firebaseSettings);
-                            }
-                            
-                            setSyncStatus('synced');
-                        } catch (error) {
-                            console.error('Error loading initial data:', error);
-                            setSyncStatus('error');
-                        }
-                    };
-                    
-                    loadInitialData();
-                    
-                    // Set up real-time listeners for automatic sync
-                    const cleanup = setupFirebaseListeners(
-                        // Recipes update handler
-                        (updatedRecipes) => {
-                            console.log('Real-time update: Recipes updated from cloud', updatedRecipes.length, 'recipes');
-                            setRecipes(updatedRecipes);
-                            saveRecipes(updatedRecipes);
-                            setSyncStatus('synced');
-                        },
-                        // Syrups update handler
-                        (updatedSyrups) => {
-                            console.log('Real-time update: Syrups updated from cloud', updatedSyrups.length, 'syrups');
-                            setSyrups(updatedSyrups);
-                            saveSyrups(updatedSyrups);
-                        },
-                        // Settings update handler
-                        (updatedSettings) => {
-                            console.log('Real-time update: Settings updated from cloud');
-                            setSettings(updatedSettings);
-                            saveSettings(updatedSettings);
-                        }
-                    );
-                    
-                    return cleanup;
-                }
-            }, [firebaseUser, firebaseInitialized]);
+                if (!firebaseUser) return;
+                
+                console.log('Setting up Firebase listeners for user:', firebaseUser.uid);
+                
+                const cleanup = setupFirebaseListeners(
+                    (newRecipes) => {
+                        console.log('Recipes updated from cloud:', newRecipes.length);
+                        setRecipes(newRecipes);
+                        saveRecipes(newRecipes);
+                    },
+                    (newSyrups) => {
+                        console.log('Syrups updated from cloud:', newSyrups.length);
+                        setSyrups(newSyrups);
+                        saveSyrups(newSyrups);
+                    },
+                    (newSettings) => {
+                        console.log('Settings updated from cloud');
+                        setSettings(newSettings);
+                        saveSettings(newSettings);
+                    }
+                );
+                
+                return cleanup;
+            }, [firebaseUser]);
             
             // Manual sync function
             const handleManualSync = async () => {
-                if (!user || !firebaseInitialized) {
-                    alert('Sync not available. Please check your Firebase configuration.');
-                    return;
-                }
-                
-                setIsManualSyncing(true);
                 setSyncStatus('syncing');
                 
                 try {
-                    // Load fresh data from Firebase
-                    const [firebaseRecipes, firebaseSyrups, firebaseSettings] = await Promise.all([
-                        loadRecipesFromFirebase(),
-                        loadSyrupsFromFirebase(),
-                        loadSettingsFromFirebase()
+                    const [recipesSuccess, syrupsSuccess, settingsSuccess] = await Promise.all([
+                        syncRecipesWithFirebase(recipes),
+                        syncSyrupsWithFirebase(syrups),
+                        syncSettingsWithFirebase(settings)
                     ]);
                     
-                    let hasChanges = false;
-                    
-                    // Update recipes if new data is available
-                    if (firebaseRecipes !== null) {
-                        setRecipes(firebaseRecipes);
-                        saveRecipes(firebaseRecipes);
-                        hasChanges = true;
-                    }
-                    
-                    // Update syrups if new data is available
-                    if (firebaseSyrups !== null) {
-                        setSyrups(firebaseSyrups);
-                        saveSyrups(firebaseSyrups);
-                        hasChanges = true;
-                    }
-                    
-                    // Update settings if new data is available
-                    if (firebaseSettings !== null) {
-                        setSettings(firebaseSettings);
-                        saveSettings(firebaseSettings);
-                        hasChanges = true;
-                    }
-                    
-                    setSyncStatus('synced');
-                    
-                    if (hasChanges) {
-                        alert('Data successfully synced from cloud!');
+                    if (recipesSuccess && syrupsSuccess && settingsSuccess) {
+                        setSyncStatus('synced');
+                        console.log('Manual sync completed successfully');
                     } else {
-                        alert('Already up to date with cloud data.');
+                        setSyncStatus('error');
+                        console.error('Manual sync partially failed');
                     }
-                    
                 } catch (error) {
                     console.error('Manual sync error:', error);
                     setSyncStatus('error');
-                    alert('Sync failed. Please check your connection and Firebase configuration.');
-                } finally {
-                    setIsManualSyncing(false);
                 }
             };
             
-            const navigateTo = (page, item = null) => {
-                if ((page === 'create-recipe' || page === 'settings' || page === 'syrups') && (!user || !user.isAdmin)) {
-                    return;
-                }
+            // Navigation handlers
+            const navigateTo = (page) => {
                 setCurrentPage(page);
-                if (page === 'view-recipe') setSelectedRecipe(item);
-                setMenuOpen(false);
+                setSelectedRecipe(null);
+                setSelectedSyrup(null);
+                setEditingRecipe(null);
+                setEditingSyrup(null);
             };
             
-            // Auto-sync functions - only sync if Firebase is initialized and user is admin
-            const autoSyncRecipes = async (updatedRecipes) => {
-                if (user && user.isAdmin && firebaseInitialized) {
-                    setSyncStatus('syncing');
-                    const success = await syncRecipesWithFirebase(updatedRecipes);
-                    if (success) {
-                        setSyncStatus('synced');
-                        console.log('Recipes auto-synced to cloud');
-                    } else {
-                        setSyncStatus('error');
-                        console.error('Failed to auto-sync recipes');
-                    }
-                }
+            const handleRecipeClick = (recipe) => {
+                setSelectedRecipe(recipe);
+                setCurrentPage('view-recipe');
             };
             
-            const autoSyncSyrups = async (updatedSyrups) => {
-                if (user && user.isAdmin && firebaseInitialized) {
-                    const success = await syncSyrupsWithFirebase(updatedSyrups);
-                    if (!success) {
-                        console.error('Failed to sync syrups to cloud');
-                    }
-                }
-            };
-            
-            const autoSyncSettings = async (updatedSettings) => {
-                if (user && user.isAdmin && firebaseInitialized) {
-                    const success = await syncSettingsWithFirebase(updatedSettings);
-                    if (!success) {
-                        console.error('Failed to sync settings to cloud');
-                    }
-                }
-            };
-            
-            const handleDeleteRecipe = (recipeId) => {
-                if (!user || !user.isAdmin) return;
-                
-                if (confirm('Are you sure you want to delete this cocktail?')) {
-                    const updatedRecipes = recipes.filter(recipe => recipe.id !== recipeId);
-                    setRecipes(updatedRecipes);
-                    saveRecipes(updatedRecipes);
-                    autoSyncRecipes(updatedRecipes);
-                    alert('Recipe deleted successfully');
-                }
-            };
-            
-            const handleSaveRecipe = (recipeData) => {
-                let updatedRecipes;
-                
-                if (isEditing && editingItem) {
-                    const index = recipes.findIndex(r => r.id === editingItem.id);
-                    if (index !== -1) {
-                        updatedRecipes = [...recipes];
-                        updatedRecipes[index] = recipeData;
-                    }
-                } else {
-                    updatedRecipes = [...recipes, recipeData];
-                }
-                
-                if (updatedRecipes) {
-                    setRecipes(updatedRecipes);
-                    saveRecipes(updatedRecipes);
-                    autoSyncRecipes(updatedRecipes);
-                    setIsEditing(false);
-                    setEditingItem(null);
-                    navigateTo('home');
-                    alert(`Recipe ${isEditing ? 'updated' : 'added'} successfully${firebaseInitialized ? ' and synced to cloud' : ''}`);
-                }
+            const handleSyrupClick = (syrup) => {
+                setSelectedSyrup(syrup);
+                setCurrentPage('view-syrup');
             };
             
             const handleEditRecipe = (recipe) => {
-                setEditingItem(recipe);
-                setIsEditing(true);
-                setCurrentPage('create-recipe');
+                setEditingRecipe(recipe);
+                setCurrentPage('edit-recipe');
             };
             
-            const handleSaveSyrup = (syrupData) => {
+            const handleEditSyrup = (syrup) => {
+                setEditingSyrup(syrup);
+                setCurrentPage('edit-syrup');
+            };
+            
+            // Data management handlers
+            const handleSaveRecipe = async (recipeData) => {
+                let updatedRecipes;
+                
+                if (editingRecipe) {
+                    // Update existing recipe
+                    updatedRecipes = recipes.map(recipe => 
+                        recipe.id === recipeData.id ? recipeData : recipe
+                    );
+                } else {
+                    // Add new recipe
+                    updatedRecipes = [...recipes, recipeData];
+                }
+                
+                setRecipes(updatedRecipes);
+                saveRecipes(updatedRecipes);
+                
+                // Sync to Firebase
+                try {
+                    await syncRecipesWithFirebase(updatedRecipes);
+                } catch (error) {
+                    console.error('Error syncing recipe to Firebase:', error);
+                }
+                
+                navigateTo('home');
+            };
+            
+            const handleSaveSyrup = async (syrupData) => {
                 let updatedSyrups;
                 
-                if (isEditing && editingItem) {
-                    const index = syrups.findIndex(s => s.id === editingItem.id);
-                    if (index !== -1) {
-                        updatedSyrups = [...syrups];
-                        updatedSyrups[index] = syrupData;
-                    }
+                if (editingSyrup) {
+                    // Update existing syrup
+                    updatedSyrups = syrups.map(syrup => 
+                        syrup.id === syrupData.id ? syrupData : syrup
+                    );
                 } else {
+                    // Add new syrup
                     updatedSyrups = [...syrups, syrupData];
                 }
                 
-                if (updatedSyrups) {
-                    setSyrups(updatedSyrups);
-                    saveSyrups(updatedSyrups);
-                    autoSyncSyrups(updatedSyrups);
-                    alert(`Syrup ${isEditing ? 'updated' : 'added'} successfully${firebaseInitialized ? ' and synced to cloud' : ''}`);
-                }
-            };
-            
-            const handleDeleteSyrup = (syrupId) => {
-                if (!user || !user.isAdmin) return;
+                setSyrups(updatedSyrups);
+                saveSyrups(updatedSyrups);
                 
-                if (confirm('Are you sure you want to delete this syrup/infusion?')) {
-                    const updatedSyrups = syrups.filter(syrup => syrup.id !== syrupId);
-                    setSyrups(updatedSyrups);
-                    saveSyrups(updatedSyrups);
-                    autoSyncSyrups(updatedSyrups);
-                    alert('Syrup deleted successfully');
+                // Sync to Firebase
+                try {
+                    await syncSyrupsWithFirebase(updatedSyrups);
+                } catch (error) {
+                    console.error('Error syncing syrup to Firebase:', error);
+                }
+                
+                navigateTo('syrups');
+            };
+            
+            // FIXED: Remove confirmation dialog for deletions
+            const handleDeleteRecipe = async (recipeId) => {
+                const updatedRecipes = recipes.filter(recipe => recipe.id !== recipeId);
+                setRecipes(updatedRecipes);
+                saveRecipes(updatedRecipes);
+                
+                // Sync to Firebase
+                try {
+                    await syncRecipesWithFirebase(updatedRecipes);
+                } catch (error) {
+                    console.error('Error syncing after delete to Firebase:', error);
+                }
+                
+                // Automatically return to main page after deleting
+                navigateTo('home');
+            };
+            
+            // FIXED: Remove confirmation dialog for deletions
+            const handleDeleteSyrup = async (syrupId) => {
+                const updatedSyrups = syrups.filter(syrup => syrup.id !== syrupId);
+                setSyrups(updatedSyrups);
+                saveSyrups(updatedSyrups);
+                
+                // Sync to Firebase
+                try {
+                    await syncSyrupsWithFirebase(updatedSyrups);
+                } catch (error) {
+                    console.error('Error syncing after delete to Firebase:', error);
+                }
+                
+                // Automatically return to syrups page after deleting
+                navigateTo('syrups');
+            };
+            
+            const handleSaveSettings = async (newSettings) => {
+                setSettings(newSettings);
+                saveSettings(newSettings);
+                
+                // Sync to Firebase
+                try {
+                    await syncSettingsWithFirebase(newSettings);
+                } catch (error) {
+                    console.error('Error syncing settings to Firebase:', error);
                 }
             };
             
-            const handleUpdateSettings = (updatedSettings) => {
-                setSettings(updatedSettings);
-                saveSettings(updatedSettings);
-                autoSyncSettings(updatedSettings);
-            };
-            
-            const renderPage = () => {
+            // Render current page
+            const renderCurrentPage = () => {
                 if (!user) {
-                    return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                    return (
+                        <LoginPage 
+                            onLogin={login}
+                            onLoginAsGuest={loginAsGuest}
+                        />
+                    );
                 }
                 
-                switch(currentPage) {
+                switch (currentPage) {
                     case 'home':
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => {
-                                setIsEditing(false);
-                                setEditingItem(null);
-                                navigateTo('create-recipe');
-                            }}
-                            recipes={recipes}
-                            syncStatus={syncStatus}
-                            onManualSync={handleManualSync}
-                        />;
+                        return (
+                            <HomePage 
+                                onRecipeClick={handleRecipeClick}
+                                onDeleteRecipe={handleDeleteRecipe}
+                                isAdmin={user.isAdmin}
+                                onCreateRecipe={() => setCurrentPage('create-recipe')}
+                                recipes={recipes}
+                                syncStatus={syncStatus}
+                                onManualSync={handleManualSync}
+                            />
+                        );
+                    
                     case 'view-recipe':
-                        return <ViewRecipePage 
-                            recipe={selectedRecipe} 
-                            onBack={() => navigateTo('home')}
-                            isAdmin={user.isAdmin}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            onEditRecipe={handleEditRecipe}
-                        />;
+                        return (
+                            <ViewRecipePage 
+                                recipe={selectedRecipe}
+                                onBack={() => navigateTo('home')}
+                                isAdmin={user.isAdmin}
+                                onDeleteRecipe={handleDeleteRecipe}
+                                onEditRecipe={handleEditRecipe}
+                            />
+                        );
+                    
+                    case 'view-syrup':
+                        return (
+                            <ViewSyrupPage 
+                                syrup={selectedSyrup}
+                                onBack={() => navigateTo('syrups')}
+                                isAdmin={user.isAdmin}
+                                onDeleteSyrup={handleDeleteSyrup}
+                                onEditSyrup={handleEditSyrup}
+                            />
+                        );
+                    
                     case 'create-recipe':
-                        return <CreateEditRecipePage 
-                            recipe={editingItem}
-                            onBack={() => navigateTo('home')} 
-                            onSave={handleSaveRecipe}
-                            isEdit={isEditing}
-                        />;
+                        return (
+                            <CreateEditRecipePage 
+                                onBack={() => navigateTo('home')}
+                                onSave={handleSaveRecipe}
+                            />
+                        );
+                    
+                    case 'edit-recipe':
+                        return (
+                            <CreateEditRecipePage 
+                                recipe={editingRecipe}
+                                onBack={() => navigateTo('home')}
+                                onSave={handleSaveRecipe}
+                                isEdit={true}
+                            />
+                        );
+                    
                     case 'syrups':
-                        return <SyrupsPage 
-                            onBack={() => navigateTo('home')} 
-                            isAdmin={user.isAdmin}
-                            syrups={syrups}
-                            onSaveSyrup={handleSaveSyrup}
-                            onDeleteSyrup={handleDeleteSyrup}
-                        />;
+                        return (
+                            <SyrupsPage 
+                                onSyrupClick={handleSyrupClick}
+                                onDeleteSyrup={handleDeleteSyrup}
+                                isAdmin={user.isAdmin}
+                                onCreateSyrup={() => setCurrentPage('create-syrup')}
+                                syrups={syrups}
+                                onBack={() => navigateTo('home')}
+                            />
+                        );
+                    
+                    case 'create-syrup':
+                        return (
+                            <CreateEditSyrupPage 
+                                onBack={() => navigateTo('syrups')}
+                                onSave={handleSaveSyrup}
+                            />
+                        );
+                    
+                    case 'edit-syrup':
+                        return (
+                            <CreateEditSyrupPage 
+                                syrup={editingSyrup}
+                                onBack={() => navigateTo('syrups')}
+                                onSave={handleSaveSyrup}
+                                isEdit={true}
+                            />
+                        );
+                    
                     case 'settings':
-                        return <SettingsPage 
-                            onBack={() => navigateTo('home')} 
-                            isAdmin={user.isAdmin}
-                            settings={settings}
-                            onUpdateSettings={handleUpdateSettings}
-                        />;
+                        return (
+                            <SettingsPage 
+                                onBack={() => navigateTo('home')}
+                                settings={settings}
+                                onSaveSettings={handleSaveSettings}
+                                isAdmin={user.isAdmin}
+                            />
+                        );
+                    
                     default:
-                        return <HomePage 
-                            onRecipeClick={(recipe) => navigateTo('view-recipe', recipe)}
-                            onDeleteRecipe={handleDeleteRecipe}
-                            isAdmin={user.isAdmin}
-                            onCreateRecipe={() => navigateTo('create-recipe')}
-                            recipes={recipes}
-                            syncStatus={syncStatus}
-                            onManualSync={handleManualSync}
-                        />;
+                        return (
+                            <HomePage 
+                                onRecipeClick={handleRecipeClick}
+                                onDeleteRecipe={handleDeleteRecipe}
+                                isAdmin={user.isAdmin}
+                                onCreateRecipe={() => setCurrentPage('create-recipe')}
+                                recipes={recipes}
+                                syncStatus={syncStatus}
+                                onManualSync={handleManualSync}
+                            />
+                        );
                 }
             };
             
             if (!user) {
-                return <LoginPage onLogin={login} onGuestLogin={loginAsGuest} />;
+                return renderCurrentPage();
             }
             
             return (
-                <div className="app">
+                <div>
                     <header className="header">
-                        <div className="header-left">
-                            <button 
-                                className={`menu-button ${menuOpen ? 'active' : ''}`}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle menu"
-                            >
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                                <span className="menu-line"></span>
-                            </button>
-                        </div>
+                        <button 
+                            className="menu-button"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        >
+                            <span className="menu-line"></span>
+                            <span className="menu-line"></span>
+                            <span className="menu-line"></span>
+                        </button>
                         
                         <div className="nav-user">
-                            👤 {user.username}
-                            {user.isAdmin && <span style={{color: '#FFB366', fontSize: '0.7rem'}}> (Admin)</span>}
-                            {!user.isAdmin && <span style={{color: '#666', fontSize: '0.7rem'}}> (Guest)</span>}
-                            <button 
-                                className={`sync-btn ${isManualSyncing ? 'syncing' : ''}`}
-                                onClick={handleManualSync}
-                                disabled={isManualSyncing || !firebaseInitialized}
-                                title={firebaseInitialized ? "Refresh and sync data" : "Firebase not configured"}
-                            >
-                                🔄 {isManualSyncing ? 'Syncing...' : 'Sync'}
-                            </button>
+                            <div className="sync-status">
+                                <div className={`sync-indicator ${syncStatus}`}></div>
+                                <span>
+                                    {syncStatus === 'synced' && 'Synced'}
+                                    {syncStatus === 'syncing' && 'Syncing...'}
+                                    {syncStatus === 'error' && 'Offline'}
+                                </span>
+                                <button 
+                                    className={`sync-btn ${syncStatus === 'syncing' ? 'syncing' : ''}`}
+                                    onClick={handleManualSync}
+                                    disabled={syncStatus === 'syncing'}
+                                >
+                                    🔄
+                                </button>
+                            </div>
+                            
+                            <span style={{color: '#FFB366'}}>{user.username}</span>
                             <button className="logout-btn" onClick={logout}>
                                 Logout
                             </button>
@@ -3185,29 +3569,18 @@
                     </header>
                     
                     <HamburgerMenu 
-                        isOpen={menuOpen}
-                        onToggle={setMenuOpen}
+                        isOpen={isMenuOpen}
+                        onToggle={setIsMenuOpen}
                         currentPage={currentPage}
                         onNavigate={navigateTo}
                         isAdmin={user.isAdmin}
                     />
                     
-                    <main>
-                        {renderPage()}
-                    </main>
-
+                    {renderCurrentPage()}
+                    
                     <footer className="footer">
-                        <p>
-                             © {new Date().getFullYear()} | {' '}
-                            <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
-                                @suraj.gg87
-                            </a>
-                            {!firebaseInitialized && (
-                                <span style={{color: '#ff6b6b', display: 'block', marginTop: '0.5rem'}}>
-                                    ⚠️ Firebase not configured - Sync disabled
-                                </span>
-                            )}
-                        </p>
+                        <p>Cocktail Codex © 2025 </p>
+                         <a href="https://www.instagram.com/suraj.gg87/" target="_blank">@suraj.gg87</a>
                     </footer>
                 </div>
             );
