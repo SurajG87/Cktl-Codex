@@ -1763,26 +1763,7 @@
                             </select>
                         </div>
                         
-                        <div className="sync-status">
-                            <div className={`sync-indicator ${
-                                syncStatus === 'synced' ? 'synced' : 
-                                syncStatus === 'syncing' ? 'syncing' : 
-                                syncStatus === 'error' ? 'error' : ''
-                            }`}></div>
-                            <span>
-                                {syncStatus === 'synced' ? 'Synced with cloud' : 
-                                 syncStatus === 'syncing' ? 'Syncing...' : 
-                                 syncStatus === 'error' ? 'Sync error' : 'Offline'}
-                            </span>
-                            <button 
-                                className="sync-btn" 
-                                onClick={onManualSync}
-                                disabled={syncStatus === 'syncing'}
-                                title="Refresh and sync data"
-                            >
-                                🔄 Sync
-                            </button>
-                        </div>
+                        {/* REMOVED the second sync button from here */}
                     </div>
                     
                     <div className="main-content">
@@ -3217,7 +3198,7 @@
 
                     <footer className="footer">
                         <p>
-                            Cocktail Codex © {new Date().getFullYear()} | Created by{' '}
+                             © {new Date().getFullYear()} | {' '}
                             <a href="https://www.instagram.com/suraj.gg87/" target="_blank" rel="noopener noreferrer">
                                 @suraj.gg87
                             </a>
