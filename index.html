@@ -7,7 +7,6 @@
 <!-- Optional: Prevents zooming when launching from home screen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cocktail Codex</title>
@@ -924,94 +923,12 @@
             }
         };
         
-        // Data management functions
+        // Data management functions - CLEAR ALL RECIPES
         const getRecipes = () => {
-            return loadFromStorage('cocktailRecipes', [
-                {
-                    id: '1',
-                    name: 'Aviation',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Coupe',
-                    abv: 28,
-                    pour_cost: 4.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 45, unit: 'ml' },
-                        { name: 'Maraschino Liqueur', amount: 15, unit: 'ml' },
-                        { name: 'Crème de Violette', amount: 15, unit: 'ml' },
-                        { name: 'Lemon Juice', amount: 30, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass. Garnish with a cherry.',
-                    notes: 'Classic pre-prohibition cocktail with a beautiful purple hue.',
-                    createdBy: 'system',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    name: 'Margarita',
-                    spirit_type: 'Tequila',
-                    venue: 'Pool Bar',
-                    glass_type: 'Margarita',
-                    abv: 25,
-                    pour_cost: 3.75,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Tequila', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Triple Sec', amount: 20, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass filled with ice.',
-                    notes: 'Classic tequila cocktail perfect for summer.',
-                    createdBy: 'system',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    id: '3',
-                    name: 'Old Fashioned',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 32,
-                    pour_cost: 4.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Bourbon', amount: 60, unit: 'ml' },
-                        { name: 'Sugar Cube', amount: 1, unit: 'pcs' },
-                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                        { name: 'Orange Twist', amount: 1, unit: 'pcs' }
-                    ],
-                    instructions: 'Muddle sugar cube with bitters and a splash of water. Add bourbon and ice. Stir gently. Garnish with orange twist.',
-                    notes: 'Classic whiskey cocktail that never goes out of style.',
-                    createdBy: 'system',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    id: '4',
-                    name: 'Zombie',
-                    spirit_type: 'Rum',
-                    venue: 'Pool Bar',
-                    glass_type: 'Collins',
-                    abv: 35,
-                    pour_cost: 5.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Dark Rum', amount: 45, unit: 'ml' },
-                        { name: 'Light Rum', amount: 30, unit: 'ml' },
-                        { name: 'Apricot Brandy', amount: 15, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 20, unit: 'ml' },
-                        { name: 'Pineapple Juice', amount: 30, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with crushed ice. Pour into collins glass. Top with more crushed ice.',
-                    notes: 'Strong tiki cocktail with complex flavors.',
-                    createdBy: 'system',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-            ]);
+            // Clear all existing recipes and return empty array
+            const emptyRecipes = [];
+            saveToStorage('cocktailRecipes', emptyRecipes);
+            return emptyRecipes;
         };
         
         const saveRecipes = (recipes) => {
