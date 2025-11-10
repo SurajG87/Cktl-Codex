@@ -89,39 +89,39 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: Square recipes grid with consistent 0.5cm gap */
+        /* UPDATED: Square recipes grid with minimal spacing - fit 4 cards per line */
         .recipes-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 0.5cm; /* Consistent 0.5cm gap */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.3cm; /* Reduced from 0.5cm to minimal spacing */
             margin-bottom: 2rem;
         }
 
         @media (max-width: 1200px) {
             .recipes-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 0.5cm;
+                grid-template-columns: repeat(4, 1fr); /* Keep 4 columns */
+                gap: 0.3cm;
             }
         }
 
         @media (max-width: 1024px) {
             .recipes-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.5cm;
+                grid-template-columns: repeat(4, 1fr); /* Keep 4 columns */
+                gap: 0.3cm;
             }
         }
 
         @media (max-width: 768px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+                grid-template-columns: repeat(3, 1fr); /* 3 columns on tablets */
+                gap: 0.3cm;
             }
         }
 
         @media (max-width: 480px) {
             .recipes-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5cm;
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+                gap: 0.3cm;
             }
         }
 
@@ -314,7 +314,7 @@
             resize: vertical;
         }
         
-        /* Header Styles */
+        /* UPDATED: Header layout improvements */
         .header {
             display: flex;
             justify-content: space-between;
@@ -322,6 +322,7 @@
             padding: 1rem;
             background: #2a2a2a;
             border-bottom: 1px solid #444;
+            gap: 1rem;
         }
         
         .menu-button {
@@ -941,17 +942,20 @@
             animation: pulse 1s infinite;
         }
         
-        /* UPDATED: Nav user with Add Recipe button */
+        /* UPDATED: Nav user with all buttons in single row */
         .nav-user {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+            margin-left: auto;
         }
         
         .nav-buttons {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
         }
         
         .add-recipe-btn {
@@ -1115,7 +1119,7 @@
             }
             
             .nav-user {
-                flex-direction: column;
+                flex-direction: row;
                 gap: 0.5rem;
             }
             
@@ -1140,7 +1144,7 @@
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+                gap: 0.3cm;
             }
             
             .recipe-card {
@@ -1170,7 +1174,7 @@
             
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.5cm;
+                gap: 0.3cm;
             }
             
             .recipe-card {
@@ -1183,7 +1187,7 @@
         @media (max-width: 380px) {
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+                gap: 0.3cm;
             }
             
             .recipe-card {
@@ -1206,6 +1210,30 @@
             
             .recipe-info {
                 padding: 0.6rem;
+            }
+        }
+        
+        /* Responsive adjustments for header */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.75rem;
+            }
+            
+            .nav-user {
+                gap: 0.5rem;
+            }
+            
+            .nav-buttons {
+                gap: 0.3rem;
+            }
+            
+            .sync-status span {
+                display: none; /* Hide sync text on small screens */
+            }
+            
+            .add-recipe-btn, .logout-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -1344,6 +1372,95 @@
                     ],
                     instructions: 'Stir all ingredients with ice. Strain into glass. Garnish with orange peel.',
                     notes: 'Equal parts make this cocktail perfectly balanced.'
+                },
+                {
+                    id: '4',
+                    name: 'Mojito',
+                    spirit_type: 'Rum',
+                    venue: 'Pool Bar',
+                    glass_type: 'Highball',
+                    abv: 15,
+                    pour_cost: 3.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'White Rum', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Mint Leaves', amount: 10, unit: 'leaves' },
+                        { name: 'Sugar', amount: 2, unit: 'tsp' },
+                        { name: 'Soda Water', amount: 100, unit: 'ml' }
+                    ],
+                    instructions: 'Muddle mint leaves with sugar and lime juice. Add rum and ice. Top with soda water. Garnish with mint sprig.',
+                    notes: 'Use fresh mint for best aroma.'
+                },
+                {
+                    id: '5',
+                    name: 'Martini',
+                    spirit_type: 'Gin',
+                    venue: 'Main Bar',
+                    glass_type: 'Martini',
+                    abv: 30,
+                    pour_cost: 4.75,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Gin', amount: 60, unit: 'ml' },
+                        { name: 'Dry Vermouth', amount: 10, unit: 'ml' },
+                        { name: 'Olive', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Stir gin and vermouth with ice. Strain into chilled martini glass. Garnish with olive.',
+                    notes: 'Shake for a colder, more diluted drink.'
+                },
+                {
+                    id: '6',
+                    name: 'Daiquiri',
+                    spirit_type: 'Rum',
+                    venue: 'Pool Bar',
+                    glass_type: 'Coupe',
+                    abv: 20,
+                    pour_cost: 3.50,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'White Rum', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Simple Syrup', amount: 20, unit: 'ml' }
+                    ],
+                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass.',
+                    notes: 'Use fresh lime juice for best results.'
+                },
+                {
+                    id: '7',
+                    name: 'Whiskey Sour',
+                    spirit_type: 'Whiskey',
+                    venue: 'Main Bar',
+                    glass_type: 'Old Fashioned',
+                    abv: 22,
+                    pour_cost: 4.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Bourbon', amount: 60, unit: 'ml' },
+                        { name: 'Lemon Juice', amount: 25, unit: 'ml' },
+                        { name: 'Simple Syrup', amount: 20, unit: 'ml' },
+                        { name: 'Egg White', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Dry shake all ingredients without ice. Add ice and shake again. Strain into glass.',
+                    notes: 'Dry shaking creates better foam from the egg white.'
+                },
+                {
+                    id: '8',
+                    name: 'Manhattan',
+                    spirit_type: 'Whiskey',
+                    venue: 'Main Bar',
+                    glass_type: 'Coupe',
+                    abv: 32,
+                    pour_cost: 5.50,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Rye Whiskey', amount: 60, unit: 'ml' },
+                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
+                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
+                        { name: 'Cherry', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Stir all ingredients with ice. Strain into chilled coupe glass. Garnish with cherry.',
+                    notes: 'Rye whiskey provides a spicier flavor profile.'
                 }
             ]);
         };
@@ -2264,7 +2381,7 @@
                             ) : (
                                 <>
                                     <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                        Showing {filteredRecipes.length} of {recipes.length} cocktails
+                                        
                                     </div>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
@@ -3250,7 +3367,6 @@
                             ) : (
                                 <>
                                     <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                        Showing {filteredSyrups.length} of {syrups.length} syrups & infusions
                                     </div>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
@@ -4008,47 +4124,49 @@
             
             return (
                 <div>
+                    {/* UPDATED: Header with all buttons in single row */}
                     <header className="header">
-                        <button 
-                            className="menu-button"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            <span className="menu-line"></span>
-                            <span className="menu-line"></span>
-                            <span className="menu-line"></span>
-                        </button>
-                        
-                        <div className="nav-user">
-                            <div className="sync-status">
-                                <div className={`sync-indicator ${syncStatus}`}></div>
-                                <span>
-                                    {syncStatus === 'synced' && 'Synced'}
-                                    {syncStatus === 'syncing' && 'Syncing...'}
-                                    {syncStatus === 'error' && 'Offline'}
-                                </span>
-                                <button 
-                                    className={`sync-btn ${syncStatus === 'syncing' ? 'syncing' : ''}`}
-                                    onClick={handleManualSync}
-                                    disabled={syncStatus === 'syncing'}
-                                >
-                                    🔄
-                                </button>
-                            </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
+                            <button 
+                                className="menu-button"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                                <span className="menu-line"></span>
+                            </button>
                             
-                            <div className="nav-buttons">
-                                {/* UPDATED: Add Recipe button moved next to Logout */}
-                                {user.isAdmin && (
+                            <div className="nav-user" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto'}}>
+                                <div className="sync-status">
+                                    <div className={`sync-indicator ${syncStatus}`}></div>
+                                    <span>
+                                        {syncStatus === 'synced' && 'Synced'}
+                                        {syncStatus === 'syncing' && 'Syncing...'}
+                                        {syncStatus === 'error' && 'Offline'}
+                                    </span>
                                     <button 
-                                        className="add-recipe-btn"
-                                        onClick={() => setCurrentPage('create-recipe')}
+                                        className={`sync-btn ${syncStatus === 'syncing' ? 'syncing' : ''}`}
+                                        onClick={handleManualSync}
+                                        disabled={syncStatus === 'syncing'}
                                     >
-                                        ➕ Add Recipe
+                                        🔄
                                     </button>
-                                )}
-                                <span style={{color: '#FFB366'}}>{user.username}</span>
-                                <button className="logout-btn" onClick={logout}>
-                                    Logout
-                                </button>
+                                </div>
+                                
+                                {/* UPDATED: All buttons in single row */}
+                                <div className="nav-buttons" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                    {user.isAdmin && (
+                                        <button 
+                                            className="add-recipe-btn"
+                                            onClick={() => setCurrentPage('create-recipe')}
+                                        >
+                                            ➕ Add Recipe
+                                        </button>
+                                    )}
+                                    <button className="logout-btn" onClick={logout}>
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </header>
