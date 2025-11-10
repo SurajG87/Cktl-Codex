@@ -89,39 +89,39 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: Square recipes grid with consistent 0.5cm gap */
+        /* UPDATED: Square recipes grid with consistent 0.2cm gap */
         .recipes-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 0.5cm; /* Consistent 0.5cm gap */
+            gap: 0.2cm; /* Consistent 0.2cm gap */
             margin-bottom: 2rem;
         }
 
         @media (max-width: 1200px) {
             .recipes-grid {
                 grid-template-columns: repeat(5, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
         }
 
         @media (max-width: 1024px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
         }
 
         @media (max-width: 768px) {
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
         }
 
         @media (max-width: 480px) {
             .recipes-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
         }
 
@@ -314,14 +314,15 @@
             resize: vertical;
         }
         
-        /* Header Styles */
+        /* UPDATED: Header with all buttons in one line */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 0.75rem 1rem;
             background: #2a2a2a;
             border-bottom: 1px solid #444;
+            gap: 1rem;
         }
         
         .menu-button {
@@ -330,6 +331,7 @@
             color: #fff;
             cursor: pointer;
             padding: 0.5rem;
+            flex-shrink: 0;
         }
         
         .menu-line {
@@ -889,12 +891,28 @@
             color: #fff;
         }
         
+        /* UPDATED: Nav user with all buttons in one line */
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+        }
+        
         .sync-status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             color: #888;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
         }
         
         .sync-indicator {
@@ -926,7 +944,7 @@
             background: #333;
             color: #fff;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
@@ -941,30 +959,18 @@
             animation: pulse 1s infinite;
         }
         
-        /* UPDATED: Nav user with Add Recipe button */
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
         .add-recipe-btn {
             background: #4CAF50;
             color: #fff;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            white-space: nowrap;
         }
         
         .add-recipe-btn:hover {
@@ -975,28 +981,29 @@
             background: #333;
             color: #fff;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
+            white-space: nowrap;
         }
         
         .logout-btn:hover {
             background: #444;
         }
         
-        /* Alphabet Navigation - RIGHT SIDE */
+        /* UPDATED: Alphabet Navigation - RIGHT SIDE with better mobile handling */
         .alphabet-nav {
             position: fixed;
-            right: 10px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-            padding: 1rem 0.5rem;
+            gap: 0.15rem;
+            padding: 0.8rem 0.4rem;
             background: rgba(42, 42, 42, 0.95);
-            border-radius: 12px;
+            border-radius: 10px;
             backdrop-filter: blur(10px);
             z-index: 100;
             max-height: 80vh;
@@ -1008,12 +1015,12 @@
             color: #FFB366;
             text-decoration: none;
             font-weight: 600;
-            padding: 0.5rem;
-            min-width: 30px;
+            padding: 0.4rem;
+            min-width: 24px;
             text-align: center;
             border-radius: 4px;
             transition: background 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             cursor: pointer;
         }
         
@@ -1042,7 +1049,7 @@
         
         .recipes-container {
             flex: 1;
-            margin-right: 60px;
+            margin-right: 50px; /* Space for alphabet nav */
         }
         
         /* Loading and Empty States */
@@ -1071,8 +1078,43 @@
             text-decoration: underline;
         }
         
-        /* Responsive Design */
+        /* Enhanced Mobile Responsiveness */
         @media (max-width: 768px) {
+            .header {
+                padding: 0.5rem 0.75rem;
+                gap: 0.5rem;
+            }
+            
+            .nav-user {
+                gap: 0.5rem;
+            }
+            
+            .nav-buttons {
+                gap: 0.3rem;
+            }
+            
+            .sync-status {
+                font-size: 0.7rem;
+                gap: 0.3rem;
+            }
+            
+            .sync-btn, .add-recipe-btn, .logout-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            .alphabet-nav {
+                right: 5px;
+                padding: 0.6rem 0.3rem;
+                gap: 0.1rem;
+            }
+            
+            .alphabet-letter {
+                padding: 0.3rem;
+                min-width: 20px;
+                font-size: 0.7rem;
+            }
+            
             .recipe-details-page {
                 grid-template-columns: 1fr;
             }
@@ -1115,7 +1157,7 @@
             }
             
             .nav-user {
-                flex-direction: column;
+                flex-direction: row;
                 gap: 0.5rem;
             }
             
@@ -1140,7 +1182,7 @@
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
             
             .recipe-card {
@@ -1170,7 +1212,7 @@
             
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.5cm;
+                gap: 0.2cm;
             }
             
             .recipe-card {
@@ -1181,31 +1223,96 @@
         
         /* Small mobile devices */
         @media (max-width: 380px) {
-            .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5cm;
+            .header {
+                padding: 0.4rem 0.5rem;
             }
             
-            .recipe-card {
-                min-height: 130px;
-                aspect-ratio: 3/4;
+            .nav-buttons {
+                gap: 0.2rem;
             }
             
-            .recipe-image {
-                height: 90px;
-                font-size: 1.5rem;
+            .sync-status span {
+                display: none; /* Hide text, show only icon on very small screens */
             }
             
-            .recipe-name {
-                font-size: 0.7rem;
-            }
-            
-            .recipe-abv {
+            .add-recipe-btn span, .logout-btn span {
                 font-size: 0.65rem;
             }
             
+            .recipes-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.2cm;
+            }
+            
+            .recipe-card {
+                height: 65px;
+            }
+            
+            .recipe-image {
+                font-size: 0.9rem;
+            }
+            
+            .recipe-name {
+                font-size: 0.5rem;
+            }
+            
+            .recipe-abv {
+                font-size: 0.45rem;
+            }
+            
             .recipe-info {
-                padding: 0.6rem;
+                padding: 0.3rem;
+            }
+        }
+        
+        /* Tablet optimization */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .recipes-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.2cm;
+            }
+            
+            .recipe-card {
+                height: 75px;
+            }
+        }
+        
+        /* Hide alphabet nav on very small screens when it might interfere */
+        @media (max-width: 350px) {
+            .alphabet-nav {
+                display: none;
+            }
+            
+            .recipes-container {
+                margin-right: 0;
+            }
+        }
+        
+        /* Improved touch targets for mobile */
+        @media (max-width: 768px) {
+            .menu-button {
+                padding: 0.75rem;
+                min-width: 44px;
+                min-height: 44px;
+            }
+            
+            .alphabet-letter {
+                min-width: 32px;
+                min-height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .recipe-card {
+                min-height: 80px; /* Better touch target */
+            }
+        }
+        
+        /* Prevent zoom on input focus for iOS */
+        @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
             }
         }
     </style>
@@ -2264,7 +2371,7 @@
                             ) : (
                                 <>
                                     <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                        Showing {filteredRecipes.length} of {recipes.length} cocktails
+                                       
                                     </div>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
@@ -3203,7 +3310,7 @@
                             <button className="button button-secondary" onClick={onBack} style={{marginBottom: '1rem'}}>
                                 ← Back to Cocktails
                             </button>
-                            <h1 className="page-title">Syrups & Infusions</h1>
+                            
                         </div>
                         {isAdmin && (
                             <button className="button" onClick={onCreateSyrup}>
@@ -3250,7 +3357,7 @@
                             ) : (
                                 <>
                                     <div style={{marginBottom: '1rem', color: '#888', fontSize: '0.9rem'}}>
-                                        Showing {filteredSyrups.length} of {syrups.length} syrups & infusions
+                                        
                                     </div>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
