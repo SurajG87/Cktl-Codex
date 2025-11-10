@@ -157,22 +157,22 @@
             z-index: 1;
         }
         
-        /* UPDATED: Name appears outside the card */
+        /* UPDATED: Name appears outside the card and aligned left */
         .recipe-name {
             font-weight: 600;
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #FFB366;
-            text-align: center;
-            padding: 0.5rem 0;
+            text-align: left;
+            padding: 0.5rem 0.75rem;
         }
         
-        /* UPDATED: Compact information layout */
+        /* UPDATED: Compact information layout with smaller font */
         .recipe-details {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Smaller font size */
         }
         
         .recipe-spirit {
@@ -350,7 +350,7 @@
             cursor: not-allowed;
         }
         
-        /* Recipe View Styles */
+        /* UPDATED: Recipe View with name next to back arrow */
         .recipe-view {
             position: relative;
             margin-top: 1rem;
@@ -363,19 +363,53 @@
             right: 0;
             bottom: 0;
             z-index: -1;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.7) blur(0px); /* Reduced blur to make background more visible */
         }
         
         .recipe-content {
-            background: rgba(42, 42, 42, 0.9);
+            background: rgba(42, 42, 42, 0.85); /* Slightly more transparent to show background */
             border-radius: 12px;
             padding: 2rem;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px); /* Reduced blur */
         }
         
-        .recipe-title {
-            font-size: 2.5rem;
+        /* UPDATED: Recipe header with back arrow and name side by side */
+        .recipe-header-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .back-arrow {
+            background: #333;
+            color: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+        
+        .back-arrow:hover {
+            background: #444;
+        }
+        
+        .recipe-title-header {
+            font-size: 2rem;
             color: #FFB366;
-            margin-bottom: 1rem;
+            margin: 0;
+            flex: 1;
         }
         
         .recipe-meta {
@@ -407,11 +441,13 @@
             justify-content: space-between;
             padding: 0.5rem 0;
             border-bottom: 1px solid #444;
+            font-size: 0.9rem; /* Smaller font for ingredients */
         }
         
         .instructions {
             white-space: pre-line;
             line-height: 1.8;
+            font-size: 0.9rem; /* Smaller font for instructions */
         }
         
         .action-buttons {
@@ -429,6 +465,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background 0.2s;
+            font-size: 0.85rem; /* Smaller font for buttons */
         }
         
         .action-button:hover {
@@ -598,7 +635,7 @@
             margin-left: 0.5rem;
         }
         
-        /* Settings Styles */
+        /* UPDATED: Settings Styles with inline add fields */
         .settings-section {
             background: #2a2a2a;
             border-radius: 12px;
@@ -609,6 +646,38 @@
         .settings-title {
             color: #FFB366;
             margin-bottom: 1rem;
+        }
+        
+        .add-item-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        .add-item-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .add-item-btn {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .add-item-btn:hover {
+            background: #45a049;
         }
         
         .settings-list {
@@ -955,6 +1024,20 @@
             
             .nav-buttons {
                 gap: 0.5rem;
+            }
+            
+            .add-item-form {
+                flex-direction: column;
+            }
+            
+            .recipe-header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .recipe-title-header {
+                font-size: 1.5rem;
             }
         }
         
@@ -1330,6 +1413,11 @@
             
             if (syrup.storage) {
                 text += `Storage: ${syrup.storage}\n`;
+            }
+            
+            // ADDED: Include cost if available
+            if (syrup.cost) {
+                text += `Cost: $${syrup.cost}\n`;
             }
             
             text += `\n---\nShared from Cocktail Codex`;
@@ -1750,7 +1838,7 @@
             );
         }
 
-        // UPDATED: Recipe Card Component with name outside and transparent background
+        // UPDATED: Recipe Card Component with name outside and aligned left
         function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -1763,10 +1851,10 @@
                     <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🍸'}
                     </div>
-                    {/* UPDATED: Name appears outside the card */}
+                    {/* UPDATED: Name appears outside the card and aligned left */}
                     <div className="recipe-name">{recipe.name}</div>
                     <div className="recipe-info">
-                        {/* UPDATED: Compact information layout */}
+                        {/* UPDATED: Compact information layout with smaller font */}
                         <div className="recipe-details">
                             <div className="recipe-spirit">{recipe.spirit_type}</div>
                             <div className="recipe-abv">{recipe.abv}%</div>
@@ -1935,14 +2023,11 @@
             );
         }
 
-        // View Recipe Component with Scale and Share (with silhouette background)
+        // UPDATED: View Recipe Component with back arrow and name side by side, and visible background
         function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const [showScaleModal, setShowScaleModal] = useState(false);
             const backgroundStyle = {
-                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                filter: 'brightness(0.3) blur(2px)'
+                backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none'
             };
             
             const handleShareRecipe = () => {
@@ -1952,32 +2037,34 @@
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Cocktails
-                    </button>
+                    {/* UPDATED: Back arrow and name side by side */}
+                    <div className="recipe-header-container">
+                        <button className="back-arrow" onClick={onBack}>
+                            ←
+                        </button>
+                        <h1 className="recipe-title-header">{recipe.name}</h1>
+                    </div>
                     
                     <div className="recipe-view">
+                        {/* UPDATED: Background picture with reduced blur to be more visible */}
                         {recipe.image_url && (
                             <div className="recipe-background" style={backgroundStyle}></div>
                         )}
                         
                         <div className="recipe-content">
                             <div className="recipe-header">
-                                <div>
-                                    <h1 className="recipe-title">{recipe.name}</h1>
-                                    <div className="recipe-meta">
-                                        <div className="meta-item">{recipe.spirit_type}</div>
-                                        <div className="meta-item">{recipe.glass_type} Glass</div>
-                                        <div className="meta-item">{recipe.abv}% ABV</div>
-                                        <div className="meta-item">${recipe.pour_cost} Cost</div>
-                                        <div className="meta-item">{recipe.venue}</div>
-                                    </div>
+                                <div className="recipe-meta">
+                                    <div className="meta-item">{recipe.spirit_type}</div>
+                                    <div className="meta-item">{recipe.glass_type} Glass</div>
+                                    <div className="meta-item">{recipe.abv}% ABV</div>
+                                    <div className="meta-item">${recipe.pour_cost} Cost</div>
+                                    <div className="meta-item">{recipe.venue}</div>
                                 </div>
                             </div>
                             
                             <div className="recipe-details-page">
                                 <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Ingredients</h3>
                                     <ul className="ingredients-list">
                                         {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
@@ -1989,12 +2076,12 @@
                                 </div>
                                 
                                 <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Instructions</h3>
                                     <div className="instructions">{recipe.instructions}</div>
                                     
                                     {recipe.notes && (
                                         <>
-                                            <h3 style={{color: '#FFB366', marginBottom: '1rem', marginTop: '1.5rem'}}>Notes</h3>
+                                            <h3 style={{color: '#FFB366', marginBottom: '1rem', marginTop: '1.5rem', fontSize: '1.1rem'}}>Notes</h3>
                                             <div className="instructions">{recipe.notes}</div>
                                         </>
                                     )}
@@ -2042,14 +2129,11 @@
             );
         }
 
-        // View Syrup Component with Scale and Share (with silhouette background)
+        // View Syrup Component with Scale and Share (with visible background)
         function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
             const [showScaleModal, setShowScaleModal] = useState(false);
             const backgroundStyle = {
-                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                filter: 'brightness(0.3) blur(2px)'
+                backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none'
             };
             
             const handleShareSyrup = () => {
@@ -2059,34 +2143,40 @@
             
             return (
                 <div className="container">
-                    <button className="button button-secondary" onClick={onBack}>
-                        ← Back to Syrups
-                    </button>
+                    {/* UPDATED: Back arrow and name side by side */}
+                    <div className="recipe-header-container">
+                        <button className="back-arrow" onClick={onBack}>
+                            ←
+                        </button>
+                        <h1 className="recipe-title-header">{syrup.name}</h1>
+                    </div>
                     
                     <div className="recipe-view">
+                        {/* UPDATED: Background picture with reduced blur to be more visible */}
                         {syrup.image_url && (
                             <div className="recipe-background" style={backgroundStyle}></div>
                         )}
                         
                         <div className="recipe-content">
                             <div className="recipe-header">
-                                <div>
-                                    <h1 className="recipe-title">{syrup.name}</h1>
-                                    <div className="recipe-meta">
-                                        <div className="meta-item">{syrup.type}</div>
-                                        {syrup.shelf_life && (
-                                            <div className="meta-item">Shelf: {syrup.shelf_life}</div>
-                                        )}
-                                        {syrup.storage && (
-                                            <div className="meta-item">Store: {syrup.storage}</div>
-                                        )}
-                                    </div>
+                                <div className="recipe-meta">
+                                    <div className="meta-item">{syrup.type}</div>
+                                    {syrup.shelf_life && (
+                                        <div className="meta-item">Shelf: {syrup.shelf_life}</div>
+                                    )}
+                                    {syrup.storage && (
+                                        <div className="meta-item">Store: {syrup.storage}</div>
+                                    )}
+                                    {/* ADDED: Cost display for syrups */}
+                                    {syrup.cost && (
+                                        <div className="meta-item">Cost: ${syrup.cost}</div>
+                                    )}
                                 </div>
                             </div>
                             
                             <div className="recipe-details-page">
                                 <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Ingredients</h3>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Ingredients</h3>
                                     {syrup.ingredients && syrup.ingredients.length > 0 ? (
                                         <ul className="ingredients-list">
                                             {syrup.ingredients.map((ingredient, index) => (
@@ -2102,7 +2192,7 @@
                                 </div>
                                 
                                 <div>
-                                    <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>Instructions</h3>
+                                    <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Instructions</h3>
                                     <div className="instructions">{syrup.instructions || 'No instructions provided'}</div>
                                     
                                     <div className="action-buttons">
@@ -2491,7 +2581,7 @@
             );
         }
 
-        // Create/Edit Syrup Component
+        // UPDATED: Create/Edit Syrup Component with cost field
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 syrup || {
@@ -2501,6 +2591,7 @@
                     instructions: '',
                     shelf_life: '',
                     storage: '',
+                    cost: '', // ADDED: Cost field
                     image_url: ''
                 }
             );
@@ -2598,6 +2689,7 @@
                 const syrupData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
+                    cost: parseFloat(formData.cost) || 0, // ADDED: Parse cost as float
                     createdBy: isEdit ? formData.createdBy : 'user',
                     createdAt: isEdit ? formData.createdAt : new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -2641,6 +2733,20 @@
                                 <option value="Bitters">Bitters</option>
                                 <option value="Cordial">Cordial</option>
                             </select>
+                        </div>
+                        
+                        {/* ADDED: Cost input field for syrups */}
+                        <div className="form-group">
+                            <label className="form-label">Cost ($)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                className="form-input"
+                                name="cost"
+                                value={formData.cost}
+                                onChange={handleInputChange}
+                                placeholder="0.00"
+                            />
                         </div>
                         
                         <div className="form-group">
@@ -2902,10 +3008,13 @@
             );
         }
 
-        // Settings Page Component
+        // UPDATED: Settings Page Component with inline add fields
         function SettingsPage({ onBack, settings, onSaveSettings, isAdmin }) {
             const [formData, setFormData] = useState(settings);
             const [dragIndex, setDragIndex] = useState(null);
+            const [newSpirit, setNewSpirit] = useState('');
+            const [newGlass, setNewGlass] = useState('');
+            const [newVenue, setNewVenue] = useState('');
             
             const handleInputChange = (section, field, value) => {
                 setFormData(prev => ({
@@ -2916,13 +3025,34 @@
                 }));
             };
             
-            const addItem = (section) => {
-                const newItem = prompt(`Enter new ${section.replace('_', ' ')}:`);
-                if (newItem && newItem.trim()) {
+            // UPDATED: Add items with inline input fields
+            const addSpiritType = () => {
+                if (newSpirit && newSpirit.trim()) {
                     setFormData(prev => ({
                         ...prev,
-                        [section]: [...prev[section], newItem.trim()]
+                        spirit_types: [...prev.spirit_types, newSpirit.trim()]
                     }));
+                    setNewSpirit('');
+                }
+            };
+            
+            const addGlassType = () => {
+                if (newGlass && newGlass.trim()) {
+                    setFormData(prev => ({
+                        ...prev,
+                        glass_types: [...prev.glass_types, newGlass.trim()]
+                    }));
+                    setNewGlass('');
+                }
+            };
+            
+            const addVenue = () => {
+                if (newVenue && newVenue.trim()) {
+                    setFormData(prev => ({
+                        ...prev,
+                        venues: [...prev.venues, newVenue.trim()]
+                    }));
+                    setNewVenue('');
                 }
             };
             
@@ -2984,6 +3114,25 @@
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="settings-section">
                             <h2 className="settings-title">Spirit Types</h2>
+                            
+                            {/* UPDATED: Inline add form for spirit types */}
+                            <div className="add-item-form">
+                                <input
+                                    type="text"
+                                    className="add-item-input"
+                                    placeholder="Enter new spirit type"
+                                    value={newSpirit}
+                                    onChange={(e) => setNewSpirit(e.target.value)}
+                                />
+                                <button 
+                                    type="button" 
+                                    className="add-item-btn"
+                                    onClick={addSpiritType}
+                                >
+                                    Add Spirit Type
+                                </button>
+                            </div>
+                            
                             <ul className="settings-list">
                                 {formData.spirit_types.map((spirit, index) => (
                                     <li 
@@ -3014,17 +3163,29 @@
                                     </li>
                                 ))}
                             </ul>
-                            <button 
-                                type="button" 
-                                className="button button-secondary"
-                                onClick={() => addItem('spirit_types')}
-                            >
-                                + Add Spirit Type
-                            </button>
                         </div>
                         
                         <div className="settings-section">
                             <h2 className="settings-title">Glass Types</h2>
+                            
+                            {/* UPDATED: Inline add form for glass types */}
+                            <div className="add-item-form">
+                                <input
+                                    type="text"
+                                    className="add-item-input"
+                                    placeholder="Enter new glass type"
+                                    value={newGlass}
+                                    onChange={(e) => setNewGlass(e.target.value)}
+                                />
+                                <button 
+                                    type="button" 
+                                    className="add-item-btn"
+                                    onClick={addGlassType}
+                                >
+                                    Add Glass Type
+                                </button>
+                            </div>
+                            
                             <ul className="settings-list">
                                 {formData.glass_types.map((glass, index) => (
                                     <li 
@@ -3055,17 +3216,29 @@
                                     </li>
                                 ))}
                             </ul>
-                            <button 
-                                type="button" 
-                                className="button button-secondary"
-                                onClick={() => addItem('glass_types')}
-                            >
-                                + Add Glass Type
-                            </button>
                         </div>
                         
                         <div className="settings-section">
                             <h2 className="settings-title">Venues</h2>
+                            
+                            {/* UPDATED: Inline add form for venues */}
+                            <div className="add-item-form">
+                                <input
+                                    type="text"
+                                    className="add-item-input"
+                                    placeholder="Enter new venue"
+                                    value={newVenue}
+                                    onChange={(e) => setNewVenue(e.target.value)}
+                                />
+                                <button 
+                                    type="button" 
+                                    className="add-item-btn"
+                                    onClick={addVenue}
+                                >
+                                    Add Venue
+                                </button>
+                            </div>
+                            
                             <ul className="settings-list">
                                 {formData.venues.map((venue, index) => (
                                     <li 
@@ -3096,13 +3269,6 @@
                                     </li>
                                 ))}
                             </ul>
-                            <button 
-                                type="button" 
-                                className="button button-secondary"
-                                onClick={() => addItem('venues')}
-                            >
-                                + Add Venue
-                            </button>
                         </div>
                         
                         <div className="buttons-row">
