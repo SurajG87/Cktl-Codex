@@ -146,7 +146,7 @@
             background: rgba(42, 42, 42, 0.9);
         }
 
-        /* UPDATED: Image area to fill the entire card with full image display */
+        /* FIXED: Image area to fill the entire card with full image display on ALL devices */
         .recipe-image {
             position: absolute;
             top: 0;
@@ -158,10 +158,12 @@
             justify-content: center;
             font-size: 1.2rem;
             overflow: hidden;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-size: cover !important; /* Force cover on all devices */
+            background-position: center !important; /* Force center on all devices */
+            background-repeat: no-repeat !important; /* Force no-repeat on all devices */
             z-index: 0;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         /* UPDATED: Info section positioned as overlay on top of image */
@@ -1146,8 +1148,13 @@
                 aspect-ratio: 3/4;
             }
             
+            /* FIXED: Full image display on mobile */
             .recipe-image {
-                height: 100px;
+                background-size: cover !important;
+                background-position: center !important;
+                background-repeat: no-repeat !important;
+                width: 100% !important;
+                height: 100% !important;
             }
             
             .recipe-name {
@@ -1209,9 +1216,13 @@
                 aspect-ratio: 3/4;
             }
             
+            /* FIXED: Full image display on small mobile */
             .recipe-image {
-                height: 90px;
-                font-size: 1.5rem;
+                background-size: cover !important;
+                background-position: center !important;
+                background-repeat: no-repeat !important;
+                width: 100% !important;
+                height: 100% !important;
             }
             
             .recipe-name {
@@ -1343,6 +1354,33 @@
         /* UPDATED: Remove "Cocktail Codex" text after hamburger menu */
         .app-title {
             display: none; /* Hide the app title text */
+        }
+
+        /* iPhone-specific fixes for full image display */
+        @media (max-width: 480px) and (min-height: 600px) {
+            .recipe-card {
+                min-height: calc(120px + 2mm);
+            }
+            
+            .recipe-image {
+                background-size: cover !important;
+                background-position: center !important;
+            }
+        }
+
+        /* Android device specific fixes */
+        @media (max-width: 480px) and (max-height: 800px) {
+            .recipe-card {
+                min-height: calc(110px + 2mm);
+            }
+        }
+
+        /* High-density mobile screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .recipe-image {
+                background-size: cover !important;
+                background-position: center !important;
+            }
         }
     </style>
 </head>
