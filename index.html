@@ -89,43 +89,39 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: 3:4 aspect ratio cards with gap-2 spacing */
+        /* UPDATED: Square recipes grid with 8px (0.5rem) spacing between cards and responsive columns */
         .recipes-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem; /* gap-2 = 0.5rem = 8px */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem; /* 8px gap between cards */
             margin-bottom: 2rem;
         }
 
-        @media (max-width: 1200px) {
+        @media (min-width: 640px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.5rem;
             }
         }
 
-        @media (max-width: 1024px) {
+        @media (min-width: 768px) {
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 0.5rem;
             }
         }
 
-        @media (max-width: 768px) {
+        @media (min-width: 1280px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
+                grid-template-columns: repeat(6, 1fr);
             }
         }
 
-        @media (max-width: 480px) {
-            .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-            }
-        }
-
-        /* UPDATED: 3:4 aspect ratio recipe card */
+        /* UPDATED: Recipe card with 3:4 aspect ratio */
         .recipe-card {
             background: rgba(42, 42, 42, 0.7);
             border-radius: 8px;
@@ -136,6 +132,7 @@
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 179, 102, 0.2);
             aspect-ratio: 3/4; /* 3:4 aspect ratio */
+            height: auto;
             display: flex;
             flex-direction: column;
         }
@@ -204,8 +201,12 @@
             flex-shrink: 0;
         }
 
-        /* Responsive adjustments for 3:4 cards */
-        @media (max-width: 768px) {
+        /* Additional responsive adjustments for better card fitting */
+        @media (max-width: 480px) {
+            .recipe-card {
+                min-height: 75px;
+            }
+            
             .recipe-name {
                 font-size: 0.6rem;
             }
@@ -215,7 +216,12 @@
             }
         }
 
-        @media (max-width: 480px) {
+        /* For very small iPhone screens */
+        @media (max-width: 380px) {
+            .recipe-card {
+                min-height: 70px;
+            }
+            
             .recipe-name {
                 font-size: 0.55rem;
             }
@@ -223,8 +229,12 @@
             .recipe-abv {
                 font-size: 0.5rem;
             }
+            
+            .recipe-info {
+                padding: 0.3rem;
+            }
         }
-
+        
         /* Remove spirit type from card display */
         .recipe-details {
             display: none;
@@ -1022,7 +1032,11 @@
             transform: scale(1.05);
         }
         
-        /* REMOVED: Letter header styles since we're removing the letter headers */
+        .alphabet-section {
+            margin-bottom: 2rem;
+        }
+        
+        /* REMOVED: Letter header styles */
         
         /* Main content with right-side alphabet */
         .main-content {
@@ -1031,11 +1045,9 @@
             position: relative;
         }
         
-        /* UPDATED: Recipes container with 2mm padding on sides */
         .recipes-container {
             flex: 1;
             margin-right: 50px; /* Space for alphabet nav */
-            padding: 0 2mm; /* Added 2mm left and right padding */
         }
         
         /* Loading and Empty States */
@@ -1046,13 +1058,14 @@
             font-style: italic;
         }
         
-        /* Footer */
+        /* UPDATED: Minimalistic footer */
         .footer {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 1rem;
             color: #888;
             border-top: 1px solid #444;
-            margin-top: 3rem;
+            margin-top: 2rem;
+            font-size: 0.8rem;
         }
         
         .footer a {
@@ -1089,7 +1102,6 @@
             /* Alphabet nav stays vertical on mobile - removed horizontal conversion */
             .recipes-container {
                 margin-right: 40px; /* Add space for alphabet nav on mobile too */
-                padding: 0 2mm; /* Added 2mm left and right padding */
             }
             
             .main-content {
@@ -1120,13 +1132,14 @@
                 font-size: 1.3rem;
             }
             
-            /* UPDATED: Ensure 3:4 aspect ratio cards on mobile */
+            /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
             }
             
             .recipe-card {
+                min-height: 140px;
                 aspect-ratio: 3/4;
             }
             
@@ -1135,11 +1148,11 @@
             }
             
             .recipe-name {
-                font-size: 0.6rem;
+                font-size: 0.75rem;
             }
             
             .recipe-abv {
-                font-size: 0.55rem;
+                font-size: 0.7rem;
             }
             
             .alphabet-letter {
@@ -1156,11 +1169,12 @@
             }
             
             .recipes-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
             }
             
             .recipe-card {
+                min-height: 160px;
                 aspect-ratio: 3/4;
             }
         }
@@ -1174,7 +1188,6 @@
             
             .recipes-container {
                 margin-right: 35px; /* Slightly less space on very small screens */
-                padding: 0 2mm; /* Added 2mm left and right padding */
             }
             
             .alphabet-letter {
@@ -1189,6 +1202,7 @@
             }
             
             .recipe-card {
+                min-height: 130px;
                 aspect-ratio: 3/4;
             }
             
@@ -1198,11 +1212,11 @@
             }
             
             .recipe-name {
-                font-size: 0.55rem;
+                font-size: 0.7rem;
             }
             
             .recipe-abv {
-                font-size: 0.5rem;
+                font-size: 0.65rem;
             }
             
             .recipe-info {
@@ -1219,7 +1233,6 @@
             
             .recipes-container {
                 margin-right: 30px;
-                padding: 0 2mm; /* Added 2mm left and right padding */
             }
         }
         
@@ -1324,12 +1337,9 @@
             background: #444;
         }
         
-        /* NEW: App title in header */
+        /* UPDATED: Remove "Cocktail Codex" text after hamburger menu */
         .app-title {
-            color: #FFB366;
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
+            display: none; /* Hide the app title text */
         }
     </style>
 </head>
@@ -2443,11 +2453,6 @@
                 return matchesSearch && matchesSpirit && matchesVenue;
             });
             
-            // Check if we're in a filtered view
-            useEffect(() => {
-                setIsFilteredView(filterVenue !== 'All');
-            }, [filterVenue]);
-            
             // Group recipes by first letter
             const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
                 const firstLetter = recipe.name.charAt(0).toUpperCase();
@@ -3430,7 +3435,7 @@
                                     className="form-input"
                                     name="storage"
                                     value={formData.storage}
-                                    onChange={(e) => handleInputChange(e)}
+                                    onChange={handleInputChange}
                                     placeholder="e.g., Refrigerate in airtight container"
                                 />
                             </div>
@@ -4297,7 +4302,7 @@
             
             return (
                 <div>
-                    {/* UPDATED: Header with all buttons in single row and app title */}
+                    {/* UPDATED: Header with hamburger menu only (no text) */}
                     <header className="header">
                         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
                             <button 
@@ -4309,8 +4314,7 @@
                                 <span className="menu-line"></span>
                             </button>
                             
-                            {/* UPDATED: Added app title after hamburger menu */}
-                            <span className="app-title">🐏 Cocktail Codex</span>
+                            {/* REMOVED: App title text after hamburger menu */}
                             
                             <div className="nav-user" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto'}}>
                                 <div className="sync-status">
@@ -4329,7 +4333,6 @@
                                     </button>
                                 </div>
                                 
-                                {/* UPDATED: All buttons in single row */}
                                 <div className="nav-buttons" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                     {user.isAdmin && (
                                         <button 
