@@ -121,7 +121,7 @@
             }
         }
 
-        /* UPDATED: Recipe card with 3:4 aspect ratio */
+        /* UPDATED: Recipe card with 3:4 aspect ratio - INCREASED SIZE BY 2MM */
         .recipe-card {
             background: rgba(42, 42, 42, 0.7);
             border-radius: 8px;
@@ -135,6 +135,9 @@
             height: auto;
             display: flex;
             flex-direction: column;
+            /* Increased by 2mm in both dimensions */
+            min-height: calc(140px + 2mm);
+            min-width: calc(105px + 2mm);
         }
 
         .recipe-card:hover {
@@ -142,7 +145,7 @@
             background: rgba(42, 42, 42, 0.9);
         }
 
-        /* UPDATED: Image area to fill the entire card */
+        /* UPDATED: Image area to fill the entire card with full image display */
         .recipe-image {
             position: absolute;
             top: 0;
@@ -156,10 +159,11 @@
             overflow: hidden;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             z-index: 0;
         }
 
-        /* UPDATED: Info section positioned at bottom with gradient overlay */
+        /* UPDATED: Info section positioned as overlay on top of image */
         .recipe-info {
             position: absolute;
             bottom: 0;
@@ -204,7 +208,7 @@
         /* Additional responsive adjustments for better card fitting */
         @media (max-width: 480px) {
             .recipe-card {
-                min-height: 75px;
+                min-height: calc(75px + 2mm);
             }
             
             .recipe-name {
@@ -219,7 +223,7 @@
         /* For very small iPhone screens */
         @media (max-width: 380px) {
             .recipe-card {
-                min-height: 70px;
+                min-height: calc(70px + 2mm);
             }
             
             .recipe-name {
@@ -1033,10 +1037,8 @@
         }
         
         .alphabet-section {
-            margin-bottom: 2rem;
+            margin-bottom: 0; /* REMOVED: Clear gap after alphabet switch */
         }
-        
-        /* REMOVED: Letter header styles */
         
         /* Main content with right-side alphabet */
         .main-content {
@@ -1139,7 +1141,7 @@
             }
             
             .recipe-card {
-                min-height: 140px;
+                min-height: calc(140px + 2mm);
                 aspect-ratio: 3/4;
             }
             
@@ -1174,7 +1176,7 @@
             }
             
             .recipe-card {
-                min-height: 160px;
+                min-height: calc(160px + 2mm);
                 aspect-ratio: 3/4;
             }
         }
@@ -1202,7 +1204,7 @@
             }
             
             .recipe-card {
-                min-height: 130px;
+                min-height: calc(130px + 2mm);
                 aspect-ratio: 3/4;
             }
             
@@ -2354,7 +2356,8 @@
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
             };
             
             return (
@@ -2362,7 +2365,7 @@
                     <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🐑'}
                     </div>
-                    {/* UPDATED: Name and ABV positioned at bottom with gradient overlay - SAME LINE */}
+                    {/* UPDATED: Name and ABV positioned as overlay on top of image */}
                     <div className="recipe-info">
                         <div className="recipe-name-abv-container">
                             <span className="recipe-name">{recipe.name}</span>
@@ -2378,7 +2381,8 @@
             const imageStyle = {
                 backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
             };
             
             return (
