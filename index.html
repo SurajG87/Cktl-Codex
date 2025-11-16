@@ -89,41 +89,87 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: Square recipes grid with minimal spacing - fit 4 cards per line */
-        .recipes-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.1cm; /* Reduced from 0.3cm to minimal spacing */
-            margin-bottom: 2rem;
-        }
+         /* UPDATED: Square recipes grid with 3mm spacing - fit 3 cards per column on iPhone */
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3mm; /* Updated from 0.1cm to 3mm */
+    margin-bottom: 2rem;
+}
 
-        @media (max-width: 1200px) {
-            .recipes-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.1cm;
-            }
-        }
+@media (max-width: 1200px) {
+    .recipes-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm; /* Updated to 3mm */
+    }
+}
 
-        @media (max-width: 1024px) {
-            .recipes-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.1cm;
-            }
-        }
+@media (max-width: 1024px) {
+    .recipes-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm; /* Updated to 3mm */
+    }
+}
 
-        @media (max-width: 768px) {
-            .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.1cm;
-            }
-        }
+@media (max-width: 768px) {
+    .recipes-grid {
+        grid-template-columns: repeat(3, 1fr); /* Ensure 3 columns on tablets */
+        gap: 3mm; /* Updated to 3mm */
+    }
+}
 
-        @media (max-width: 480px) {
-            .recipes-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.1cm;
-            }
-        }
+@media (max-width: 480px) {
+    .recipes-grid {
+        grid-template-columns: repeat(3, 1fr); /* Changed from 2 to 3 columns for iPhone */
+        gap: 3mm; /* Updated to 3mm */
+    }
+}
+
+/* UPDATED: Adjust card height for better fit with 3mm spacing */
+.recipe-card {
+    background: rgba(42, 42, 42, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 179, 102, 0.2);
+    aspect-ratio: 3/4;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Additional responsive adjustments for iPhone with 3 cards per column */
+@media (max-width: 480px) {
+    .recipe-card {
+        height: 75px; /* Slightly reduced height to fit 3 cards better */
+    }
+    
+    .recipe-name {
+        font-size: 0.6rem; /* Slightly smaller text for 3-column layout */
+    }
+    
+    .recipe-abv {
+        font-size: 0.55rem; /* Slightly smaller text for 3-column layout */
+    }
+}
+
+/* For very small iPhone screens */
+@media (max-width: 380px) {
+    .recipe-card {
+        height: 70px; /* Further reduced height for very small screens */
+    }
+    
+    .recipe-name {
+        font-size: 0.55rem; /* Even smaller text for very small screens */
+    }
+    
+    .recipe-abv {
+        font-size: 0.5rem; /* Even smaller text for very small screens */
+    }
+}
 
         /* UPDATED: Square recipe card with image filling the entire card */
         .recipe-card {
