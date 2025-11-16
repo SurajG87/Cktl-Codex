@@ -89,51 +89,39 @@
             margin-bottom: 1rem;
         }
         
-   /* UPDATED: Square recipes grid with 8mm spacing between cards */
-.recipes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 1.2cm; /* 1.2cm spacing between cards */
-    margin-bottom: 2rem;
-}
+        /* UPDATED: Square recipes grid with 8px (0.5rem) spacing between cards and responsive columns */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem; /* 8px gap between cards */
+            margin-bottom: 2rem;
+        }
 
-@media (max-width: 1200px) {
-    .recipes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
-        gap: 1.2cm;
-    }
-}
+        @media (min-width: 640px) {
+            .recipes-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
-@media (max-width: 1024px) {
-    .recipes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        gap: 1.2cm;
-    }
-}
+        @media (min-width: 768px) {
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
 
-@media (max-width: 768px) {
-    .recipes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-        gap: 1.2cm;
-    }
-}
+        @media (min-width: 1024px) {
+            .recipes-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
-@media (max-width: 480px) {
-    .recipes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-        gap: 1.2cm;
-    }
-}
+        @media (min-width: 1280px) {
+            .recipes-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
 
-/* For very small iPhone screens */
-@media (max-width: 380px) {
-    .recipes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-        gap: 1.2cm;
-    }
-}
-
-        /* UPDATED: Adjust card height for better fit with  spacing */
+        /* UPDATED: Recipe card with 3:4 aspect ratio */
         .recipe-card {
             background: rgba(42, 42, 42, 0.7);
             border-radius: 8px;
@@ -143,9 +131,8 @@
             position: relative;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 179, 102, 0.2);
-            aspect-ratio: 3/4;
-            height: auto; /* Changed from fixed height to auto */
-            min-height: 80px;
+            aspect-ratio: 3/4; /* 3:4 aspect ratio */
+            height: auto;
             display: flex;
             flex-direction: column;
         }
@@ -535,7 +522,7 @@
             list-style: none;
         }
         
-        /* UPDATED: Display measurement first, then ingredient name with 1.2cm space */
+        /* UPDATED: Display measurement first, then ingredient name with 4cm space */
         .ingredient-item {
             display: flex;
             padding: 0.4rem 0;
@@ -544,7 +531,7 @@
         }
         
         .ingredient-amount {
-            width: 1.2cm;
+            width: 4cm;
             flex-shrink: 0;
             font-weight: 600;
         }
@@ -1077,13 +1064,14 @@
             font-style: italic;
         }
         
-        /* Footer */
+        /* UPDATED: Minimalistic footer */
         .footer {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 1rem;
             color: #888;
             border-top: 1px solid #444;
-            margin-top: 3rem;
+            margin-top: 2rem;
+            font-size: 0.8rem;
         }
         
         .footer a {
@@ -1152,8 +1140,8 @@
             
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-                gap: ;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
             }
             
             .recipe-card {
@@ -1187,8 +1175,8 @@
             }
             
             .recipes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
-                gap: ;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
             }
             
             .recipe-card {
@@ -1215,8 +1203,8 @@
             }
             
             .recipes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-                gap: ;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
             }
             
             .recipe-card {
@@ -1355,12 +1343,9 @@
             background: #444;
         }
         
-        /* NEW: App title in header */
+        /* UPDATED: Remove "Cocktail Codex" text after hamburger menu */
         .app-title {
-            color: #FFB366;
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
+            display: none; /* Hide the app title text */
         }
     </style>
 </head>
@@ -2649,7 +2634,7 @@
                                     <ul className="ingredients-list">
                                         {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
-                                                {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
+                                                {/* UPDATED: Display measurement first, then ingredient name with 4cm space */}
                                                 <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
                                                 <span className="ingredient-name">{ingredient.name}</span>
                                             </li>
@@ -2764,7 +2749,7 @@
                                         <ul className="ingredients-list">
                                             {syrup.ingredients.map((ingredient, index) => (
                                                 <li key={index} className="ingredient-item">
-                                                    {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
+                                                    {/* UPDATED: Display measurement first, then ingredient name with 4cm space */}
                                                     <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
                                                     <span className="ingredient-name">{ingredient.name}</span>
                                                 </li>
@@ -4323,7 +4308,7 @@
             
             return (
                 <div>
-                    {/* UPDATED: Header with all buttons in single row and app title */}
+                    {/* UPDATED: Header with hamburger menu only (no text) */}
                     <header className="header">
                         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
                             <button 
@@ -4335,8 +4320,7 @@
                                 <span className="menu-line"></span>
                             </button>
                             
-                            {/* UPDATED: Added app title after hamburger menu */}
-                            <span className="app-title">🐏 Cocktail Codex</span>
+                            {/* REMOVED: App title text after hamburger menu */}
                             
                             <div className="nav-user" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto'}}>
                                 <div className="sync-status">
@@ -4355,7 +4339,6 @@
                                     </button>
                                 </div>
                                 
-                                {/* UPDATED: All buttons in single row */}
                                 <div className="nav-buttons" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                     {user.isAdmin && (
                                         <button 
