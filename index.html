@@ -22,6 +22,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -1365,6 +1366,7 @@
         let app;
         let db;
         let auth;
+        let storage;
         
         try {
             if (typeof firebase === 'undefined') {
@@ -1374,6 +1376,7 @@
             app = firebase.initializeApp(firebaseConfig);
             db = firebase.firestore(app);
             auth = firebase.auth(app);
+            storage = firebase.storage(app);
             console.log('Firebase initialized successfully');
         } catch (error) {
             console.error('Firebase initialization error:', error);
@@ -1394,6 +1397,13 @@
                     callback({ uid: 'offline-user' });
                     return () => {};
                 }
+            };
+            storage = {
+                ref: () => ({
+                    put: () => Promise.resolve({
+                        ref: { getDownloadURL: () => Promise.resolve('') }
+                    })
+                })
             };
         }
         
@@ -1461,113 +1471,6 @@
                     ],
                     instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass. Garnish with lime wheel.',
                     notes: 'Use fresh lime juice for optimal flavor.'
-                },
-                {
-                    id: '3',
-                    name: 'Negroni',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 28,
-                    pour_cost: 5.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 30, unit: 'ml' },
-                        { name: 'Campari', amount: 30, unit: 'ml' },
-                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
-                        { name: 'Orange Peel', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir all ingredients with ice. Strain into glass. Garnish with orange peel.',
-                    notes: 'Equal parts make this cocktail perfectly balanced.'
-                },
-                {
-                    id: '4',
-                    name: 'Mojito',
-                    spirit_type: 'Rum',
-                    venue: 'Pool Bar',
-                    glass_type: 'Highball',
-                    abv: 15,
-                    pour_cost: 3.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'White Rum', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Mint Leaves', amount: 10, unit: 'leaves' },
-                        { name: 'Sugar', amount: 2, unit: 'tsp' },
-                        { name: 'Soda Water', amount: 100, unit: 'ml' }
-                    ],
-                    instructions: 'Muddle mint leaves with sugar and lime juice. Add rum and ice. Top with soda water. Garnish with mint sprig.',
-                    notes: 'Use fresh mint for best aroma.'
-                },
-                {
-                    id: '5',
-                    name: 'Martini',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Martini',
-                    abv: 30,
-                    pour_cost: 4.75,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 60, unit: 'ml' },
-                        { name: 'Dry Vermouth', amount: 10, unit: 'ml' },
-                        { name: 'Olive', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir gin and vermouth with ice. Strain into chilled martini glass. Garnish with olive.',
-                    notes: 'Shake for a colder, more diluted drink.'
-                },
-                {
-                    id: '6',
-                    name: 'Daiquiri',
-                    spirit_type: 'Rum',
-                    venue: 'Pool Bar',
-                    glass_type: 'Coupe',
-                    abv: 20,
-                    pour_cost: 3.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'White Rum', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Simple Syrup', amount: 20, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass.',
-                    notes: 'Use fresh lime juice for best results.'
-                },
-                {
-                    id: '7',
-                    name: 'Whiskey Sour',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 22,
-                    pour_cost: 4.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Bourbon', amount: 60, unit: 'ml' },
-                        { name: 'Lemon Juice', amount: 25, unit: 'ml' },
-                        { name: 'Simple Syrup', amount: 20, unit: 'ml' },
-                        { name: 'Egg White', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Dry shake all ingredients without ice. Add ice and shake again. Strain into glass.',
-                    notes: 'Dry shaking creates better foam from the egg white.'
-                },
-                {
-                    id: '8',
-                    name: 'Manhattan',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Coupe',
-                    abv: 32,
-                    pour_cost: 5.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Rye Whiskey', amount: 60, unit: 'ml' },
-                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
-                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                        { name: 'Cherry', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir all ingredients with ice. Strain into chilled coupe glass. Garnish with cherry.',
-                    notes: 'Rye whiskey provides a spicier flavor profile.'
                 }
             ]);
         };
@@ -1590,21 +1493,6 @@
                     shelf_life: '1 month refrigerated',
                     storage: 'Airtight container in refrigerator',
                     cost: 0.50,
-                    image_url: ''
-                },
-                {
-                    id: '2',
-                    name: 'Ginger Syrup',
-                    type: 'Syrup',
-                    ingredients: [
-                        { name: 'Fresh Ginger', amount: 100, unit: 'gram' },
-                        { name: 'Sugar', amount: 1, unit: 'cup' },
-                        { name: 'Water', amount: 1, unit: 'cup' }
-                    ],
-                    instructions: 'Peel and slice ginger. Simmer with water and sugar for 15 minutes. Strain and cool.',
-                    shelf_life: '2 weeks refrigerated',
-                    storage: 'Airtight container in refrigerator',
-                    cost: 1.25,
                     image_url: ''
                 }
             ]);
@@ -1634,6 +1522,22 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
+        };
+
+        // NEW: Upload image to Firebase Storage and return URL
+        const uploadImageToFirebase = async (file, fileName) => {
+            try {
+                console.log('Uploading image to Firebase Storage:', fileName);
+                const storageRef = storage.ref();
+                const imageRef = storageRef.child(`images/${fileName}`);
+                const snapshot = await imageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                console.log('Image uploaded successfully:', downloadURL);
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading image to Firebase:', error);
+                throw error;
+            }
         };
 
         // Enhanced Firebase Data Management for Auto Sync
@@ -2806,7 +2710,7 @@
             );
         }
 
-        // Create/Edit Recipe Component with drag and drop
+        // UPDATED: Create/Edit Recipe Component with Firebase Storage upload
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -2825,6 +2729,7 @@
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
+            const [isUploading, setIsUploading] = useState(false);
             const settings = getSettings();
             
             const handleInputChange = (e) => {
@@ -2862,18 +2767,40 @@
                 }
             };
             
+            // UPDATED: Handle image upload with Firebase Storage
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
-                        const base64 = await convertImageToBase64(file);
+                        setIsUploading(true);
+                        
+                        // Generate unique filename
+                        const fileName = `recipe_${Date.now()}_${file.name}`;
+                        
+                        // Upload to Firebase Storage
+                        const downloadURL = await uploadImageToFirebase(file, fileName);
+                        
                         setFormData(prev => ({
                             ...prev,
-                            image_url: base64
+                            image_url: downloadURL
                         }));
-                        setImagePreview(base64);
+                        setImagePreview(downloadURL);
+                        
+                        setIsUploading(false);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert('Error uploading image. Please try again.');
+                        setIsUploading(false);
+                        
+                        // Fallback to base64 if Firebase upload fails
+                        try {
+                            const base64 = await convertImageToBase64(file);
+                            setFormData(prev => ({
+                                ...prev,
+                                image_url: base64
+                            }));
+                            setImagePreview(base64);
+                        } catch (fallbackError) {
+                            alert('Error uploading image. Please try again.');
+                        }
                     }
                 }
             };
@@ -3032,12 +2959,18 @@
                                 onDrop={handleDrop}
                                 onClick={() => document.getElementById('image-upload').click()}
                             >
-                                <div className="drop-zone-text">
-                                    {imagePreview ? 'Change Image' : 'Upload Image'}
-                                </div>
-                                <div className="drop-zone-subtext">
-                                    Drag & drop or click to upload
-                                </div>
+                                {isUploading ? (
+                                    <div className="drop-zone-text">Uploading...</div>
+                                ) : (
+                                    <>
+                                        <div className="drop-zone-text">
+                                            {imagePreview ? 'Change Image' : 'Upload Image'}
+                                        </div>
+                                        <div className="drop-zone-subtext">
+                                            Drag & drop or click to upload
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             
                             <input
@@ -3137,8 +3070,8 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
-                                {isEdit ? 'Update Cocktail' : 'Add Cocktail'}
+                            <button type="submit" className="button" disabled={isUploading}>
+                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Cocktail' : 'Add Cocktail')}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
@@ -3149,7 +3082,7 @@
             );
         }
 
-        // UPDATED: Create/Edit Syrup Component with cost field
+        // UPDATED: Create/Edit Syrup Component with cost field and Firebase Storage
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 syrup || {
@@ -3166,6 +3099,7 @@
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
+            const [isUploading, setIsUploading] = useState(false);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -3202,18 +3136,40 @@
                 }
             };
             
+            // UPDATED: Handle image upload with Firebase Storage
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
-                        const base64 = await convertImageToBase64(file);
+                        setIsUploading(true);
+                        
+                        // Generate unique filename
+                        const fileName = `syrup_${Date.now()}_${file.name}`;
+                        
+                        // Upload to Firebase Storage
+                        const downloadURL = await uploadImageToFirebase(file, fileName);
+                        
                         setFormData(prev => ({
                             ...prev,
-                            image_url: base64
+                            image_url: downloadURL
                         }));
-                        setImagePreview(base64);
+                        setImagePreview(downloadURL);
+                        
+                        setIsUploading(false);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert('Error uploading image. Please try again.');
+                        setIsUploading(false);
+                        
+                        // Fallback to base64 if Firebase upload fails
+                        try {
+                            const base64 = await convertImageToBase64(file);
+                            setFormData(prev => ({
+                                ...prev,
+                                image_url: base64
+                            }));
+                            setImagePreview(base64);
+                        } catch (fallbackError) {
+                            alert('Error uploading image. Please try again.');
+                        }
                     }
                 }
             };
@@ -3326,12 +3282,18 @@
                                 onDrop={handleDrop}
                                 onClick={() => document.getElementById('image-upload').click()}
                             >
-                                <div className="drop-zone-text">
-                                    {imagePreview ? 'Change Image' : 'Upload Image'}
-                                </div>
-                                <div className="drop-zone-subtext">
-                                    Drag & drop or click to upload
-                                </div>
+                                {isUploading ? (
+                                    <div className="drop-zone-text">Uploading...</div>
+                                ) : (
+                                    <>
+                                        <div className="drop-zone-text">
+                                            {imagePreview ? 'Change Image' : 'Upload Image'}
+                                        </div>
+                                        <div className="drop-zone-subtext">
+                                            Drag & drop or click to upload
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             
                             <input
@@ -3446,8 +3408,8 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
-                                {isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion'}
+                            <button type="submit" className="button" disabled={isUploading}>
+                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion')}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
