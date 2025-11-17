@@ -853,6 +853,7 @@
             max-width: 200px;
             max-height: 200px;
             border-radius: 8px;
+            border: 2px solid #444;
         }
         
         /* Drop Zone Styles */
@@ -864,6 +865,12 @@
             cursor: pointer;
             transition: background 0.2s;
             margin-bottom: 1rem;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .drop-zone:hover, .drop-zone.dragover {
@@ -2748,7 +2755,7 @@
             );
         }
 
-        // UPDATED: Create/Edit Recipe Component with Firebase Storage upload
+        // FIXED: Create/Edit Recipe Component with Firebase Storage upload
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -2805,14 +2812,28 @@
                 }
             };
             
-            // UPDATED: Handle image upload with Firebase Storage
+            // FIXED: Handle image upload with Firebase Storage
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
                         setIsUploading(true);
                         
+                        // Check file size (limit to 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Image size should be less than 5MB');
+                            setIsUploading(false);
+                            return;
+                        }
+                        
+                        // Check if it's an image file
+                        if (!file.type.startsWith('image/')) {
+                            alert('Please select an image file (JPEG, PNG, etc.)');
+                            setIsUploading(false);
+                            return;
+                        }
+                        
                         // Generate unique filename
-                        const fileName = `recipe_${Date.now()}_${file.name}`;
+                        const fileName = `recipe_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
                         
                         // Upload to Firebase Storage
                         const downloadURL = await uploadImageToFirebase(file, fileName);
@@ -2837,7 +2858,8 @@
                             }));
                             setImagePreview(base64);
                         } catch (fallbackError) {
-                            alert('Error uploading image. Please try again.');
+                            console.error('Fallback upload failed:', fallbackError);
+                            alert('Error uploading image. Please try again with a smaller file.');
                         }
                     }
                 }
@@ -2867,7 +2889,12 @@
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    await handleImageUpload(files[0]);
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        await handleImageUpload(file);
+                    } else {
+                        alert('Please drop an image file (JPEG, PNG, etc.)');
+                    }
                 }
             };
             
@@ -2988,29 +3015,42 @@
                             </div>
                         </div>
                         
+                        {/* FIXED: Image Upload Section */}
                         <div className="form-group">
                             <label className="form-label">Image</label>
+                            
+                            {/* Drop Zone */}
                             <div 
                                 className={`drop-zone ${isDragging ? 'dragover' : ''}`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
                                 onClick={() => document.getElementById('image-upload').click()}
+                                style={{ position: 'relative', minHeight: '120px' }}
                             >
                                 {isUploading ? (
-                                    <div className="drop-zone-text">Uploading...</div>
+                                    <div className="drop-zone-text">
+                                        <div>Uploading Image...</div>
+                                        <div style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Please wait</div>
+                                    </div>
+                                ) : imagePreview ? (
+                                    <div style={{textAlign: 'center'}}>
+                                        <div className="drop-zone-text">Click to Change Image</div>
+                                        <div className="drop-zone-subtext">or drag & drop a new one</div>
+                                    </div>
                                 ) : (
                                     <>
-                                        <div className="drop-zone-text">
-                                            {imagePreview ? 'Change Image' : 'Upload Image'}
-                                        </div>
+                                        <div className="drop-zone-text">Upload Image</div>
                                         <div className="drop-zone-subtext">
                                             Drag & drop or click to upload
+                                            <br />
+                                            <small>Max 5MB - JPEG, PNG, WebP</small>
                                         </div>
                                     </>
                                 )}
                             </div>
                             
+                            {/* Hidden File Input */}
                             <input
                                 type="file"
                                 id="image-upload"
@@ -3019,9 +3059,23 @@
                                 style={{display: 'none'}}
                             />
                             
+                            {/* Image Preview */}
                             {imagePreview && (
-                                <div className="image-upload">
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                <div className="image-upload" style={{marginTop: '1rem'}}>
+                                    <div style={{fontSize: '0.9rem', color: '#FFB366', marginBottom: '0.5rem'}}>
+                                        Image Preview:
+                                    </div>
+                                    <img 
+                                        src={imagePreview} 
+                                        alt="Preview" 
+                                        className="image-preview" 
+                                        style={{ 
+                                            maxWidth: '200px', 
+                                            maxHeight: '200px',
+                                            borderRadius: '8px',
+                                            border: '2px solid #444'
+                                        }} 
+                                    />
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
@@ -3029,9 +3083,17 @@
                                             setImagePreview('');
                                             setFormData(prev => ({ ...prev, image_url: '' }));
                                         }}
+                                        style={{marginTop: '0.5rem'}}
                                     >
                                         Remove Image
                                     </button>
+                                </div>
+                            )}
+                            
+                            {/* Current Image Info */}
+                            {isEdit && formData.image_url && !imagePreview && (
+                                <div style={{marginTop: '0.5rem', fontSize: '0.8rem', color: '#888'}}>
+                                    Current image is set. Upload a new one to replace it.
                                 </div>
                             )}
                         </div>
@@ -3108,8 +3170,13 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button" disabled={isUploading}>
-                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Cocktail' : 'Add Cocktail')}
+                            <button 
+                                type="submit" 
+                                className="button" 
+                                disabled={isUploading}
+                                style={{opacity: isUploading ? 0.6 : 1}}
+                            >
+                                {isUploading ? 'Uploading Image...' : (isEdit ? 'Update Cocktail' : 'Add Cocktail')}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
@@ -3174,14 +3241,28 @@
                 }
             };
             
-            // UPDATED: Handle image upload with Firebase Storage
+            // FIXED: Handle image upload with Firebase Storage for syrups
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
                         setIsUploading(true);
                         
+                        // Check file size (limit to 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Image size should be less than 5MB');
+                            setIsUploading(false);
+                            return;
+                        }
+                        
+                        // Check if it's an image file
+                        if (!file.type.startsWith('image/')) {
+                            alert('Please select an image file (JPEG, PNG, etc.)');
+                            setIsUploading(false);
+                            return;
+                        }
+                        
                         // Generate unique filename
-                        const fileName = `syrup_${Date.now()}_${file.name}`;
+                        const fileName = `syrup_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
                         
                         // Upload to Firebase Storage
                         const downloadURL = await uploadImageToFirebase(file, fileName);
@@ -3206,7 +3287,8 @@
                             }));
                             setImagePreview(base64);
                         } catch (fallbackError) {
-                            alert('Error uploading image. Please try again.');
+                            console.error('Fallback upload failed:', fallbackError);
+                            alert('Error uploading image. Please try again with a smaller file.');
                         }
                     }
                 }
@@ -3236,7 +3318,12 @@
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    await handleImageUpload(files[0]);
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        await handleImageUpload(file);
+                    } else {
+                        alert('Please drop an image file (JPEG, PNG, etc.)');
+                    }
                 }
             };
             
@@ -3311,40 +3398,67 @@
                             />
                         </div>
                         
+                        {/* FIXED: Image Upload Section for Syrups */}
                         <div className="form-group">
                             <label className="form-label">Image</label>
+                            
+                            {/* Drop Zone */}
                             <div 
                                 className={`drop-zone ${isDragging ? 'dragover' : ''}`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                onClick={() => document.getElementById('image-upload').click()}
+                                onClick={() => document.getElementById('syrup-image-upload').click()}
+                                style={{ position: 'relative', minHeight: '120px' }}
                             >
                                 {isUploading ? (
-                                    <div className="drop-zone-text">Uploading...</div>
+                                    <div className="drop-zone-text">
+                                        <div>Uploading Image...</div>
+                                        <div style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Please wait</div>
+                                    </div>
+                                ) : imagePreview ? (
+                                    <div style={{textAlign: 'center'}}>
+                                        <div className="drop-zone-text">Click to Change Image</div>
+                                        <div className="drop-zone-subtext">or drag & drop a new one</div>
+                                    </div>
                                 ) : (
                                     <>
-                                        <div className="drop-zone-text">
-                                            {imagePreview ? 'Change Image' : 'Upload Image'}
-                                        </div>
+                                        <div className="drop-zone-text">Upload Image</div>
                                         <div className="drop-zone-subtext">
                                             Drag & drop or click to upload
+                                            <br />
+                                            <small>Max 5MB - JPEG, PNG, WebP</small>
                                         </div>
                                     </>
                                 )}
                             </div>
                             
+                            {/* Hidden File Input */}
                             <input
                                 type="file"
-                                id="image-upload"
+                                id="syrup-image-upload"
                                 accept="image/*"
                                 onChange={handleFileInputChange}
                                 style={{display: 'none'}}
                             />
                             
+                            {/* Image Preview */}
                             {imagePreview && (
-                                <div className="image-upload">
-                                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                                <div className="image-upload" style={{marginTop: '1rem'}}>
+                                    <div style={{fontSize: '0.9rem', color: '#FFB366', marginBottom: '0.5rem'}}>
+                                        Image Preview:
+                                    </div>
+                                    <img 
+                                        src={imagePreview} 
+                                        alt="Preview" 
+                                        className="image-preview" 
+                                        style={{ 
+                                            maxWidth: '200px', 
+                                            maxHeight: '200px',
+                                            borderRadius: '8px',
+                                            border: '2px solid #444'
+                                        }} 
+                                    />
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
@@ -3352,9 +3466,17 @@
                                             setImagePreview('');
                                             setFormData(prev => ({ ...prev, image_url: '' }));
                                         }}
+                                        style={{marginTop: '0.5rem'}}
                                     >
                                         Remove Image
                                     </button>
+                                </div>
+                            )}
+                            
+                            {/* Current Image Info */}
+                            {isEdit && formData.image_url && !imagePreview && (
+                                <div style={{marginTop: '0.5rem', fontSize: '0.8rem', color: '#888'}}>
+                                    Current image is set. Upload a new one to replace it.
                                 </div>
                             )}
                         </div>
@@ -3446,8 +3568,13 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button" disabled={isUploading}>
-                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion')}
+                            <button 
+                                type="submit" 
+                                className="button" 
+                                disabled={isUploading}
+                                style={{opacity: isUploading ? 0.6 : 1}}
+                            >
+                                {isUploading ? 'Uploading Image...' : (isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion')}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
