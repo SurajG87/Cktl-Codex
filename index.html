@@ -121,7 +121,7 @@
             }
         }
 
-        /* UPDATED: Recipe card with full image display on mobile */
+        /* UPDATED: Recipe card with 3:4 aspect ratio */
         .recipe-card {
             background: rgba(42, 42, 42, 0.7);
             border-radius: 8px;
@@ -142,7 +142,7 @@
             background: rgba(42, 42, 42, 0.9);
         }
 
-        /* UPDATED: Image area to fill the entire card - ENHANCED for mobile */
+        /* UPDATED: Image area to fill the entire card */
         .recipe-image {
             position: absolute;
             top: 0;
@@ -156,15 +156,7 @@
             overflow: hidden;
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
             z-index: 0;
-        }
-
-        /* NEW: Ensure images display properly on all devices */
-        .recipe-image.normal {
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
         }
 
         /* UPDATED: Info section positioned at bottom with gradient overlay */
@@ -209,108 +201,37 @@
             flex-shrink: 0;
         }
 
-        /* NEW: Enhanced mobile styles for full image display */
-        @media (max-width: 768px) {
-            .recipe-card {
-                min-height: 140px;
-                aspect-ratio: 3/4;
-            }
-            
-            .recipe-image {
-                /* Ensure image fills the entire card on mobile */
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-            }
-            
-            .recipe-name {
-                font-size: 0.75rem;
-            }
-            
-            .recipe-abv {
-                font-size: 0.7rem;
-            }
-        }
-
-        /* Small mobile devices - ENHANCED image display */
+        /* Additional responsive adjustments for better card fitting */
         @media (max-width: 480px) {
             .recipe-card {
-                min-height: 130px;
-                aspect-ratio: 3/4;
-            }
-            
-            .recipe-image {
-                /* Force full image display on small screens */
-                background-size: cover !important;
-                background-position: center !important;
-                background-repeat: no-repeat !important;
+                min-height: 75px;
             }
             
             .recipe-name {
-                font-size: 0.7rem;
+                font-size: 0.6rem;
             }
             
             .recipe-abv {
-                font-size: 0.65rem;
-            }
-            
-            .recipe-info {
-                padding: 0.6rem;
+                font-size: 0.55rem;
             }
         }
 
         /* For very small iPhone screens */
         @media (max-width: 380px) {
             .recipe-card {
-                min-height: 120px;
-                aspect-ratio: 3/4;
-            }
-            
-            .recipe-image {
-                /* Ensure full image display on very small screens */
-                background-size: cover !important;
-                background-position: center !important;
-                background-repeat: no-repeat !important;
+                min-height: 70px;
             }
             
             .recipe-name {
-                font-size: 0.65rem;
+                font-size: 0.55rem;
             }
             
             .recipe-abv {
-                font-size: 0.6rem;
+                font-size: 0.5rem;
             }
             
             .recipe-info {
-                padding: 0.5rem;
-            }
-        }
-
-        /* NEW: Touch-friendly improvements for mobile */
-        @media (max-width: 768px) {
-            .recipe-card {
-                /* Better touch targets */
-                min-height: 140px;
-            }
-            
-            .recipes-grid {
-                /* Slightly larger gap for better touch interaction */
-                gap: 0.6rem;
-            }
-            
-            /* Improve image loading performance */
-            .recipe-image {
-                will-change: transform;
-                backface-visibility: hidden;
-            }
-        }
-
-        /* NEW: Performance optimizations for mobile */
-        @media (max-width: 480px) {
-            .recipe-image {
-                /* Optimize for mobile performance */
-                transform: translateZ(0);
-                -webkit-transform: translateZ(0);
+                padding: 0.3rem;
             }
         }
         
@@ -1220,7 +1141,24 @@
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.6rem;
+                gap: 0.5rem;
+            }
+            
+            .recipe-card {
+                min-height: 140px;
+                aspect-ratio: 3/4;
+            }
+            
+            .recipe-image {
+                height: 100px;
+            }
+            
+            .recipe-name {
+                font-size: 0.75rem;
+            }
+            
+            .recipe-abv {
+                font-size: 0.7rem;
             }
             
             .alphabet-letter {
@@ -1239,6 +1177,11 @@
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
+            }
+            
+            .recipe-card {
+                min-height: 160px;
+                aspect-ratio: 3/4;
             }
         }
         
@@ -1261,7 +1204,29 @@
             
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.6rem;
+                gap: 0.5rem;
+            }
+            
+            .recipe-card {
+                min-height: 130px;
+                aspect-ratio: 3/4;
+            }
+            
+            .recipe-image {
+                height: 90px;
+                font-size: 1.5rem;
+            }
+            
+            .recipe-name {
+                font-size: 0.7rem;
+            }
+            
+            .recipe-abv {
+                font-size: 0.65rem;
+            }
+            
+            .recipe-info {
+                padding: 0.6rem;
             }
         }
         
@@ -2390,13 +2355,12 @@
             );
         }
 
-        // UPDATED: Recipe Card Component with full image display for mobile
+        // UPDATED: Recipe Card Component with image filling the entire card and name/ABV on same line
         function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
+                backgroundPosition: 'center'
             };
             
             return (
@@ -2420,8 +2384,7 @@
             const imageStyle = {
                 backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
+                backgroundPosition: 'center'
             };
             
             return (
