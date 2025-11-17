@@ -89,39 +89,39 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: Square recipes grid with 3mm spacing - fit 3 cards per column on iPhone */
+        /* UPDATED: Square recipes grid with minimal spacing - fit 4 cards per line */
         .recipes-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 3mm; /* Updated from 0.1cm to 3mm */
+            gap: 0.1cm; /* Reduced from 0.3cm to minimal spacing */
             margin-bottom: 2rem;
         }
 
         @media (max-width: 1200px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 3mm; /* Updated to 3mm */
+                gap: 0.1cm;
             }
         }
 
         @media (max-width: 1024px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 3mm; /* Updated to 3mm */
+                gap: 0.1cm;
             }
         }
 
         @media (max-width: 768px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr); /* Ensure 3 columns on tablets */
-                gap: 3mm; /* Updated to 3mm */
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.1cm;
             }
         }
 
         @media (max-width: 480px) {
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr); /* Changed from 2 to 3 columns for iPhone */
-                gap: 3mm; /* Updated to 3mm */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.1cm;
             }
         }
 
@@ -481,25 +481,6 @@
             background: #444;
         }
         
-        /* UPDATED: Venue button next to back arrow */
-        .venue-button {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-        
-        .venue-button:hover {
-            background: #444;
-        }
-        
         /* UPDATED: Smaller recipe title */
         .recipe-title-header {
             font-size: 1.5rem;
@@ -534,22 +515,13 @@
             list-style: none;
         }
         
-        /* UPDATED: Display measurement first, then ingredient name with 1.2cm space */
+        /* UPDATED: Display measurement first, then ingredient name */
         .ingredient-item {
             display: flex;
+            justify-content: space-between;
             padding: 0.4rem 0;
             border-bottom: 1px solid #444;
             font-size: 0.85rem;
-        }
-        
-        .ingredient-amount {
-            width: 1.2cm;
-            flex-shrink: 0;
-            font-weight: 600;
-        }
-        
-        .ingredient-name {
-            flex: 1;
         }
         
         .instructions {
@@ -558,16 +530,13 @@
             font-size: 0.85rem;
         }
         
-        /* UPDATED: Action buttons in same line */
         .action-buttons {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
             margin-top: 1.5rem;
-            justify-content: flex-start;
         }
         
-        /* UPDATED: Remove colors from action buttons */
         .action-button {
             background: #333;
             color: #fff;
@@ -577,11 +546,26 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 0.8rem;
-            white-space: nowrap;
         }
         
         .action-button:hover {
             background: #444;
+        }
+        
+        .action-button.scale {
+            background: #4CAF50;
+        }
+        
+        .action-button.share {
+            background: #2196F3;
+        }
+        
+        .action-button.edit {
+            background: #FF9800;
+        }
+        
+        .action-button.delete {
+            background: #f44336;
         }
         
         /* Scale Recipe Styles - Compact */
@@ -719,6 +703,7 @@
         
         .scaled-ingredient {
             display: flex;
+            justify-content: space-between;
             padding: 0.4rem 0;
             border-bottom: 1px solid #444;
             font-size: 0.9rem;
@@ -1005,7 +990,7 @@
             background: #444;
         }
         
-        /* UPDATED: Alphabet Navigation - RIGHT SIDE VERTICAL for both desktop and mobile */
+        /* UPDATED: Alphabet Navigation - RIGHT SIDE VERTICAL */
         .alphabet-nav {
             position: fixed;
             right: 10px;
@@ -1063,11 +1048,9 @@
             position: relative;
         }
         
-        /* UPDATED: Recipes container with 2mm padding on sides */
         .recipes-container {
             flex: 1;
             margin-right: 50px; /* Space for alphabet nav */
-            padding: 0 2mm; /* Added 2mm left and right padding */
         }
         
         /* Loading and Empty States */
@@ -1118,15 +1101,27 @@
                 flex-direction: column;
             }
             
-            /* Alphabet nav stays vertical on mobile - removed horizontal conversion */
+            .alphabet-nav {
+                position: static;
+                transform: none;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                background: #2a2a2a;
+                border-radius: 8px;
+                padding: 0.8rem;
+                margin-bottom: 1.5rem;
+                max-height: none;
+                width: 100%;
+                box-shadow: none;
+            }
+            
             .recipes-container {
-                margin-right: 40px; /* Add space for alphabet nav on mobile too */
-                padding: 0 2mm; /* Added 2mm left and right padding */
+                margin-right: 0;
             }
             
             .main-content {
                 flex-direction: column;
-                position: relative; /* Ensure proper positioning context */
             }
             
             .nav-user {
@@ -1155,7 +1150,7 @@
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 3mm; /* Updated to 3mm */
+                gap: 0.1cm;
             }
             
             .recipe-card {
@@ -1190,7 +1185,7 @@
             
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 3mm; /* Updated to 3mm */
+                gap: 0.1cm;
             }
             
             .recipe-card {
@@ -1200,26 +1195,10 @@
         }
         
         /* Small mobile devices */
-        @media (max-width: 480px) {
-            .alphabet-nav {
-                right: 5px; /* Adjust position for very small screens */
-                padding: 0.6rem 0.2rem;
-            }
-            
-            .recipes-container {
-                margin-right: 35px; /* Slightly less space on very small screens */
-                padding: 0 2mm; /* Added 2mm left and right padding */
-            }
-            
-            .alphabet-letter {
-                padding: 0.25rem 0.4rem;
-                font-size: 0.7rem;
-                min-width: 20px;
-            }
-            
+        @media (max-width: 380px) {
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 3mm; /* Updated to 3mm */
+                gap: 0.1cm;
             }
             
             .recipe-card {
@@ -1242,19 +1221,6 @@
             
             .recipe-info {
                 padding: 0.6rem;
-            }
-        }
-        
-        /* Ensure alphabet nav is visible and properly positioned on all screens */
-        @media (max-width: 380px) {
-            .alphabet-nav {
-                right: 3px;
-                padding: 0.5rem 0.15rem;
-            }
-            
-            .recipes-container {
-                margin-right: 30px;
-                padding: 0 2mm; /* Added 2mm left and right padding */
             }
         }
         
@@ -1357,14 +1323,6 @@
         
         .venue-category-btn:hover {
             background: #444;
-        }
-        
-        /* NEW: App title in header */
-        .app-title {
-            color: #FFB366;
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
         }
     </style>
 </head>
@@ -2029,15 +1987,16 @@
                 }
             };
 
-            // UPDATED: Share scaled ingredients instead of original recipe
             const shareScaledRecipe = () => {
                 const scaleFactor = calculateScaleFactor();
                 const dilution = customDilution ? parseFloat(customDilution) : dilutionPercentage;
                 
-                let shareText = `🐑 ${recipe.name} - Scaled Recipe\n`;
-                shareText += `Spirit: ${recipe.spirit_type}\n`;
-                shareText += `Glass: ${recipe.glass_type}\n`;
-                shareText += `ABV: ${recipe.abv}% | Cost: $${recipe.pour_cost}\n\n`;
+                const scaledRecipe = {
+                    ...recipe,
+                    ingredients: scaledIngredients
+                };
+                
+                let shareText = generateRecipeShareText(scaledRecipe);
                 
                 // Add scaling information
                 let scalingInfo = '';
@@ -2051,24 +2010,7 @@
                     scalingInfo += ` with ${dilution}% dilution`;
                 }
                 
-                shareText += `${scalingInfo}\n\n`;
-                
-                shareText += `SCALED INGREDIENTS:\n`;
-                scaledIngredients.forEach(ingredient => {
-                    shareText += `• ${ingredient.scaledAmount} ${ingredient.unit} ${ingredient.name}`;
-                    if (ingredient.isDilution) {
-                        shareText += ` (dilution)`;
-                    }
-                    shareText += `\n`;
-                });
-                
-                shareText += `\nINSTRUCTIONS:\n${recipe.instructions}\n`;
-                
-                if (recipe.notes) {
-                    shareText += `\nNOTES:\n${recipe.notes}\n`;
-                }
-                
-                shareText += `\n---\nShared from Cocktail Codex`;
+                shareText = shareText.replace('Shared from Cocktail Codex', `${scalingInfo} | Shared from Cocktail Codex`);
                 
                 shareContent(shareText, `Scaled ${recipe.name} Recipe`);
             };
@@ -2223,7 +2165,7 @@
                             ))}
                         </div>
                         
-                        {/* UPDATED: Final volume and servings info - MOVED TO BOTTOM */}
+                        {/* UPDATED: Final volume and servings summary - MOVED TO BOTTOM */}
                         <div className="scale-summary">
                             <div className="scale-summary-item">
                                 Final Volume: <span className="scale-summary-value">{finalVolume.toFixed(1)} ml</span>
@@ -2234,7 +2176,7 @@
                         </div>
                         
                         <div className="action-buttons" style={{marginTop: '1.5rem'}}>
-                            <button className="action-button" onClick={shareScaledRecipe}>
+                            <button className="action-button share" onClick={shareScaledRecipe}>
                                 📤 Share Scaled
                             </button>
                             <button className="action-button" onClick={onClose}>
@@ -2342,6 +2284,7 @@
                     <div ref={menuRef} className={`side-menu ${isOpen ? 'active' : ''}`}>
                         <div className="side-menu-header">
                             <div className="side-menu-logo">🐑</div>
+                            <div className="side-menu-title">Cocktail Codex</div>
                         </div>
                         
                         <nav className="side-menu-nav">
@@ -2615,21 +2558,12 @@
                 shareContent(shareText, `${recipe.name} Recipe`);
             };
             
-            // UPDATED: Venue button to go back to venue page
-            const handleVenueButton = () => {
-                // Navigate to the venue page (for now, just go back to home)
-                onBack();
-            };
-            
             return (
                 <div className="container">
-                    {/* UPDATED: Back arrow, venue button and name side by side - smaller */}
+                    {/* UPDATED: Back arrow and name side by side - smaller */}
                     <div className="recipe-header-container">
                         <button className="back-arrow" onClick={onBack}>
                             ←
-                        </button>
-                        <button className="venue-button" onClick={handleVenueButton}>
-                            📍 {recipe.venue}
                         </button>
                         <h1 className="recipe-title-header">{recipe.name}</h1>
                     </div>
@@ -2658,9 +2592,8 @@
                                     <ul className="ingredients-list">
                                         {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
-                                                {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
-                                                <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
-                                                <span className="ingredient-name">{ingredient.name}</span>
+                                                {/* UPDATED: Display measurement first, then ingredient name */}
+                                                <span>{ingredient.amount} {ingredient.unit} {ingredient.name}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -2677,18 +2610,17 @@
                                         </>
                                     )}
                                     
-                                    {/* UPDATED: Action buttons in same line */}
                                     <div className="action-buttons">
-                                        <button className="action-button" onClick={() => setShowScaleModal(true)}>
+                                        <button className="action-button scale" onClick={() => setShowScaleModal(true)}>
                                             ⚖️ Scale
                                         </button>
-                                        <button className="action-button" onClick={handleShareRecipe}>
+                                        <button className="action-button share" onClick={handleShareRecipe}>
                                             📤 Share
                                         </button>
                                         {isAdmin && (
                                             <>
                                                 <button 
-                                                    className="action-button"
+                                                    className="action-button edit"
                                                     onClick={() => {
                                                         if (onEditRecipe) {
                                                             onEditRecipe(recipe);
@@ -2698,7 +2630,7 @@
                                                     ✏️ Edit
                                                 </button>
                                                 <button 
-                                                    className="action-button"
+                                                    className="action-button delete"
                                                     onClick={() => onDeleteRecipe(recipe.id)}
                                                 >
                                                     🗑️ Delete
@@ -2773,9 +2705,8 @@
                                         <ul className="ingredients-list">
                                             {syrup.ingredients.map((ingredient, index) => (
                                                 <li key={index} className="ingredient-item">
-                                                    {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
-                                                    <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
-                                                    <span className="ingredient-name">{ingredient.name}</span>
+                                                    {/* UPDATED: Display measurement first, then ingredient name */}
+                                                    <span>{ingredient.amount} {ingredient.unit} {ingredient.name}</span>
                                                 </li>
                                             ))}
                                         </ul>
@@ -2788,18 +2719,17 @@
                                     <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Instructions</h3>
                                     <div className="instructions">{syrup.instructions || 'No instructions provided'}</div>
                                     
-                                    {/* UPDATED: Action buttons in same line */}
                                     <div className="action-buttons">
-                                        <button className="action-button" onClick={() => setShowScaleModal(true)}>
+                                        <button className="action-button scale" onClick={() => setShowScaleModal(true)}>
                                             ⚖️ Scale
                                         </button>
-                                        <button className="action-button" onClick={handleShareSyrup}>
+                                        <button className="action-button share" onClick={handleShareSyrup}>
                                             📤 Share
                                         </button>
                                         {isAdmin && (
                                             <>
                                                 <button 
-                                                    className="action-button"
+                                                    className="action-button edit"
                                                     onClick={() => {
                                                         if (onEditSyrup) {
                                                             onEditSyrup(syrup);
@@ -2809,7 +2739,7 @@
                                                     ✏️ Edit
                                                 </button>
                                                 <button 
-                                                    className="action-button"
+                                                    className="action-button delete"
                                                     onClick={() => onDeleteSyrup(syrup.id)}
                                                 >
                                                     🗑️ Delete
@@ -3465,7 +3395,7 @@
                                     className="form-input"
                                     name="storage"
                                     value={formData.storage}
-                                    onChange={(e) => handleInputChange(e)}
+                                    onChange={handleInputChange}
                                     placeholder="e.g., Refrigerate in airtight container"
                                 />
                             </div>
@@ -4332,7 +4262,7 @@
             
             return (
                 <div>
-                    {/* UPDATED: Header with all buttons in single row and app title */}
+                    {/* UPDATED: Header with all buttons in single row */}
                     <header className="header">
                         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
                             <button 
@@ -4343,9 +4273,6 @@
                                 <span className="menu-line"></span>
                                 <span className="menu-line"></span>
                             </button>
-                            
-                            {/* UPDATED: Added app title after hamburger menu */}
-                            <span className="app-title">🐏 Cocktail Codex</span>
                             
                             <div className="nav-user" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto'}}>
                                 <div className="sync-status">
