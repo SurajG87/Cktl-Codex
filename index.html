@@ -22,7 +22,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -90,39 +89,43 @@
             margin-bottom: 1rem;
         }
         
-        /* UPDATED: Square recipes grid with 8px (0.5rem) spacing between cards and responsive columns */
+        /* UPDATED: Square recipes grid with 3mm spacing - fit 3 cards per column on iPhone */
         .recipes-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem; /* 8px gap between cards */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3mm; /* Updated from 0.1cm to 3mm */
             margin-bottom: 2rem;
         }
 
-        @media (min-width: 640px) {
+        @media (max-width: 1200px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
+                gap: 3mm; /* Updated to 3mm */
             }
         }
 
-        @media (min-width: 768px) {
-            .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 1024px) {
+        @media (max-width: 1024px) {
             .recipes-grid {
                 grid-template-columns: repeat(4, 1fr);
+                gap: 3mm; /* Updated to 3mm */
             }
         }
 
-        @media (min-width: 1280px) {
+        @media (max-width: 768px) {
             .recipes-grid {
-                grid-template-columns: repeat(6, 1fr);
+                grid-template-columns: repeat(3, 1fr); /* Ensure 3 columns on tablets */
+                gap: 3mm; /* Updated to 3mm */
             }
         }
 
-        /* UPDATED: Recipe card with 3:4 aspect ratio - INCREASED SIZE BY 2MM */
+        @media (max-width: 480px) {
+            .recipes-grid {
+                grid-template-columns: repeat(3, 1fr); /* Changed from 2 to 3 columns for iPhone */
+                gap: 3mm; /* Updated to 3mm */
+            }
+        }
+
+        /* UPDATED: Square recipe card with image filling the entire card */
         .recipe-card {
             background: rgba(42, 42, 42, 0.7);
             border-radius: 8px;
@@ -132,13 +135,10 @@
             position: relative;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 179, 102, 0.2);
-            aspect-ratio: 3/4; /* 3:4 aspect ratio */
-            height: auto;
+            aspect-ratio: 3/4;
+            height: 80px;
             display: flex;
             flex-direction: column;
-            /* Increased by 2mm in both dimensions */
-            min-height: calc(140px + 2mm);
-            min-width: calc(105px + 2mm);
         }
 
         .recipe-card:hover {
@@ -146,7 +146,7 @@
             background: rgba(42, 42, 42, 0.9);
         }
 
-        /* FIXED: Image area to fill the entire card with full image display on ALL devices */
+        /* UPDATED: Image area to fill the entire card */
         .recipe-image {
             position: absolute;
             top: 0;
@@ -158,15 +158,12 @@
             justify-content: center;
             font-size: 1.2rem;
             overflow: hidden;
-            background-size: cover !important; /* Force cover on all devices */
-            background-position: center !important; /* Force center on all devices */
-            background-repeat: no-repeat !important; /* Force no-repeat on all devices */
+            background-size: cover;
+            background-position: center;
             z-index: 0;
-            width: 100% !important;
-            height: 100% !important;
         }
 
-        /* UPDATED: Info section positioned as overlay on top of image */
+        /* UPDATED: Info section positioned at bottom with gradient overlay */
         .recipe-info {
             position: absolute;
             bottom: 0;
@@ -208,10 +205,14 @@
             flex-shrink: 0;
         }
 
-        /* Additional responsive adjustments for better card fitting */
-        @media (max-width: 480px) {
+        /* Responsive adjustments for smaller cards */
+        @media (max-width: 768px) {
             .recipe-card {
-                min-height: calc(75px + 2mm);
+                height: 75px;
+            }
+            
+            .recipe-image {
+                font-size: 1rem;
             }
             
             .recipe-name {
@@ -223,10 +224,14 @@
             }
         }
 
-        /* For very small iPhone screens */
+        /* Small mobile devices */
         @media (max-width: 380px) {
             .recipe-card {
-                min-height: calc(70px + 2mm);
+                height: 70px;
+            }
+            
+            .recipe-image {
+                font-size: 0.9rem;
             }
             
             .recipe-name {
@@ -529,7 +534,7 @@
             list-style: none;
         }
         
-        /* UPDATED: Display measurement first, then ingredient name with 4cm space */
+        /* UPDATED: Display measurement first, then ingredient name with 1.2cm space */
         .ingredient-item {
             display: flex;
             padding: 0.4rem 0;
@@ -538,7 +543,7 @@
         }
         
         .ingredient-amount {
-            width: 4cm;
+            width: 1.2cm;
             flex-shrink: 0;
             font-weight: 600;
         }
@@ -853,7 +858,6 @@
             max-width: 200px;
             max-height: 200px;
             border-radius: 8px;
-            border: 2px solid #444;
         }
         
         /* Drop Zone Styles */
@@ -1041,7 +1045,15 @@
         }
         
         .alphabet-section {
-            margin-bottom: 0; /* REMOVED: Clear gap after alphabet switch */
+            margin-bottom: 2rem;
+        }
+        
+        .letter-header {
+            color: #FFB366;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #FFB366;
         }
         
         /* Main content with right-side alphabet */
@@ -1051,9 +1063,11 @@
             position: relative;
         }
         
+        /* UPDATED: Recipes container with 2mm padding on sides */
         .recipes-container {
             flex: 1;
             margin-right: 50px; /* Space for alphabet nav */
+            padding: 0 2mm; /* Added 2mm left and right padding */
         }
         
         /* Loading and Empty States */
@@ -1064,14 +1078,13 @@
             font-style: italic;
         }
         
-        /* UPDATED: Minimalistic footer */
+        /* Footer */
         .footer {
             text-align: center;
-            padding: 1rem;
+            padding: 2rem 1rem;
             color: #888;
             border-top: 1px solid #444;
-            margin-top: 2rem;
-            font-size: 0.8rem;
+            margin-top: 3rem;
         }
         
         .footer a {
@@ -1108,6 +1121,7 @@
             /* Alphabet nav stays vertical on mobile - removed horizontal conversion */
             .recipes-container {
                 margin-right: 40px; /* Add space for alphabet nav on mobile too */
+                padding: 0 2mm; /* Added 2mm left and right padding */
             }
             
             .main-content {
@@ -1141,21 +1155,16 @@
             /* UPDATED: Ensure square cards on mobile */
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
+                gap: 3mm; /* Updated to 3mm */
             }
             
             .recipe-card {
-                min-height: calc(140px + 2mm);
+                min-height: 140px;
                 aspect-ratio: 3/4;
             }
             
-            /* FIXED: Full image display on mobile */
             .recipe-image {
-                background-size: cover !important;
-                background-position: center !important;
-                background-repeat: no-repeat !important;
-                width: 100% !important;
-                height: 100% !important;
+                height: 100px;
             }
             
             .recipe-name {
@@ -1180,12 +1189,12 @@
             }
             
             .recipes-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 3mm; /* Updated to 3mm */
             }
             
             .recipe-card {
-                min-height: calc(160px + 2mm);
+                min-height: 160px;
                 aspect-ratio: 3/4;
             }
         }
@@ -1199,6 +1208,7 @@
             
             .recipes-container {
                 margin-right: 35px; /* Slightly less space on very small screens */
+                padding: 0 2mm; /* Added 2mm left and right padding */
             }
             
             .alphabet-letter {
@@ -1209,21 +1219,17 @@
             
             .recipes-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
+                gap: 3mm; /* Updated to 3mm */
             }
             
             .recipe-card {
-                min-height: calc(130px + 2mm);
+                min-height: 130px;
                 aspect-ratio: 3/4;
             }
             
-            /* FIXED: Full image display on small mobile */
             .recipe-image {
-                background-size: cover !important;
-                background-position: center !important;
-                background-repeat: no-repeat !important;
-                width: 100% !important;
-                height: 100% !important;
+                height: 90px;
+                font-size: 1.5rem;
             }
             
             .recipe-name {
@@ -1248,6 +1254,7 @@
             
             .recipes-container {
                 margin-right: 30px;
+                padding: 0 2mm; /* Added 2mm left and right padding */
             }
         }
         
@@ -1352,36 +1359,12 @@
             background: #444;
         }
         
-        /* UPDATED: Remove "Cocktail Codex" text after hamburger menu */
+        /* NEW: App title in header */
         .app-title {
-            display: none; /* Hide the app title text */
-        }
-
-        /* iPhone-specific fixes for full image display */
-        @media (max-width: 480px) and (min-height: 600px) {
-            .recipe-card {
-                min-height: calc(120px + 2mm);
-            }
-            
-            .recipe-image {
-                background-size: cover !important;
-                background-position: center !important;
-            }
-        }
-
-        /* Android device specific fixes */
-        @media (max-width: 480px) and (max-height: 800px) {
-            .recipe-card {
-                min-height: calc(110px + 2mm);
-            }
-        }
-
-        /* High-density mobile screens */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .recipe-image {
-                background-size: cover !important;
-                background-position: center !important;
-            }
+            color: #FFB366;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
         }
     </style>
 </head>
@@ -1405,7 +1388,6 @@
         let app;
         let db;
         let auth;
-        let storage;
         
         try {
             if (typeof firebase === 'undefined') {
@@ -1415,7 +1397,6 @@
             app = firebase.initializeApp(firebaseConfig);
             db = firebase.firestore(app);
             auth = firebase.auth(app);
-            storage = firebase.storage(app);
             console.log('Firebase initialized successfully');
         } catch (error) {
             console.error('Firebase initialization error:', error);
@@ -1436,13 +1417,6 @@
                     callback({ uid: 'offline-user' });
                     return () => {};
                 }
-            };
-            storage = {
-                ref: () => ({
-                    put: () => Promise.resolve({
-                        ref: { getDownloadURL: () => Promise.resolve('') }
-                    })
-                })
             };
         }
         
@@ -1510,6 +1484,113 @@
                     ],
                     instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass. Garnish with lime wheel.',
                     notes: 'Use fresh lime juice for optimal flavor.'
+                },
+                {
+                    id: '3',
+                    name: 'Negroni',
+                    spirit_type: 'Gin',
+                    venue: 'Main Bar',
+                    glass_type: 'Old Fashioned',
+                    abv: 28,
+                    pour_cost: 5.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Gin', amount: 30, unit: 'ml' },
+                        { name: 'Campari', amount: 30, unit: 'ml' },
+                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
+                        { name: 'Orange Peel', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Stir all ingredients with ice. Strain into glass. Garnish with orange peel.',
+                    notes: 'Equal parts make this cocktail perfectly balanced.'
+                },
+                {
+                    id: '4',
+                    name: 'Mojito',
+                    spirit_type: 'Rum',
+                    venue: 'Pool Bar',
+                    glass_type: 'Highball',
+                    abv: 15,
+                    pour_cost: 3.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'White Rum', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Mint Leaves', amount: 10, unit: 'leaves' },
+                        { name: 'Sugar', amount: 2, unit: 'tsp' },
+                        { name: 'Soda Water', amount: 100, unit: 'ml' }
+                    ],
+                    instructions: 'Muddle mint leaves with sugar and lime juice. Add rum and ice. Top with soda water. Garnish with mint sprig.',
+                    notes: 'Use fresh mint for best aroma.'
+                },
+                {
+                    id: '5',
+                    name: 'Martini',
+                    spirit_type: 'Gin',
+                    venue: 'Main Bar',
+                    glass_type: 'Martini',
+                    abv: 30,
+                    pour_cost: 4.75,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Gin', amount: 60, unit: 'ml' },
+                        { name: 'Dry Vermouth', amount: 10, unit: 'ml' },
+                        { name: 'Olive', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Stir gin and vermouth with ice. Strain into chilled martini glass. Garnish with olive.',
+                    notes: 'Shake for a colder, more diluted drink.'
+                },
+                {
+                    id: '6',
+                    name: 'Daiquiri',
+                    spirit_type: 'Rum',
+                    venue: 'Pool Bar',
+                    glass_type: 'Coupe',
+                    abv: 20,
+                    pour_cost: 3.50,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'White Rum', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Simple Syrup', amount: 20, unit: 'ml' }
+                    ],
+                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass.',
+                    notes: 'Use fresh lime juice for best results.'
+                },
+                {
+                    id: '7',
+                    name: 'Whiskey Sour',
+                    spirit_type: 'Whiskey',
+                    venue: 'Main Bar',
+                    glass_type: 'Old Fashioned',
+                    abv: 22,
+                    pour_cost: 4.25,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Bourbon', amount: 60, unit: 'ml' },
+                        { name: 'Lemon Juice', amount: 25, unit: 'ml' },
+                        { name: 'Simple Syrup', amount: 20, unit: 'ml' },
+                        { name: 'Egg White', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Dry shake all ingredients without ice. Add ice and shake again. Strain into glass.',
+                    notes: 'Dry shaking creates better foam from the egg white.'
+                },
+                {
+                    id: '8',
+                    name: 'Manhattan',
+                    spirit_type: 'Whiskey',
+                    venue: 'Main Bar',
+                    glass_type: 'Coupe',
+                    abv: 32,
+                    pour_cost: 5.50,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Rye Whiskey', amount: 60, unit: 'ml' },
+                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
+                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
+                        { name: 'Cherry', amount: 1, unit: 'piece' }
+                    ],
+                    instructions: 'Stir all ingredients with ice. Strain into chilled coupe glass. Garnish with cherry.',
+                    notes: 'Rye whiskey provides a spicier flavor profile.'
                 }
             ]);
         };
@@ -1532,6 +1613,21 @@
                     shelf_life: '1 month refrigerated',
                     storage: 'Airtight container in refrigerator',
                     cost: 0.50,
+                    image_url: ''
+                },
+                {
+                    id: '2',
+                    name: 'Ginger Syrup',
+                    type: 'Syrup',
+                    ingredients: [
+                        { name: 'Fresh Ginger', amount: 100, unit: 'gram' },
+                        { name: 'Sugar', amount: 1, unit: 'cup' },
+                        { name: 'Water', amount: 1, unit: 'cup' }
+                    ],
+                    instructions: 'Peel and slice ginger. Simmer with water and sugar for 15 minutes. Strain and cool.',
+                    shelf_life: '2 weeks refrigerated',
+                    storage: 'Airtight container in refrigerator',
+                    cost: 1.25,
                     image_url: ''
                 }
             ]);
@@ -1561,22 +1657,6 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
-        };
-
-        // NEW: Upload image to Firebase Storage and return URL
-        const uploadImageToFirebase = async (file, fileName) => {
-            try {
-                console.log('Uploading image to Firebase Storage:', fileName);
-                const storageRef = storage.ref();
-                const imageRef = storageRef.child(`images/${fileName}`);
-                const snapshot = await imageRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                console.log('Image uploaded successfully:', downloadURL);
-                return downloadURL;
-            } catch (error) {
-                console.error('Error uploading image to Firebase:', error);
-                throw error;
-            }
         };
 
         // Enhanced Firebase Data Management for Auto Sync
@@ -2299,8 +2379,7 @@
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
+                backgroundPosition: 'center'
             };
             
             return (
@@ -2308,7 +2387,7 @@
                     <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🐑'}
                     </div>
-                    {/* UPDATED: Name and ABV positioned as overlay on top of image */}
+                    {/* UPDATED: Name and ABV positioned at bottom with gradient overlay - SAME LINE */}
                     <div className="recipe-info">
                         <div className="recipe-name-abv-container">
                             <span className="recipe-name">{recipe.name}</span>
@@ -2324,8 +2403,7 @@
             const imageStyle = {
                 backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
+                backgroundPosition: 'center'
             };
             
             return (
@@ -2399,6 +2477,11 @@
                 
                 return matchesSearch && matchesSpirit && matchesVenue;
             });
+            
+            // Check if we're in a filtered view
+            useEffect(() => {
+                setIsFilteredView(filterVenue !== 'All');
+            }, [filterVenue]);
             
             // Group recipes by first letter
             const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
@@ -2494,7 +2577,7 @@
                                 <>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
-                                            {/* REMOVED: Letter header */}
+                                            <h2 className="letter-header">{letter}</h2>
                                             <div className="recipes-grid">
                                                 {groupedRecipes[letter].map(recipe => (
                                                     <RecipeCard 
@@ -2575,7 +2658,7 @@
                                     <ul className="ingredients-list">
                                         {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
-                                                {/* UPDATED: Display measurement first, then ingredient name with 4cm space */}
+                                                {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
                                                 <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
                                                 <span className="ingredient-name">{ingredient.name}</span>
                                             </li>
@@ -2690,7 +2773,7 @@
                                         <ul className="ingredients-list">
                                             {syrup.ingredients.map((ingredient, index) => (
                                                 <li key={index} className="ingredient-item">
-                                                    {/* UPDATED: Display measurement first, then ingredient name with 4cm space */}
+                                                    {/* UPDATED: Display measurement first, then ingredient name with 1.2cm space */}
                                                     <span className="ingredient-amount">{ingredient.amount} {ingredient.unit}</span>
                                                     <span className="ingredient-name">{ingredient.name}</span>
                                                 </li>
@@ -2749,7 +2832,7 @@
             );
         }
 
-        // FIXED: Create/Edit Recipe Component with working image upload
+        // Create/Edit Recipe Component with drag and drop
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -2768,7 +2851,6 @@
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
-            const [isUploading, setIsUploading] = useState(false);
             const settings = getSettings();
             
             const handleInputChange = (e) => {
@@ -2806,54 +2888,26 @@
                 }
             };
             
-            // SIMPLIFIED: Handle image upload - quick fix
             const handleImageUpload = async (file) => {
-                if (!file) return;
-                
-                try {
-                    setIsUploading(true);
-                    
-                    // Quick validation
-                    if (!file.type.startsWith('image/')) {
-                        alert('Please select an image file (JPEG, PNG, etc.)');
-                        setIsUploading(false);
-                        return;
-                    }
-                    
-                    // Convert to base64 for immediate preview
-                    const base64 = await convertImageToBase64(file);
-                    setImagePreview(base64);
-                    
-                    // Try Firebase upload in background
+                if (file) {
                     try {
-                        const fileName = `recipe_${Date.now()}_${file.name}`;
-                        const downloadURL = await uploadImageToFirebase(file, fileName);
-                        setFormData(prev => ({
-                            ...prev,
-                            image_url: downloadURL
-                        }));
-                        console.log('Image uploaded to Firebase:', downloadURL);
-                    } catch (firebaseError) {
-                        console.log('Firebase upload failed, using base64');
-                        // Fallback to base64
+                        const base64 = await convertImageToBase64(file);
                         setFormData(prev => ({
                             ...prev,
                             image_url: base64
                         }));
+                        setImagePreview(base64);
+                    } catch (error) {
+                        console.error('Error uploading image:', error);
+                        alert('Error uploading image. Please try again.');
                     }
-                    
-                } catch (error) {
-                    console.error('Image upload error:', error);
-                    alert('Error uploading image. Please try another image.');
-                } finally {
-                    setIsUploading(false);
                 }
             };
             
-            const handleFileInputChange = (e) => {
+            const handleFileInputChange = async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    handleImageUpload(file);
+                    await handleImageUpload(file);
                 }
             };
             
@@ -2868,18 +2922,13 @@
                 setIsDragging(false);
             };
             
-            const handleDrop = (e) => {
+            const handleDrop = async (e) => {
                 e.preventDefault();
                 setIsDragging(false);
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    const file = files[0];
-                    if (file.type.startsWith('image/')) {
-                        handleImageUpload(file);
-                    } else {
-                        alert('Please drop an image file');
-                    }
+                    await handleImageUpload(files[0]);
                 }
             };
             
@@ -2887,7 +2936,7 @@
                 e.preventDefault();
                 
                 if (!formData.name) {
-                    alert('Please enter a cocktail name');
+                    alert('Please at least enter a cocktail name');
                     return;
                 }
                 
@@ -3000,10 +3049,8 @@
                             </div>
                         </div>
                         
-                        {/* FIXED: Image Upload Section */}
                         <div className="form-group">
                             <label className="form-label">Image</label>
-                            
                             <div 
                                 className={`drop-zone ${isDragging ? 'dragover' : ''}`}
                                 onDragOver={handleDragOver}
@@ -3011,19 +3058,12 @@
                                 onDrop={handleDrop}
                                 onClick={() => document.getElementById('image-upload').click()}
                             >
-                                {isUploading ? (
-                                    <div>Uploading...</div>
-                                ) : imagePreview ? (
-                                    <div>
-                                        <div>✓ Image Ready</div>
-                                        <div style={{fontSize: '0.8rem', color: '#888'}}>Click to change</div>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <div>Click to upload image</div>
-                                        <div style={{fontSize: '0.8rem', color: '#888'}}>or drag & drop</div>
-                                    </div>
-                                )}
+                                <div className="drop-zone-text">
+                                    {imagePreview ? 'Change Image' : 'Upload Image'}
+                                </div>
+                                <div className="drop-zone-subtext">
+                                    Drag & drop or click to upload
+                                </div>
                             </div>
                             
                             <input
@@ -3035,18 +3075,8 @@
                             />
                             
                             {imagePreview && (
-                                <div style={{marginTop: '1rem', textAlign: 'center'}}>
-                                    <img 
-                                        src={imagePreview} 
-                                        alt="Preview" 
-                                        style={{ 
-                                            maxWidth: '150px', 
-                                            maxHeight: '150px',
-                                            borderRadius: '8px',
-                                            border: '2px solid #444'
-                                        }} 
-                                    />
-                                    <br />
+                                <div className="image-upload">
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
@@ -3054,7 +3084,6 @@
                                             setImagePreview('');
                                             setFormData(prev => ({ ...prev, image_url: '' }));
                                         }}
-                                        style={{marginTop: '0.5rem'}}
                                     >
                                         Remove Image
                                     </button>
@@ -3134,12 +3163,8 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button 
-                                type="submit" 
-                                className="button" 
-                                disabled={isUploading}
-                            >
-                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Cocktail' : 'Add Cocktail')}
+                            <button type="submit" className="button">
+                                {isEdit ? 'Update Cocktail' : 'Add Cocktail'}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
@@ -3150,7 +3175,7 @@
             );
         }
 
-        // UPDATED: Create/Edit Syrup Component with cost field and Firebase Storage
+        // UPDATED: Create/Edit Syrup Component with cost field
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 syrup || {
@@ -3167,7 +3192,6 @@
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
-            const [isUploading, setIsUploading] = useState(false);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -3204,55 +3228,18 @@
                 }
             };
             
-            // FIXED: Handle image upload with Firebase Storage for syrups
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
-                        setIsUploading(true);
-                        
-                        // Check file size (limit to 5MB)
-                        if (file.size > 5 * 1024 * 1024) {
-                            alert('Image size should be less than 5MB');
-                            setIsUploading(false);
-                            return;
-                        }
-                        
-                        // Check if it's an image file
-                        if (!file.type.startsWith('image/')) {
-                            alert('Please select an image file (JPEG, PNG, etc.)');
-                            setIsUploading(false);
-                            return;
-                        }
-                        
-                        // Generate unique filename
-                        const fileName = `syrup_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-                        
-                        // Upload to Firebase Storage
-                        const downloadURL = await uploadImageToFirebase(file, fileName);
-                        
+                        const base64 = await convertImageToBase64(file);
                         setFormData(prev => ({
                             ...prev,
-                            image_url: downloadURL
+                            image_url: base64
                         }));
-                        setImagePreview(downloadURL);
-                        
-                        setIsUploading(false);
+                        setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        setIsUploading(false);
-                        
-                        // Fallback to base64 if Firebase upload fails
-                        try {
-                            const base64 = await convertImageToBase64(file);
-                            setFormData(prev => ({
-                                ...prev,
-                                image_url: base64
-                            }));
-                            setImagePreview(base64);
-                        } catch (fallbackError) {
-                            console.error('Fallback upload failed:', fallbackError);
-                            alert('Error uploading image. Please try again with a smaller file.');
-                        }
+                        alert('Error uploading image. Please try again.');
                     }
                 }
             };
@@ -3281,12 +3268,7 @@
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    const file = files[0];
-                    if (file.type.startsWith('image/')) {
-                        await handleImageUpload(file);
-                    } else {
-                        alert('Please drop an image file (JPEG, PNG, etc.)');
-                    }
+                    await handleImageUpload(files[0]);
                 }
             };
             
@@ -3361,67 +3343,34 @@
                             />
                         </div>
                         
-                        {/* FIXED: Image Upload Section for Syrups */}
                         <div className="form-group">
                             <label className="form-label">Image</label>
-                            
-                            {/* Drop Zone */}
                             <div 
                                 className={`drop-zone ${isDragging ? 'dragover' : ''}`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                onClick={() => document.getElementById('syrup-image-upload').click()}
-                                style={{ position: 'relative', minHeight: '120px' }}
+                                onClick={() => document.getElementById('image-upload').click()}
                             >
-                                {isUploading ? (
-                                    <div className="drop-zone-text">
-                                        <div>Uploading Image...</div>
-                                        <div style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Please wait</div>
-                                    </div>
-                                ) : imagePreview ? (
-                                    <div style={{textAlign: 'center'}}>
-                                        <div className="drop-zone-text">Click to Change Image</div>
-                                        <div className="drop-zone-subtext">or drag & drop a new one</div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="drop-zone-text">Upload Image</div>
-                                        <div className="drop-zone-subtext">
-                                            Drag & drop or click to upload
-                                            <br />
-                                            <small>Max 5MB - JPEG, PNG, WebP</small>
-                                        </div>
-                                    </>
-                                )}
+                                <div className="drop-zone-text">
+                                    {imagePreview ? 'Change Image' : 'Upload Image'}
+                                </div>
+                                <div className="drop-zone-subtext">
+                                    Drag & drop or click to upload
+                                </div>
                             </div>
                             
-                            {/* Hidden File Input */}
                             <input
                                 type="file"
-                                id="syrup-image-upload"
+                                id="image-upload"
                                 accept="image/*"
                                 onChange={handleFileInputChange}
                                 style={{display: 'none'}}
                             />
                             
-                            {/* Image Preview */}
                             {imagePreview && (
-                                <div className="image-upload" style={{marginTop: '1rem'}}>
-                                    <div style={{fontSize: '0.9rem', color: '#FFB366', marginBottom: '0.5rem'}}>
-                                        Image Preview:
-                                    </div>
-                                    <img 
-                                        src={imagePreview} 
-                                        alt="Preview" 
-                                        className="image-preview" 
-                                        style={{ 
-                                            maxWidth: '200px', 
-                                            maxHeight: '200px',
-                                            borderRadius: '8px',
-                                            border: '2px solid #444'
-                                        }} 
-                                    />
+                                <div className="image-upload">
+                                    <img src={imagePreview} alt="Preview" className="image-preview" />
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
@@ -3429,17 +3378,9 @@
                                             setImagePreview('');
                                             setFormData(prev => ({ ...prev, image_url: '' }));
                                         }}
-                                        style={{marginTop: '0.5rem'}}
                                     >
                                         Remove Image
                                     </button>
-                                </div>
-                            )}
-                            
-                            {/* Current Image Info */}
-                            {isEdit && formData.image_url && !imagePreview && (
-                                <div style={{marginTop: '0.5rem', fontSize: '0.8rem', color: '#888'}}>
-                                    Current image is set. Upload a new one to replace it.
                                 </div>
                             )}
                         </div>
@@ -3524,20 +3465,15 @@
                                     className="form-input"
                                     name="storage"
                                     value={formData.storage}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleInputChange(e)}
                                     placeholder="e.g., Refrigerate in airtight container"
                                 />
                             </div>
                         </div>
                         
                         <div className="buttons-row">
-                            <button 
-                                type="submit" 
-                                className="button" 
-                                disabled={isUploading}
-                                style={{opacity: isUploading ? 0.6 : 1}}
-                            >
-                                {isUploading ? 'Uploading Image...' : (isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion')}
+                            <button type="submit" className="button">
+                                {isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion'}
                             </button>
                             <button type="button" className="button button-secondary" onClick={onBack}>
                                 Cancel
@@ -3637,7 +3573,7 @@
                                 <>
                                     {sortedLetters.map(letter => (
                                         <div key={letter} id={`letter-${letter}`} className="alphabet-section">
-                                            {/* REMOVED: Letter header */}
+                                            <h2 className="letter-header">{letter}</h2>
                                             <div className="recipes-grid">
                                                 {groupedSyrups[letter].map(syrup => (
                                                     <SyrupCard 
@@ -4396,7 +4332,7 @@
             
             return (
                 <div>
-                    {/* UPDATED: Header with hamburger menu only (no text) */}
+                    {/* UPDATED: Header with all buttons in single row and app title */}
                     <header className="header">
                         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
                             <button 
@@ -4408,7 +4344,8 @@
                                 <span className="menu-line"></span>
                             </button>
                             
-                            {/* REMOVED: App title text after hamburger menu */}
+                            {/* UPDATED: Added app title after hamburger menu */}
+                            <span className="app-title">🐏 Cocktail Codex</span>
                             
                             <div className="nav-user" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto'}}>
                                 <div className="sync-status">
@@ -4427,6 +4364,7 @@
                                     </button>
                                 </div>
                                 
+                                {/* UPDATED: All buttons in single row */}
                                 <div className="nav-buttons" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                     {user.isAdmin && (
                                         <button 
