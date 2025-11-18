@@ -22,6 +22,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -860,6 +861,11 @@
             background: rgba(255, 179, 102, 0.1);
         }
         
+        .drop-zone.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .drop-zone-text {
             color: #FFB366;
             font-size: 1.1rem;
@@ -1346,6 +1352,7 @@
         let app;
         let db;
         let auth;
+        let storage;
         
         try {
             if (typeof firebase === 'undefined') {
@@ -1355,44 +1362,33 @@
             app = firebase.initializeApp(firebaseConfig);
             db = firebase.firestore(app);
             auth = firebase.auth(app);
+            storage = firebase.storage(app);
             console.log('Firebase initialized successfully');
         } catch (error) {
             console.error('Firebase initialization error:', error);
-            // Enhanced fallback: Create mock Firebase functions for offline use
+            // Fallback: Create mock Firebase functions for offline use
             db = {
-                collection: (name) => ({
-                    doc: (id) => ({
-                        set: (data) => {
-                            console.log('Mock Firebase: Setting document', name, id, data);
-                            return Promise.resolve();
-                        },
-                        get: () => {
-                            console.log('Mock Firebase: Getting document', name, id);
-                            return Promise.resolve({ exists: false, data: () => null });
-                        },
-                        onSnapshot: (callback) => {
-                            console.log('Mock Firebase: Setting up listener for', name, id);
-                            // Return unsubscribe function
-                            return () => {};
-                        }
+                collection: () => ({
+                    doc: () => ({
+                        set: () => Promise.resolve(),
+                        get: () => Promise.resolve({ exists: false, data: () => null }),
+                        onSnapshot: () => () => {}
                     })
                 })
             };
             auth = {
-                signInAnonymously: () => {
-                    console.log('Mock Firebase: Signing in anonymously');
-                    return Promise.resolve({ user: { uid: 'offline-user' } });
-                },
-                signOut: () => {
-                    console.log('Mock Firebase: Signing out');
-                    return Promise.resolve();
-                },
+                signInAnonymously: () => Promise.resolve(),
+                signOut: () => Promise.resolve(),
                 onAuthStateChanged: (callback) => {
-                    console.log('Mock Firebase: Setting up auth state listener');
                     callback({ uid: 'offline-user' });
                     return () => {};
-                },
-                currentUser: { uid: 'offline-user' }
+                }
+            };
+            storage = {
+                ref: () => ({
+                    put: () => Promise.resolve(),
+                    getDownloadURL: () => Promise.resolve('')
+                })
             };
         }
         
@@ -1442,6 +1438,24 @@
                     ],
                     instructions: 'Muddle sugar cube with bitters and a splash of water. Add bourbon and ice. Stir gently. Garnish with orange peel.',
                     notes: 'Use high-quality bourbon for best results.'
+                },
+                {
+                    id: '2',
+                    name: 'Margarita',
+                    spirit_type: 'Tequila',
+                    venue: 'Pool Bar',
+                    glass_type: 'Margarita',
+                    abv: 25,
+                    pour_cost: 3.75,
+                    image_url: '',
+                    ingredients: [
+                        { name: 'Tequila', amount: 50, unit: 'ml' },
+                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
+                        { name: 'Triple Sec', amount: 20, unit: 'ml' },
+                        { name: 'Agave Syrup', amount: 10, unit: 'ml' }
+                    ],
+                    instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass. Garnish with lime wheel.',
+                    notes: 'Use fresh lime juice for optimal flavor.'
                 }
             ]);
         };
@@ -1485,39 +1499,62 @@
             return saveToStorage('cocktailSettings', settings);
         };
 
-        // FIXED: Utility function to convert image to base64 with better error handling
-        const convertImageToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                // Check if file is valid
-                if (!file || !file.type.startsWith('image/')) {
-                    reject(new Error('Invalid file type. Please select an image file.'));
-                    return;
-                }
+        // NEW: Upload image to Firebase Storage
+        const uploadImageToFirebase = async (file, path) => {
+            try {
+                console.log('Uploading image to Firebase Storage...');
+                const storageRef = storage.ref();
+                const imageRef = storageRef.child(path);
                 
-                // Check file size (limit to 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    reject(new Error('Image size too large. Please select an image smaller than 5MB.'));
-                    return;
-                }
+                // Upload the file
+                const snapshot = await imageRef.put(file);
                 
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(new Error('Failed to read image file: ' + error));
-            });
+                // Get download URL
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                
+                console.log('Image uploaded successfully:', downloadURL);
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading image to Firebase:', error);
+                throw error;
+            }
         };
 
-        // FIXED: Enhanced Firebase Data Management for Auto Sync with better error handling
-        const syncRecipesWithFirebase = async (recipes) => {
+        // NEW: Delete image from Firebase Storage
+        const deleteImageFromFirebase = async (imageUrl) => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping sync');
-                    return false;
+                if (!imageUrl || !imageUrl.includes('firebasestorage.googleapis.com')) {
+                    return; // Not a Firebase storage URL
                 }
                 
+                // Extract the path from the URL
+                const storageRef = storage.refFromURL(imageUrl);
+                await storageRef.delete();
+                console.log('Image deleted from Firebase Storage');
+            } catch (error) {
+                console.error('Error deleting image from Firebase:', error);
+            }
+        };
+
+        // UPDATED: Enhanced Firebase Data Management with image handling
+        const syncRecipesWithFirebase = async (recipes) => {
+            try {
                 console.log('Syncing recipes to Firebase:', recipes.length, 'recipes');
+                
+                // Create a clean copy without large base64 data for Firestore
+                const recipesForFirestore = recipes.map(recipe => {
+                    const cleanRecipe = { ...recipe };
+                    
+                    // If image is base64 (local), remove it for Firestore sync
+                    if (cleanRecipe.image_url && cleanRecipe.image_url.startsWith('data:')) {
+                        cleanRecipe.image_url = ''; // Remove base64 data for Firestore
+                    }
+                    
+                    return cleanRecipe;
+                });
+                
                 await db.collection('sharedData').doc('recipes').set({
-                    data: recipes,
+                    data: recipesForFirestore,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedBy: auth.currentUser ? auth.currentUser.uid : 'anonymous',
                     version: Date.now()
@@ -1532,14 +1569,22 @@
 
         const syncSyrupsWithFirebase = async (syrups) => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping sync');
-                    return false;
-                }
-                
                 console.log('Syncing syrups to Firebase:', syrups.length, 'syrups');
+                
+                // Create a clean copy without large base64 data for Firestore
+                const syrupsForFirestore = syrups.map(syrup => {
+                    const cleanSyrup = { ...syrup };
+                    
+                    // If image is base64 (local), remove it for Firestore sync
+                    if (cleanSyrup.image_url && cleanSyrup.image_url.startsWith('data:')) {
+                        cleanSyrup.image_url = ''; // Remove base64 data for Firestore
+                    }
+                    
+                    return cleanSyrup;
+                });
+                
                 await db.collection('sharedData').doc('syrups').set({
-                    data: syrups,
+                    data: syrupsForFirestore,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedBy: auth.currentUser ? auth.currentUser.uid : 'anonymous',
                     version: Date.now()
@@ -1554,11 +1599,6 @@
 
         const syncSettingsWithFirebase = async (settings) => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping sync');
-                    return false;
-                }
-                
                 console.log('Syncing settings to Firebase');
                 await db.collection('sharedData').doc('settings').set({
                     data: settings,
@@ -1576,11 +1616,6 @@
 
         const loadRecipesFromFirebase = async () => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping load');
-                    return null;
-                }
-                
                 console.log('Loading recipes from Firebase...');
                 const doc = await db.collection('sharedData').doc('recipes').get();
                 if (doc.exists) {
@@ -1598,11 +1633,6 @@
 
         const loadSyrupsFromFirebase = async () => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping load');
-                    return null;
-                }
-                
                 console.log('Loading syrups from Firebase...');
                 const doc = await db.collection('sharedData').doc('syrups').get();
                 if (doc.exists) {
@@ -1620,11 +1650,6 @@
 
         const loadSettingsFromFirebase = async () => {
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping load');
-                    return null;
-                }
-                
                 console.log('Loading settings from Firebase...');
                 const doc = await db.collection('sharedData').doc('settings').get();
                 if (doc.exists) {
@@ -1640,16 +1665,11 @@
             }
         };
 
-        // FIXED: Set up real-time listeners for data changes with better error handling
+        // Set up real-time listeners for data changes
         const setupFirebaseListeners = (onRecipesUpdate, onSyrupsUpdate, onSettingsUpdate) => {
             console.log('Setting up Firebase real-time listeners...');
             
             try {
-                if (!db) {
-                    console.log('Firebase not available, skipping listener setup');
-                    return () => {};
-                }
-                
                 const recipesUnsubscribe = db.collection('sharedData').doc('recipes')
                     .onSnapshot((doc) => {
                         if (doc.exists) {
@@ -1745,7 +1765,6 @@
             
             text += `INGREDIENTS:\n`;
             recipe.ingredients.forEach(ingredient => {
-                // UPDATED: Display measurement first, then ingredient name
                 text += `• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n`;
             });
             
@@ -1765,7 +1784,6 @@
             if (syrup.ingredients && syrup.ingredients.length > 0) {
                 text += `INGREDIENTS:\n`;
                 syrup.ingredients.forEach(ingredient => {
-                    // UPDATED: Display measurement first, then ingredient name
                     text += `• ${ingredient.amount} ${ingredient.unit} ${ingredient.name}\n`;
                 });
                 text += `\n`;
@@ -1783,7 +1801,6 @@
                 text += `Storage: ${syrup.storage}\n`;
             }
             
-            // ADDED: Include cost if available
             if (syrup.cost) {
                 text += `Cost: $${syrup.cost}\n`;
             }
@@ -1802,17 +1819,14 @@
             }, 0);
         };
 
-        // FIXED: Correct dilution formula - water dilution should be divided by total volume
         const scaleIngredients = (ingredients, scaleFactor, dilutionPercentage = 0) => {
             const scaledIngredients = ingredients.map(ingredient => ({
                 ...ingredient,
                 scaledAmount: Math.round(ingredient.amount * scaleFactor * 10) / 10
             }));
 
-            // Add dilution if specified - FIXED FORMULA
             if (dilutionPercentage > 0) {
                 const totalVolume = calculateTotalVolume(scaledIngredients);
-                // Correct formula: dilutionAmount = (totalVolume * dilutionPercentage) / 100
                 const dilutionAmount = (totalVolume * dilutionPercentage) / 100;
                 
                 if (dilutionAmount > 0) {
@@ -1829,9 +1843,9 @@
             return scaledIngredients;
         };
 
-        // UPDATED: Scale Recipe Modal Component with mobile-friendly layout
+        // UPDATED: Scale Recipe Modal Component
         function ScaleRecipeModal({ recipe, onClose }) {
-            const [scaleType, setScaleType] = useState('servings'); // 'servings' or 'volume'
+            const [scaleType, setScaleType] = useState('servings');
             const [servings, setServings] = useState(1);
             const [totalVolume, setTotalVolume] = useState('');
             const [volumeUnit, setVolumeUnit] = useState('ml');
@@ -1839,25 +1853,22 @@
             const [customDilution, setCustomDilution] = useState('');
             const [scaledIngredients, setScaledIngredients] = useState([]);
             
-            // Calculate scale factor based on current settings
             const calculateScaleFactor = () => {
                 if (scaleType === 'servings') {
                     return servings;
                 } else {
-                    // Calculate based on total volume
                     const originalVolume = calculateTotalVolume(recipe.ingredients);
                     if (originalVolume === 0) return 1;
                     
                     let targetVolume = parseFloat(totalVolume);
                     if (volumeUnit === 'oz') {
-                        targetVolume = targetVolume * 29.5735; // Convert oz to ml
+                        targetVolume = targetVolume * 29.5735;
                     }
                     
                     return targetVolume / originalVolume;
                 }
             };
 
-            // Calculate final volume and servings
             const calculateFinalVolume = () => {
                 const scaleFactor = calculateScaleFactor();
                 const dilution = customDilution ? parseFloat(customDilution) : dilutionPercentage;
@@ -1876,7 +1887,6 @@
                 return finalVolume / originalVolume;
             };
 
-            // Update scaled ingredients when settings change
             useEffect(() => {
                 const scaleFactor = calculateScaleFactor();
                 const dilution = customDilution ? parseFloat(customDilution) : dilutionPercentage;
@@ -1905,7 +1915,6 @@
                 }
             };
 
-            // UPDATED: Close modal when clicking outside
             const handleOverlayClick = (e) => {
                 if (e.target === e.currentTarget) {
                     onClose();
@@ -1923,7 +1932,6 @@
                 
                 let shareText = generateRecipeShareText(scaledRecipe);
                 
-                // Add scaling information
                 let scalingInfo = '';
                 if (scaleType === 'servings') {
                     scalingInfo = `Scaled to ${servings} serving${servings !== 1 ? 's' : ''}`;
@@ -1950,7 +1958,6 @@
                     <div className="modal">
                         <h2 className="modal-title">Scale: {recipe.name}</h2>
 
-                        {/* Step 1: Scale Type Selection */}
                         <div className="scale-step">
                             <h3 className="step-title">Scaling Method</h3>
                             <div className="scale-options">
@@ -1979,7 +1986,6 @@
                             </div>
                         </div>
 
-                        {/* Step 2: Quantity Input */}
                         <div className="scale-step">
                             <h3 className="step-title">Quantity</h3>
                             {scaleType === 'servings' ? (
@@ -2026,7 +2032,6 @@
                             )}
                         </div>
 
-                        {/* Step 3: Dilution Options */}
                         <div className="scale-step">
                             <h3 className="step-title">Dilution (Optional)</h3>
                             
@@ -2069,7 +2074,6 @@
                             </div>
                         </div>
 
-                        {/* Scaled Ingredients Preview */}
                         <div className="scaled-ingredients">
                             <h3 style={{color: '#FFB366', marginBottom: '1rem'}}>
                                 Scaled Ingredients {scaleFactor !== 1 && `(${scaleFactor.toFixed(2)}x)`}
@@ -2077,7 +2081,6 @@
                             {scaledIngredients.map((ingredient, index) => (
                                 <div key={index} className="scaled-ingredient">
                                     <span>
-                                        {/* UPDATED: Display measurement first, then ingredient name */}
                                         <strong>{ingredient.scaledAmount}</strong> {ingredient.unit} {ingredient.name}
                                         {ingredient.isDilution && <span style={{color: '#888', fontSize: '0.8rem'}}> (dilution)</span>}
                                     </span>
@@ -2090,7 +2093,6 @@
                             ))}
                         </div>
                         
-                        {/* UPDATED: Final volume and servings summary - MOVED TO BOTTOM */}
                         <div className="scale-summary">
                             <div className="scale-summary-item">
                                 Final Volume: <span className="scale-summary-value">{finalVolume.toFixed(1)} ml</span>
@@ -2242,7 +2244,7 @@
             );
         }
 
-        // UPDATED: Recipe Card Component with image filling the entire card and name/ABV on same line
+        // UPDATED: Recipe Card Component
         function RecipeCard({ recipe, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : 'none',
@@ -2255,7 +2257,6 @@
                     <div className={`recipe-image ${recipe.image_url ? 'normal' : ''}`} style={imageStyle}>
                         {!recipe.image_url && '🐑'}
                     </div>
-                    {/* UPDATED: Name and ABV positioned at bottom with gradient overlay - SAME LINE */}
                     <div className="recipe-info">
                         <div className="recipe-name-abv-container">
                             <span className="recipe-name">{recipe.name}</span>
@@ -2266,7 +2267,7 @@
             );
         }
 
-        // UPDATED: Syrup Card Component with same layout pattern
+        // UPDATED: Syrup Card Component
         function SyrupCard({ syrup, onClick, isAdmin }) {
             const imageStyle = {
                 backgroundImage: syrup.image_url ? `url(${syrup.image_url})` : 'none',
@@ -2291,7 +2292,7 @@
             );
         }
 
-        // FIXED: Alphabet Navigation Component - RIGHT SIDE VERTICAL
+        // Alphabet Navigation Component
         function AlphabetNav({ letters, onLetterClick }) {
             return (
                 <div className="alphabet-nav">
@@ -2308,7 +2309,7 @@
             );
         }
 
-        // NEW: Filter Navigation Component for All Venues
+        // Filter Navigation Component
         function FilterNavigation({ onBack, onVenueCategory, currentFilter }) {
             return (
                 <div className="filter-navigation">
@@ -2329,7 +2330,7 @@
             );
         }
 
-        // FIXED: Home Page Component with Right-Side Alphabet Navigation
+        // Home Page Component
         function HomePage({ onRecipeClick, onDeleteRecipe, isAdmin, onCreateRecipe, recipes, syncStatus, onManualSync }) {
             const [searchTerm, setSearchTerm] = useState('');
             const [filterSpirit, setFilterSpirit] = useState('All');
@@ -2337,7 +2338,6 @@
             const [isFilteredView, setIsFilteredView] = useState(false);
             const settings = getSettings();
             
-            // Filter recipes based on search and filters
             const filteredRecipes = recipes.filter(recipe => {
                 const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesSpirit = filterSpirit === 'All' || recipe.spirit_type === filterSpirit;
@@ -2346,12 +2346,10 @@
                 return matchesSearch && matchesSpirit && matchesVenue;
             });
             
-            // Check if we're in a filtered view
             useEffect(() => {
                 setIsFilteredView(filterVenue !== 'All');
             }, [filterVenue]);
             
-            // Group recipes by first letter
             const groupedRecipes = filteredRecipes.reduce((groups, recipe) => {
                 const firstLetter = recipe.name.charAt(0).toUpperCase();
                 if (!groups[firstLetter]) {
@@ -2361,10 +2359,8 @@
                 return groups;
             }, {});
             
-            // Sort the groups alphabetically
             const sortedLetters = Object.keys(groupedRecipes).sort();
             
-            // Scroll to letter function
             const scrollToLetter = (letter) => {
                 const element = document.getElementById(`letter-${letter}`);
                 if (element) {
@@ -2372,23 +2368,18 @@
                 }
             };
             
-            // Handle back from filtered view
             const handleBackFromFilter = () => {
                 setFilterVenue('All');
                 setIsFilteredView(false);
             };
             
-            // Handle venue category navigation
             const handleVenueCategory = () => {
-                // This would navigate to a venue category page
-                // For now, just reset the filter
                 setFilterVenue('All');
                 setIsFilteredView(false);
             };
             
             return (
                 <div className="container">
-                    {/* NEW: Filter Navigation for All Venues view */}
                     {isFilteredView && (
                         <FilterNavigation 
                             onBack={handleBackFromFilter}
@@ -2462,7 +2453,6 @@
                             )}
                         </div>
                         
-                        {/* FIXED: Right-side Alphabet Navigation - Always visible when there are letters */}
                         {sortedLetters.length > 0 && (
                             <AlphabetNav letters={sortedLetters} onLetterClick={scrollToLetter} />
                         )}
@@ -2471,7 +2461,7 @@
             );
         }
 
-        // UPDATED: View Recipe Component with back arrow and name side by side - no table layout
+        // UPDATED: View Recipe Component
         function ViewRecipePage({ recipe, onBack, isAdmin, onDeleteRecipe, onEditRecipe }) {
             const [showScaleModal, setShowScaleModal] = useState(false);
             const backgroundStyle = {
@@ -2485,7 +2475,6 @@
             
             return (
                 <div className="container">
-                    {/* UPDATED: Back arrow and name side by side - smaller */}
                     <div className="recipe-header-container">
                         <button className="back-arrow" onClick={onBack}>
                             ←
@@ -2494,7 +2483,6 @@
                     </div>
                     
                     <div className="recipe-view">
-                        {/* UPDATED: Background picture with reduced blur to be more visible */}
                         {recipe.image_url && (
                             <div className="recipe-background" style={backgroundStyle}></div>
                         )}
@@ -2510,14 +2498,12 @@
                                 </div>
                             </div>
                             
-                            {/* UPDATED: Remove table layout, use flex column */}
                             <div className="recipe-details-page">
                                 <div>
                                     <h3 style={{color: '#FFB366', marginBottom: '1rem', fontSize: '1.1rem'}}>Ingredients</h3>
                                     <ul className="ingredients-list">
                                         {recipe.ingredients.map((ingredient, index) => (
                                             <li key={index} className="ingredient-item">
-                                                {/* UPDATED: Display measurement first, then ingredient name */}
                                                 <span>{ingredient.amount} {ingredient.unit} {ingredient.name}</span>
                                             </li>
                                         ))}
@@ -2578,7 +2564,7 @@
             );
         }
 
-        // View Syrup Component with Scale and Share (with visible background)
+        // View Syrup Component
         function ViewSyrupPage({ syrup, onBack, isAdmin, onDeleteSyrup, onEditSyrup }) {
             const [showScaleModal, setShowScaleModal] = useState(false);
             const backgroundStyle = {
@@ -2592,7 +2578,6 @@
             
             return (
                 <div className="container">
-                    {/* UPDATED: Back arrow and name side by side */}
                     <div className="recipe-header-container">
                         <button className="back-arrow" onClick={onBack}>
                             ←
@@ -2601,7 +2586,6 @@
                     </div>
                     
                     <div className="recipe-view">
-                        {/* UPDATED: Background picture with reduced blur to be more visible */}
                         {syrup.image_url && (
                             <div className="recipe-background" style={backgroundStyle}></div>
                         )}
@@ -2616,7 +2600,6 @@
                                     {syrup.storage && (
                                         <div className="meta-item">Store: {syrup.storage}</div>
                                     )}
-                                    {/* ADDED: Cost display for syrups */}
                                     {syrup.cost && (
                                         <div className="meta-item">Cost: ${syrup.cost}</div>
                                     )}
@@ -2630,7 +2613,6 @@
                                         <ul className="ingredients-list">
                                             {syrup.ingredients.map((ingredient, index) => (
                                                 <li key={index} className="ingredient-item">
-                                                    {/* UPDATED: Display measurement first, then ingredient name */}
                                                     <span>{ingredient.amount} {ingredient.unit} {ingredient.name}</span>
                                                 </li>
                                             ))}
@@ -2687,7 +2669,7 @@
             );
         }
 
-        // FIXED: Create/Edit Recipe Component with drag and drop and proper image handling
+        // UPDATED: Create/Edit Recipe Component with Firebase Storage
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -2706,15 +2688,8 @@
             
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
+            const [isUploading, setIsUploading] = useState(false);
             const settings = getSettings();
-            
-            // FIXED: Initialize form data when recipe prop changes (for editing)
-            useEffect(() => {
-                if (recipe) {
-                    setFormData(recipe);
-                    setImagePreview(recipe.image_url || '');
-                }
-            }, [recipe]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -2751,19 +2726,37 @@
                 }
             };
             
-            // FIXED: Enhanced image upload with better error handling
+            // UPDATED: Handle image upload with Firebase Storage
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
-                        const base64 = await convertImageToBase64(file);
+                        setIsUploading(true);
+                        
+                        // Create a local preview using object URL instead of base64
+                        const objectUrl = URL.createObjectURL(file);
+                        setImagePreview(objectUrl);
+                        
+                        // Upload to Firebase Storage
+                        const timestamp = Date.now();
+                        const fileName = `recipes/${timestamp}_${file.name}`;
+                        const downloadURL = await uploadImageToFirebase(file, fileName);
+                        
+                        // Update form data with Firebase Storage URL
                         setFormData(prev => ({
                             ...prev,
-                            image_url: base64
+                            image_url: downloadURL
                         }));
-                        setImagePreview(base64);
+                        
+                        // Clean up object URL
+                        URL.revokeObjectURL(objectUrl);
+                        
+                        console.log('Image uploaded to Firebase Storage:', downloadURL);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert(error.message || 'Error uploading image. Please try again.');
+                        alert('Error uploading image. Please try again.');
+                        setImagePreview('');
+                    } finally {
+                        setIsUploading(false);
                     }
                 }
             };
@@ -2775,7 +2768,6 @@
                 }
             };
             
-            // Drag and drop handlers
             const handleDragOver = (e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -2794,6 +2786,21 @@
                 if (files.length > 0) {
                     await handleImageUpload(files[0]);
                 }
+            };
+            
+            // UPDATED: Handle image removal
+            const handleRemoveImage = async () => {
+                // If it's a Firebase Storage URL, delete it from storage
+                if (formData.image_url && formData.image_url.includes('firebasestorage.googleapis.com')) {
+                    try {
+                        await deleteImageFromFirebase(formData.image_url);
+                    } catch (error) {
+                        console.error('Error deleting image from storage:', error);
+                    }
+                }
+                
+                setImagePreview('');
+                setFormData(prev => ({ ...prev, image_url: '' }));
             };
             
             const handleSubmit = (e) => {
@@ -2914,19 +2921,20 @@
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Image</label>
+                            <label className="form-label">Image {isUploading && '(Uploading...)'}</label>
                             <div 
-                                className={`drop-zone ${isDragging ? 'dragover' : ''}`}
+                                className={`drop-zone ${isDragging ? 'dragover' : ''} ${isUploading ? 'disabled' : ''}`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                onClick={() => document.getElementById('image-upload').click()}
+                                onClick={() => !isUploading && document.getElementById('image-upload').click()}
+                                style={isUploading ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                             >
                                 <div className="drop-zone-text">
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </div>
                                 <div className="drop-zone-subtext">
-                                    Drag & drop or click to upload
+                                    {isUploading ? 'Uploading...' : 'Drag & drop or click to upload'}
                                 </div>
                             </div>
                             
@@ -2936,6 +2944,7 @@
                                 accept="image/*"
                                 onChange={handleFileInputChange}
                                 style={{display: 'none'}}
+                                disabled={isUploading}
                             />
                             
                             {imagePreview && (
@@ -2944,10 +2953,8 @@
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
-                                        onClick={() => {
-                                            setImagePreview('');
-                                            setFormData(prev => ({ ...prev, image_url: '' }));
-                                        }}
+                                        onClick={handleRemoveImage}
+                                        disabled={isUploading}
                                     >
                                         Remove Image
                                     </button>
@@ -3027,10 +3034,10 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
-                                {isEdit ? 'Update Cocktail' : 'Add Cocktail'}
+                            <button type="submit" className="button" disabled={isUploading}>
+                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Cocktail' : 'Add Cocktail')}
                             </button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>
+                            <button type="button" className="button button-secondary" onClick={onBack} disabled={isUploading}>
                                 Cancel
                             </button>
                         </div>
@@ -3039,7 +3046,7 @@
             );
         }
 
-        // FIXED: Create/Edit Syrup Component with cost field and proper image handling
+        // UPDATED: Create/Edit Syrup Component with Firebase Storage
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 syrup || {
@@ -3049,21 +3056,14 @@
                     instructions: '',
                     shelf_life: '',
                     storage: '',
-                    cost: '', // ADDED: Cost field
+                    cost: '',
                     image_url: ''
                 }
             );
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
-            
-            // FIXED: Initialize form data when syrup prop changes (for editing)
-            useEffect(() => {
-                if (syrup) {
-                    setFormData(syrup);
-                    setImagePreview(syrup.image_url || '');
-                }
-            }, [syrup]);
+            const [isUploading, setIsUploading] = useState(false);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -3100,19 +3100,37 @@
                 }
             };
             
-            // FIXED: Enhanced image upload with better error handling
+            // UPDATED: Handle image upload with Firebase Storage for syrups
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
-                        const base64 = await convertImageToBase64(file);
+                        setIsUploading(true);
+                        
+                        // Create a local preview using object URL instead of base64
+                        const objectUrl = URL.createObjectURL(file);
+                        setImagePreview(objectUrl);
+                        
+                        // Upload to Firebase Storage
+                        const timestamp = Date.now();
+                        const fileName = `syrups/${timestamp}_${file.name}`;
+                        const downloadURL = await uploadImageToFirebase(file, fileName);
+                        
+                        // Update form data with Firebase Storage URL
                         setFormData(prev => ({
                             ...prev,
-                            image_url: base64
+                            image_url: downloadURL
                         }));
-                        setImagePreview(base64);
+                        
+                        // Clean up object URL
+                        URL.revokeObjectURL(objectUrl);
+                        
+                        console.log('Syrup image uploaded to Firebase Storage:', downloadURL);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert(error.message || 'Error uploading image. Please try again.');
+                        alert('Error uploading image. Please try again.');
+                        setImagePreview('');
+                    } finally {
+                        setIsUploading(false);
                     }
                 }
             };
@@ -3124,7 +3142,6 @@
                 }
             };
             
-            // Drag and drop handlers
             const handleDragOver = (e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -3145,6 +3162,21 @@
                 }
             };
             
+            // UPDATED: Handle image removal for syrups
+            const handleRemoveImage = async () => {
+                // If it's a Firebase Storage URL, delete it from storage
+                if (formData.image_url && formData.image_url.includes('firebasestorage.googleapis.com')) {
+                    try {
+                        await deleteImageFromFirebase(formData.image_url);
+                    } catch (error) {
+                        console.error('Error deleting image from storage:', error);
+                    }
+                }
+                
+                setImagePreview('');
+                setFormData(prev => ({ ...prev, image_url: '' }));
+            };
+            
             const handleSubmit = (e) => {
                 e.preventDefault();
                 
@@ -3156,7 +3188,7 @@
                 const syrupData = {
                     ...formData,
                     id: isEdit ? formData.id : Date.now().toString(),
-                    cost: parseFloat(formData.cost) || 0, // ADDED: Parse cost as float
+                    cost: parseFloat(formData.cost) || 0,
                     createdBy: isEdit ? formData.createdBy : 'user',
                     createdAt: isEdit ? formData.createdAt : new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -3202,7 +3234,6 @@
                             </select>
                         </div>
                         
-                        {/* ADDED: Cost input field for syrups */}
                         <div className="form-group">
                             <label className="form-label">Cost ($)</label>
                             <input
@@ -3217,19 +3248,20 @@
                         </div>
                         
                         <div className="form-group">
-                            <label className="form-label">Image</label>
+                            <label className="form-label">Image {isUploading && '(Uploading...)'}</label>
                             <div 
-                                className={`drop-zone ${isDragging ? 'dragover' : ''}`}
+                                className={`drop-zone ${isDragging ? 'dragover' : ''} ${isUploading ? 'disabled' : ''}`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                onClick={() => document.getElementById('image-upload').click()}
+                                onClick={() => !isUploading && document.getElementById('image-upload').click()}
+                                style={isUploading ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                             >
                                 <div className="drop-zone-text">
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </div>
                                 <div className="drop-zone-subtext">
-                                    Drag & drop or click to upload
+                                    {isUploading ? 'Uploading...' : 'Drag & drop or click to upload'}
                                 </div>
                             </div>
                             
@@ -3239,6 +3271,7 @@
                                 accept="image/*"
                                 onChange={handleFileInputChange}
                                 style={{display: 'none'}}
+                                disabled={isUploading}
                             />
                             
                             {imagePreview && (
@@ -3247,10 +3280,8 @@
                                     <button 
                                         type="button" 
                                         className="button button-secondary"
-                                        onClick={() => {
-                                            setImagePreview('');
-                                            setFormData(prev => ({ ...prev, image_url: '' }));
-                                        }}
+                                        onClick={handleRemoveImage}
+                                        disabled={isUploading}
                                     >
                                         Remove Image
                                     </button>
@@ -3345,10 +3376,10 @@
                         </div>
                         
                         <div className="buttons-row">
-                            <button type="submit" className="button">
-                                {isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion'}
+                            <button type="submit" className="button" disabled={isUploading}>
+                                {isUploading ? 'Uploading...' : (isEdit ? 'Update Syrup/Infusion' : 'Add Syrup/Infusion')}
                             </button>
-                            <button type="button" className="button button-secondary" onClick={onBack}>
+                            <button type="button" className="button button-secondary" onClick={onBack} disabled={isUploading}>
                                 Cancel
                             </button>
                         </div>
@@ -3362,7 +3393,6 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [filterType, setFilterType] = useState('All');
             
-            // Filter syrups based on search and filters
             const filteredSyrups = syrups.filter(syrup => {
                 const matchesSearch = syrup.name.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesType = filterType === 'All' || syrup.type === filterType;
@@ -3370,7 +3400,6 @@
                 return matchesSearch && matchesType;
             });
             
-            // Group syrups by first letter
             const groupedSyrups = filteredSyrups.reduce((groups, syrup) => {
                 const firstLetter = syrup.name.charAt(0).toUpperCase();
                 if (!groups[firstLetter]) {
@@ -3380,10 +3409,8 @@
                 return groups;
             }, {});
             
-            // Sort the groups alphabetically
             const sortedLetters = Object.keys(groupedSyrups).sort();
             
-            // Scroll to letter function
             const scrollToLetter = (letter) => {
                 const element = document.getElementById(`letter-${letter}`);
                 if (element) {
@@ -3463,7 +3490,6 @@
                             )}
                         </div>
                         
-                        {/* Right-side Alphabet Navigation */}
                         {sortedLetters.length > 0 && (
                             <AlphabetNav letters={sortedLetters} onLetterClick={scrollToLetter} />
                         )}
@@ -3472,7 +3498,7 @@
             );
         }
 
-        // UPDATED: Settings Page Component with inline add fields
+        // Settings Page Component
         function SettingsPage({ onBack, settings, onSaveSettings, isAdmin }) {
             const [formData, setFormData] = useState(settings);
             const [dragIndex, setDragIndex] = useState(null);
@@ -3489,7 +3515,6 @@
                 }));
             };
             
-            // UPDATED: Add items with inline input fields
             const addSpiritType = () => {
                 if (newSpirit && newSpirit.trim()) {
                     setFormData(prev => ({
@@ -3579,7 +3604,6 @@
                         <div className="settings-section">
                             <h2 className="settings-title">Spirit Types</h2>
                             
-                            {/* UPDATED: Inline add form for spirit types */}
                             <div className="add-item-form">
                                 <input
                                     type="text"
@@ -3632,7 +3656,6 @@
                         <div className="settings-section">
                             <h2 className="settings-title">Glass Types</h2>
                             
-                            {/* UPDATED: Inline add form for glass types */}
                             <div className="add-item-form">
                                 <input
                                     type="text"
@@ -3685,7 +3708,6 @@
                         <div className="settings-section">
                             <h2 className="settings-title">Venues</h2>
                             
-                            {/* UPDATED: Inline add form for venues */}
                             <div className="add-item-form">
                                 <input
                                     type="text"
@@ -3825,7 +3847,7 @@
             );
         }
 
-        // FIXED: Main App Component with enhanced Firebase sync and data management
+        // Main App Component
         function App() {
             const { user, firebaseUser, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
@@ -3837,14 +3859,13 @@
             const [recipes, setRecipes] = useState([]);
             const [syrups, setSyrups] = useState([]);
             const [settings, setSettings] = useState(getSettings());
-            const [syncStatus, setSyncStatus] = useState('synced'); // 'synced', 'syncing', 'error'
+            const [syncStatus, setSyncStatus] = useState('synced');
             
             // Load initial data
             useEffect(() => {
                 const loadInitialData = async () => {
                     console.log('Loading initial data...');
                     
-                    // Load from localStorage first for immediate display
                     const localRecipes = getRecipes();
                     const localSyrups = getSyrups();
                     const localSettings = getSettings();
@@ -3858,7 +3879,6 @@
                         syrups: localSyrups.length
                     });
                     
-                    // Then try to load from Firebase
                     try {
                         setSyncStatus('syncing');
                         
@@ -3868,7 +3888,6 @@
                             loadSettingsFromFirebase()
                         ]);
                         
-                        // Use Firebase data if available and newer
                         if (firebaseRecipes !== null) {
                             setRecipes(firebaseRecipes);
                             saveRecipes(firebaseRecipes);
@@ -3975,24 +3994,21 @@
                 setCurrentPage('edit-syrup');
             };
             
-            // FIXED: Data management handlers with better error handling
+            // UPDATED: Data management handlers with image cleanup
             const handleSaveRecipe = async (recipeData) => {
                 let updatedRecipes;
                 
                 if (editingRecipe) {
-                    // Update existing recipe
                     updatedRecipes = recipes.map(recipe => 
                         recipe.id === recipeData.id ? recipeData : recipe
                     );
                 } else {
-                    // Add new recipe
                     updatedRecipes = [...recipes, recipeData];
                 }
                 
                 setRecipes(updatedRecipes);
                 saveRecipes(updatedRecipes);
                 
-                // Auto-sync to Firebase
                 try {
                     await syncRecipesWithFirebase(updatedRecipes);
                     console.log('Recipe saved and synced to Firebase');
@@ -4007,19 +4023,16 @@
                 let updatedSyrups;
                 
                 if (editingSyrup) {
-                    // Update existing syrup
                     updatedSyrups = syrups.map(syrup => 
                         syrup.id === syrupData.id ? syrupData : syrup
                     );
                 } else {
-                    // Add new syrup
                     updatedSyrups = [...syrups, syrupData];
                 }
                 
                 setSyrups(updatedSyrups);
                 saveSyrups(updatedSyrups);
                 
-                // Auto-sync to Firebase
                 try {
                     await syncSyrupsWithFirebase(updatedSyrups);
                     console.log('Syrup saved and synced to Firebase');
@@ -4030,13 +4043,22 @@
                 navigateTo('syrups');
             };
             
-            // FIXED: Remove confirmation dialog for deletions
+            // UPDATED: Delete handlers with image cleanup
             const handleDeleteRecipe = async (recipeId) => {
+                const recipeToDelete = recipes.find(recipe => recipe.id === recipeId);
+                
+                if (recipeToDelete && recipeToDelete.image_url && recipeToDelete.image_url.includes('firebasestorage.googleapis.com')) {
+                    try {
+                        await deleteImageFromFirebase(recipeToDelete.image_url);
+                    } catch (error) {
+                        console.error('Error deleting image from storage:', error);
+                    }
+                }
+                
                 const updatedRecipes = recipes.filter(recipe => recipe.id !== recipeId);
                 setRecipes(updatedRecipes);
                 saveRecipes(updatedRecipes);
                 
-                // Auto-sync to Firebase
                 try {
                     await syncRecipesWithFirebase(updatedRecipes);
                     console.log('Recipe deleted and synced to Firebase');
@@ -4044,17 +4066,24 @@
                     console.error('Error syncing after delete to Firebase:', error);
                 }
                 
-                // Automatically return to main page after deleting
                 navigateTo('home');
             };
             
-            // FIXED: Remove confirmation dialog for deletions
             const handleDeleteSyrup = async (syrupId) => {
+                const syrupToDelete = syrups.find(syrup => syrup.id === syrupId);
+                
+                if (syrupToDelete && syrupToDelete.image_url && syrupToDelete.image_url.includes('firebasestorage.googleapis.com')) {
+                    try {
+                        await deleteImageFromFirebase(syrupToDelete.image_url);
+                    } catch (error) {
+                        console.error('Error deleting image from storage:', error);
+                    }
+                }
+                
                 const updatedSyrups = syrups.filter(syrup => syrup.id !== syrupId);
                 setSyrups(updatedSyrups);
                 saveSyrups(updatedSyrups);
                 
-                // Auto-sync to Firebase
                 try {
                     await syncSyrupsWithFirebase(updatedSyrups);
                     console.log('Syrup deleted and synced to Firebase');
@@ -4062,7 +4091,6 @@
                     console.error('Error syncing after delete to Firebase:', error);
                 }
                 
-                // Automatically return to syrups page after deleting
                 navigateTo('syrups');
             };
             
@@ -4070,7 +4098,6 @@
                 setSettings(newSettings);
                 saveSettings(newSettings);
                 
-                // Auto-sync to Firebase
                 try {
                     await syncSettingsWithFirebase(newSettings);
                     console.log('Settings saved and synced to Firebase');
@@ -4205,7 +4232,6 @@
             
             return (
                 <div>
-                    {/* UPDATED: Header with all buttons in single row */}
                     <header className="header">
                         <div style={{display: 'flex', alignItems: 'center', gap: '1rem', width: '100%'}}>
                             <button 
@@ -4234,7 +4260,6 @@
                                     </button>
                                 </div>
                                 
-                                {/* UPDATED: All buttons in single row */}
                                 <div className="nav-buttons" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                     {user.isAdmin && (
                                         <button 
@@ -4264,8 +4289,7 @@
                     
                     <footer className="footer">
                         <p>Cocktail Codex © 2025 </p>
-                       
-<a href="https://www.instagram.com/suraj.gg87/" target="_blank">@suraj.gg87</a>
+                        <a href="https://www.instagram.com/suraj.gg87/" target="_blank">@suraj.gg87</a>
                     </footer>
                 </div>
             );
