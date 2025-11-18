@@ -1358,23 +1358,41 @@
             console.log('Firebase initialized successfully');
         } catch (error) {
             console.error('Firebase initialization error:', error);
-            // Fallback: Create mock Firebase functions for offline use
+            // Enhanced fallback: Create mock Firebase functions for offline use
             db = {
-                collection: () => ({
-                    doc: () => ({
-                        set: () => Promise.resolve(),
-                        get: () => Promise.resolve({ exists: false, data: () => null }),
-                        onSnapshot: () => () => {}
+                collection: (name) => ({
+                    doc: (id) => ({
+                        set: (data) => {
+                            console.log('Mock Firebase: Setting document', name, id, data);
+                            return Promise.resolve();
+                        },
+                        get: () => {
+                            console.log('Mock Firebase: Getting document', name, id);
+                            return Promise.resolve({ exists: false, data: () => null });
+                        },
+                        onSnapshot: (callback) => {
+                            console.log('Mock Firebase: Setting up listener for', name, id);
+                            // Return unsubscribe function
+                            return () => {};
+                        }
                     })
                 })
             };
             auth = {
-                signInAnonymously: () => Promise.resolve(),
-                signOut: () => Promise.resolve(),
+                signInAnonymously: () => {
+                    console.log('Mock Firebase: Signing in anonymously');
+                    return Promise.resolve({ user: { uid: 'offline-user' } });
+                },
+                signOut: () => {
+                    console.log('Mock Firebase: Signing out');
+                    return Promise.resolve();
+                },
                 onAuthStateChanged: (callback) => {
+                    console.log('Mock Firebase: Setting up auth state listener');
                     callback({ uid: 'offline-user' });
                     return () => {};
-                }
+                },
+                currentUser: { uid: 'offline-user' }
             };
         }
         
@@ -1424,131 +1442,6 @@
                     ],
                     instructions: 'Muddle sugar cube with bitters and a splash of water. Add bourbon and ice. Stir gently. Garnish with orange peel.',
                     notes: 'Use high-quality bourbon for best results.'
-                },
-                {
-                    id: '2',
-                    name: 'Margarita',
-                    spirit_type: 'Tequila',
-                    venue: 'Pool Bar',
-                    glass_type: 'Margarita',
-                    abv: 25,
-                    pour_cost: 3.75,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Tequila', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Triple Sec', amount: 20, unit: 'ml' },
-                        { name: 'Agave Syrup', amount: 10, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into salt-rimmed glass. Garnish with lime wheel.',
-                    notes: 'Use fresh lime juice for optimal flavor.'
-                },
-                {
-                    id: '3',
-                    name: 'Negroni',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 28,
-                    pour_cost: 5.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 30, unit: 'ml' },
-                        { name: 'Campari', amount: 30, unit: 'ml' },
-                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
-                        { name: 'Orange Peel', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir all ingredients with ice. Strain into glass. Garnish with orange peel.',
-                    notes: 'Equal parts make this cocktail perfectly balanced.'
-                },
-                {
-                    id: '4',
-                    name: 'Mojito',
-                    spirit_type: 'Rum',
-                    venue: 'Pool Bar',
-                    glass_type: 'Highball',
-                    abv: 15,
-                    pour_cost: 3.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'White Rum', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Mint Leaves', amount: 10, unit: 'leaves' },
-                        { name: 'Sugar', amount: 2, unit: 'tsp' },
-                        { name: 'Soda Water', amount: 100, unit: 'ml' }
-                    ],
-                    instructions: 'Muddle mint leaves with sugar and lime juice. Add rum and ice. Top with soda water. Garnish with mint sprig.',
-                    notes: 'Use fresh mint for best aroma.'
-                },
-                {
-                    id: '5',
-                    name: 'Martini',
-                    spirit_type: 'Gin',
-                    venue: 'Main Bar',
-                    glass_type: 'Martini',
-                    abv: 30,
-                    pour_cost: 4.75,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Gin', amount: 60, unit: 'ml' },
-                        { name: 'Dry Vermouth', amount: 10, unit: 'ml' },
-                        { name: 'Olive', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir gin and vermouth with ice. Strain into chilled martini glass. Garnish with olive.',
-                    notes: 'Shake for a colder, more diluted drink.'
-                },
-                {
-                    id: '6',
-                    name: 'Daiquiri',
-                    spirit_type: 'Rum',
-                    venue: 'Pool Bar',
-                    glass_type: 'Coupe',
-                    abv: 20,
-                    pour_cost: 3.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'White Rum', amount: 50, unit: 'ml' },
-                        { name: 'Lime Juice', amount: 25, unit: 'ml' },
-                        { name: 'Simple Syrup', amount: 20, unit: 'ml' }
-                    ],
-                    instructions: 'Shake all ingredients with ice. Strain into chilled coupe glass.',
-                    notes: 'Use fresh lime juice for best results.'
-                },
-                {
-                    id: '7',
-                    name: 'Whiskey Sour',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Old Fashioned',
-                    abv: 22,
-                    pour_cost: 4.25,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Bourbon', amount: 60, unit: 'ml' },
-                        { name: 'Lemon Juice', amount: 25, unit: 'ml' },
-                        { name: 'Simple Syrup', amount: 20, unit: 'ml' },
-                        { name: 'Egg White', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Dry shake all ingredients without ice. Add ice and shake again. Strain into glass.',
-                    notes: 'Dry shaking creates better foam from the egg white.'
-                },
-                {
-                    id: '8',
-                    name: 'Manhattan',
-                    spirit_type: 'Whiskey',
-                    venue: 'Main Bar',
-                    glass_type: 'Coupe',
-                    abv: 32,
-                    pour_cost: 5.50,
-                    image_url: '',
-                    ingredients: [
-                        { name: 'Rye Whiskey', amount: 60, unit: 'ml' },
-                        { name: 'Sweet Vermouth', amount: 30, unit: 'ml' },
-                        { name: 'Angostura Bitters', amount: 2, unit: 'dash' },
-                        { name: 'Cherry', amount: 1, unit: 'piece' }
-                    ],
-                    instructions: 'Stir all ingredients with ice. Strain into chilled coupe glass. Garnish with cherry.',
-                    notes: 'Rye whiskey provides a spicier flavor profile.'
                 }
             ]);
         };
@@ -1572,21 +1465,6 @@
                     storage: 'Airtight container in refrigerator',
                     cost: 0.50,
                     image_url: ''
-                },
-                {
-                    id: '2',
-                    name: 'Ginger Syrup',
-                    type: 'Syrup',
-                    ingredients: [
-                        { name: 'Fresh Ginger', amount: 100, unit: 'gram' },
-                        { name: 'Sugar', amount: 1, unit: 'cup' },
-                        { name: 'Water', amount: 1, unit: 'cup' }
-                    ],
-                    instructions: 'Peel and slice ginger. Simmer with water and sugar for 15 minutes. Strain and cool.',
-                    shelf_life: '2 weeks refrigerated',
-                    storage: 'Airtight container in refrigerator',
-                    cost: 1.25,
-                    image_url: ''
                 }
             ]);
         };
@@ -1607,19 +1485,36 @@
             return saveToStorage('cocktailSettings', settings);
         };
 
-        // Utility function to convert image to base64
+        // FIXED: Utility function to convert image to base64 with better error handling
         const convertImageToBase64 = (file) => {
             return new Promise((resolve, reject) => {
+                // Check if file is valid
+                if (!file || !file.type.startsWith('image/')) {
+                    reject(new Error('Invalid file type. Please select an image file.'));
+                    return;
+                }
+                
+                // Check file size (limit to 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    reject(new Error('Image size too large. Please select an image smaller than 5MB.'));
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+                reader.onerror = error => reject(new Error('Failed to read image file: ' + error));
             });
         };
 
-        // Enhanced Firebase Data Management for Auto Sync
+        // FIXED: Enhanced Firebase Data Management for Auto Sync with better error handling
         const syncRecipesWithFirebase = async (recipes) => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping sync');
+                    return false;
+                }
+                
                 console.log('Syncing recipes to Firebase:', recipes.length, 'recipes');
                 await db.collection('sharedData').doc('recipes').set({
                     data: recipes,
@@ -1637,6 +1532,11 @@
 
         const syncSyrupsWithFirebase = async (syrups) => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping sync');
+                    return false;
+                }
+                
                 console.log('Syncing syrups to Firebase:', syrups.length, 'syrups');
                 await db.collection('sharedData').doc('syrups').set({
                     data: syrups,
@@ -1654,6 +1554,11 @@
 
         const syncSettingsWithFirebase = async (settings) => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping sync');
+                    return false;
+                }
+                
                 console.log('Syncing settings to Firebase');
                 await db.collection('sharedData').doc('settings').set({
                     data: settings,
@@ -1671,6 +1576,11 @@
 
         const loadRecipesFromFirebase = async () => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping load');
+                    return null;
+                }
+                
                 console.log('Loading recipes from Firebase...');
                 const doc = await db.collection('sharedData').doc('recipes').get();
                 if (doc.exists) {
@@ -1688,6 +1598,11 @@
 
         const loadSyrupsFromFirebase = async () => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping load');
+                    return null;
+                }
+                
                 console.log('Loading syrups from Firebase...');
                 const doc = await db.collection('sharedData').doc('syrups').get();
                 if (doc.exists) {
@@ -1705,6 +1620,11 @@
 
         const loadSettingsFromFirebase = async () => {
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping load');
+                    return null;
+                }
+                
                 console.log('Loading settings from Firebase...');
                 const doc = await db.collection('sharedData').doc('settings').get();
                 if (doc.exists) {
@@ -1720,11 +1640,16 @@
             }
         };
 
-        // Set up real-time listeners for data changes
+        // FIXED: Set up real-time listeners for data changes with better error handling
         const setupFirebaseListeners = (onRecipesUpdate, onSyrupsUpdate, onSettingsUpdate) => {
             console.log('Setting up Firebase real-time listeners...');
             
             try {
+                if (!db) {
+                    console.log('Firebase not available, skipping listener setup');
+                    return () => {};
+                }
+                
                 const recipesUnsubscribe = db.collection('sharedData').doc('recipes')
                     .onSnapshot((doc) => {
                         if (doc.exists) {
@@ -2762,7 +2687,7 @@
             );
         }
 
-        // Create/Edit Recipe Component with drag and drop
+        // FIXED: Create/Edit Recipe Component with drag and drop and proper image handling
         function CreateEditRecipePage({ recipe, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 recipe || {
@@ -2782,6 +2707,14 @@
             const [imagePreview, setImagePreview] = useState(recipe?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
             const settings = getSettings();
+            
+            // FIXED: Initialize form data when recipe prop changes (for editing)
+            useEffect(() => {
+                if (recipe) {
+                    setFormData(recipe);
+                    setImagePreview(recipe.image_url || '');
+                }
+            }, [recipe]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -2818,6 +2751,7 @@
                 }
             };
             
+            // FIXED: Enhanced image upload with better error handling
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
@@ -2829,7 +2763,7 @@
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert('Error uploading image. Please try again.');
+                        alert(error.message || 'Error uploading image. Please try again.');
                     }
                 }
             };
@@ -3105,7 +3039,7 @@
             );
         }
 
-        // UPDATED: Create/Edit Syrup Component with cost field
+        // FIXED: Create/Edit Syrup Component with cost field and proper image handling
         function CreateEditSyrupPage({ syrup, onBack, onSave, isEdit = false }) {
             const [formData, setFormData] = useState(
                 syrup || {
@@ -3122,6 +3056,14 @@
             
             const [imagePreview, setImagePreview] = useState(syrup?.image_url || '');
             const [isDragging, setIsDragging] = useState(false);
+            
+            // FIXED: Initialize form data when syrup prop changes (for editing)
+            useEffect(() => {
+                if (syrup) {
+                    setFormData(syrup);
+                    setImagePreview(syrup.image_url || '');
+                }
+            }, [syrup]);
             
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
@@ -3158,6 +3100,7 @@
                 }
             };
             
+            // FIXED: Enhanced image upload with better error handling
             const handleImageUpload = async (file) => {
                 if (file) {
                     try {
@@ -3169,7 +3112,7 @@
                         setImagePreview(base64);
                     } catch (error) {
                         console.error('Error uploading image:', error);
-                        alert('Error uploading image. Please try again.');
+                        alert(error.message || 'Error uploading image. Please try again.');
                     }
                 }
             };
@@ -3882,7 +3825,7 @@
             );
         }
 
-        // Main App Component
+        // FIXED: Main App Component with enhanced Firebase sync and data management
         function App() {
             const { user, firebaseUser, login, loginAsGuest, logout } = useAuth();
             const [currentPage, setCurrentPage] = useState('home');
@@ -4032,7 +3975,7 @@
                 setCurrentPage('edit-syrup');
             };
             
-            // Data management handlers
+            // FIXED: Data management handlers with better error handling
             const handleSaveRecipe = async (recipeData) => {
                 let updatedRecipes;
                 
